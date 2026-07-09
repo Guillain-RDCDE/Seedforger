@@ -942,7 +942,7 @@ namespace Seedforger {
         long uploadedR;
         if (AppOptions.RealisticSpeed && uploadShaper != null)
           uploadedR = uploadShaper.NextSecondBytes(
-            (long) (torrentInfo.uploadRate * Stealth.DiurnalFactor(DateTime.Now)));
+            (long) (torrentInfo.uploadRate * SpeedFactor()));
         else
           uploadedR = torrentInfo.uploadRate + RandomSp(txtRandUpMin.Text, txtRandUpMax.Text, chkRandUP.Checked);
 
@@ -959,7 +959,7 @@ namespace Seedforger {
           long downloadedR;
           if (AppOptions.RealisticSpeed && downloadShaper != null)
             downloadedR = downloadShaper.NextSecondBytes(
-              (long) (torrentInfo.downloadRate * Stealth.DiurnalFactor(DateTime.Now)));
+              (long) (torrentInfo.downloadRate * SpeedFactor()));
           else
             downloadedR = torrentInfo.downloadRate +
                           RandomSp(txtRandDownMin.Text, txtRandDownMax.Text, chkRandDown.Checked);
@@ -1016,6 +1016,16 @@ namespace Seedforger {
         SetCountersCallback d = UpdateCounters;
         Invoke(d, torrentInfo);
       }
+    }
+
+    /// <summary>Combined speed multiplier: 0 outside the active-hours window
+    /// (paused), otherwise the day/night rhythm factor.</summary>
+    private static double SpeedFactor() {
+      var now = DateTime.Now;
+      if (AppOptions.ActiveHoursEnabled &&
+          !Stealth.InActiveHours(now, AppOptions.ActiveHoursStart, AppOptions.ActiveHoursEnd))
+        return 0.0;
+      return Stealth.DiurnalFactor(now);
     }
 
     private static string SetPrecision(string data, int prec) {

@@ -21,6 +21,12 @@ namespace Seedforger {
     /// start, so the emulated client isn't the same every session.</summary>
     internal static bool RandomizeClientOnStart = false;
 
+    /// <summary>When enabled, seeding only uploads during [Start, End) hours
+    /// (outside the window the speed drops to 0, like the machine is idle).</summary>
+    internal static bool ActiveHoursEnabled = false;
+    internal static int ActiveHoursStart = 8;
+    internal static int ActiveHoursEnd = 24;
+
     /// <summary>Debug escape hatch: set SF_NOTHEME to disable the theme engine.</summary>
     internal static readonly bool ThemingEnabled =
       System.Environment.GetEnvironmentVariable("SF_NOTHEME") == null;

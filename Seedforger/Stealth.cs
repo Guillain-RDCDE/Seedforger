@@ -33,6 +33,17 @@ namespace Seedforger {
     }
 
     /// <summary>
+    /// True if <paramref name="now"/> falls inside the [startHour, endHour) active
+    /// window. Handles windows that wrap past midnight (e.g. 22 → 6). When start
+    /// equals end the window is treated as the whole day.
+    /// </summary>
+    internal static bool InActiveHours(DateTime now, int startHour, int endHour) {
+      if (startHour == endHour) return true;
+      var h = now.Hour;
+      return startHour < endHour ? h >= startHour && h < endHour : h >= startHour || h < endHour;
+    }
+
+    /// <summary>
     /// Sanity-checks the chosen speeds and returns human-readable warnings when
     /// they look implausible for a home connection (empty list = looks fine).
     /// </summary>

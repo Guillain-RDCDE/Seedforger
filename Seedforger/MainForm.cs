@@ -71,9 +71,13 @@ namespace Seedforger {
         connectionMenuItem.DropDownItems.Add(item);
       }
 
+      var activeHoursItem = new ToolStripMenuItem("Active hours…");
+      activeHoursItem.Click += (s, e) => SetActiveHours();
+
       // Inserted at index 0 in reverse so the final order is:
-      // Dark mode / Realistic speed / Randomize client / Connection profile / sep / (existing)
+      // Dark / Realistic / Randomize client / Connection profile / Active hours / sep / (existing)
       settingsToolStripMenuItem.DropDownItems.Insert(0, new ToolStripSeparator());
+      settingsToolStripMenuItem.DropDownItems.Insert(0, activeHoursItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, connectionMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, rotateClientMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, realisticSpeedMenuItem);
@@ -89,6 +93,38 @@ namespace Seedforger {
         if (tab.SelectedTab?.Controls.Count > 0 && tab.SelectedTab.Controls[0] is RM rm) rm.TestAnnounce();
       };
       currentToolStripMenuItem.DropDownItems.Add(testAnnounceItem);
+    }
+
+    /// <summary>Lets the user set an "active hours" window during which seeding
+    /// uploads; outside it the speed drops to 0 (like the PC is idle).</summary>
+    private void SetActiveHours() {
+      var current = AppOptions.ActiveHoursEnabled
+        ? $"{AppOptions.ActiveHoursStart}-{AppOptions.ActiveHoursEnd}" : "";
+      using (var prompt = new Prompt("Active hours",
+               "Seed only between these hours (0-24), e.g. 8-24 or 22-6.\nLeave empty for 24/7:", current)) {
+        if (prompt.ShowDialog() != DialogResult.OK) return;
+        var text = (prompt.Result ?? "").Trim();
+        if (text.Length == 0) {
+          AppOptions.ActiveHoursEnabled = false;
+        }
+        else {
+          var parts = text.Split('-');
+          if (parts.Length != 2 ||
+              !int.TryParse(parts[0].Trim(), out var a) || !int.TryParse(parts[1].Trim(), out var b) ||
+              a < 0 || a > 24 || b < 0 || b > 24) {
+            MessageBox.Show("Use a format like 8-24 or 22-6.", AppInfo.Name);
+            return;
+          }
+          AppOptions.ActiveHoursEnabled = true;
+          AppOptions.ActiveHoursStart = a;
+          AppOptions.ActiveHoursEnd = b;
+        }
+        var s = Settings.Current;
+        s.ActiveHoursEnabled = AppOptions.ActiveHoursEnabled;
+        s.ActiveHoursStart = AppOptions.ActiveHoursStart;
+        s.ActiveHoursEnd = AppOptions.ActiveHoursEnd;
+        s.Save();
+      }
     }
 
     /// <summary>Loads every .torrent file in a chosen folder, each in its own tab.</summary>
@@ -321,6 +357,9 @@ namespace Seedforger {
         // First launch follows the OS theme; afterwards the user's choice sticks.
         AppOptions.DarkMode = Settings.IsFirstRun ? Theme.IsSystemDark() : s.DarkMode;
         AppOptions.RandomizeClientOnStart = s.RandomizeClientOnStart;
+        AppOptions.ActiveHoursEnabled = s.ActiveHoursEnabled;
+        AppOptions.ActiveHoursStart = s.ActiveHoursStart;
+        AppOptions.ActiveHoursEnd = s.ActiveHoursEnd;
         realisticSpeedMenuItem.Checked = AppOptions.RealisticSpeed;
         darkModeMenuItem.Checked = AppOptions.DarkMode;
         rotateClientMenuItem.Checked = AppOptions.RandomizeClientOnStart;

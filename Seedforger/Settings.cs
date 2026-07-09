@@ -46,6 +46,9 @@ namespace Seedforger {
     public bool RealisticSpeed { get; set; } = true;
     public bool DarkMode { get; set; } = false;
     public bool RandomizeClientOnStart { get; set; } = false;
+    public bool ActiveHoursEnabled { get; set; } = false;
+    public int ActiveHoursStart { get; set; } = 8;
+    public int ActiveHoursEnd { get; set; } = 24;
 
     #endregion
 

@@ -49,6 +49,18 @@ namespace Seedforger.Tests {
       Assert.Contains(w, m => m.Contains("exceeds download"));
     }
 
+    [Theory]
+    [InlineData(10, 8, 24, true)]   // inside a normal daytime window
+    [InlineData(2, 8, 24, false)]   // outside it
+    [InlineData(23, 22, 6, true)]   // inside a window that wraps midnight
+    [InlineData(3, 22, 6, true)]    // still inside the wrapped window
+    [InlineData(12, 22, 6, false)]  // outside the wrapped window
+    [InlineData(5, 9, 9, true)]     // start == end => always active
+    public void InActiveHours_HandlesWindowsAndWraps(int hour, int start, int end, bool expected) {
+      var now = new DateTime(2026, 1, 1, hour, 30, 0);
+      Assert.Equal(expected, Stealth.InActiveHours(now, start, end));
+    }
+
     [Fact]
     public void Believability_NormalHomeLine_NoWarnings() {
       // ~10 Mbps up / 100 Mbps down (fibre-ish)
