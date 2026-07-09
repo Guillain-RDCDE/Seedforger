@@ -20,6 +20,8 @@ namespace Seedforger {
 
     private bool getNew = true;
     private readonly Random rand = new Random((int) DateTime.Now.Ticks);
+    private SpeedShaper uploadShaper;
+    private SpeedShaper downloadShaper;
     private int remWork;
     internal string DefaultDirectory = "";
     private const string DefaultClient = "qBittorrent";
@@ -472,6 +474,9 @@ namespace Seedforger {
       // txtStopValue.Text = res.ToString();
       updateProcessStarted = true;
       seedMode = false;
+      // Fresh ramp-up each start so speeds climb from zero like a real client.
+      uploadShaper = new SpeedShaper(rand);
+      downloadShaper = new SpeedShaper(rand);
       requestScrap = checkRequestScrap.Checked;
       UpdateScrapStats("", "", "");
       StartButton.Enabled = false;
@@ -876,9 +881,12 @@ namespace Seedforger {
         // Random random = new Random();
         // modify Upload Rate
         uploadCount.Text = FormatFileSize((ulong) torrentInfo.uploaded);
-        var uploadedR = torrentInfo.uploadRate + RandomSp(txtRandUpMin.Text, txtRandUpMax.Text, chkRandUP.Checked);
+        long uploadedR;
+        if (AppOptions.RealisticSpeed && uploadShaper != null)
+          uploadedR = uploadShaper.NextSecondBytes(torrentInfo.uploadRate);
+        else
+          uploadedR = torrentInfo.uploadRate + RandomSp(txtRandUpMin.Text, txtRandUpMax.Text, chkRandUP.Checked);
 
-        // Int64 uploadedR = torrentInfo.uploadRate + (Int64)random.Next(10 * 1024) - 5 * 1024;
         if (uploadedR < 0) {
           uploadedR = 0;
         }
@@ -889,10 +897,13 @@ namespace Seedforger {
         downloadCount.Text = FormatFileSize((ulong) torrentInfo.downloaded);
         if (!seedMode && torrentInfo.downloadRate > 0) // dont update download stats
         {
-          var downloadedR = torrentInfo.downloadRate +
-                            RandomSp(txtRandDownMin.Text, txtRandDownMax.Text, chkRandDown.Checked);
+          long downloadedR;
+          if (AppOptions.RealisticSpeed && downloadShaper != null)
+            downloadedR = downloadShaper.NextSecondBytes(torrentInfo.downloadRate);
+          else
+            downloadedR = torrentInfo.downloadRate +
+                          RandomSp(txtRandDownMin.Text, txtRandDownMax.Text, chkRandDown.Checked);
 
-          // Int64 downloadedR = torrentInfo.downloadRate + (Int64)random.Next(10 * 1024) - 5 * 1024;
           if (downloadedR < 0) {
             downloadedR = 0;
           }
