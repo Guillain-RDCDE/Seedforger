@@ -59,6 +59,12 @@ It works **independently of your torrent client** — you don't even need one in
 | **Realistic announces** | `SpeedShaper` applies a ramp-up + mean-reverting random walk instead of flat noise, so reported speeds look human. |
 | **Portable settings** | Everything is stored in `settings.json` next to the exe. **No registry**, fully portable. |
 | **Proxy** | SOCKS4 / 4a / 5 and HTTP-CONNECT for HTTP trackers. |
+| **Stealth** | Announce-interval jitter, a day/night speed rhythm, an **active-hours** window, believability warnings, and **client rotation** each start. |
+| **Connection profiles** | One-click believable speeds for ADSL / VDSL / cable / fibre 100-300-1G / 4G / 5G. |
+| **Auto-stop targets** | Stop on time, uploaded, downloaded, **ratio**, or seeders/leechers. |
+| **Magnet & batch** | Open **magnet links** (infohash-only), and load a whole folder of `.torrent`s into tabs. |
+| **Dry-run** | *File → Test announce* sends a single announce and shows whether the tracker accepted it. |
+| **Light & dark themes** | Follows your OS on first launch; toggle in Settings. |
 
 ### Emulated clients (built-in)
 qBittorrent · Transmission · Deluge · libtorrent · µTorrent · BitTorrent · BitComet · Vuze · Azureus · BitLord · ABC · BTuga · BitTornado · Burst · BitTyrant · BitSpirit · KTorrent · Gnome BT — several versions each.

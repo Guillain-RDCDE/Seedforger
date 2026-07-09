@@ -85,6 +85,16 @@ namespace Seedforger {
 
       // File menu: torrent tools
       currentToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
+      var openMagnetItem = new ToolStripMenuItem("Open magnet…");
+      openMagnetItem.Click += (s, e) => {
+        using (var p = new Prompt("Open magnet", "Paste a magnet link:", "")) {
+          if (p.ShowDialog() != DialogResult.OK) return;
+          var uri = (p.Result ?? "").Trim();
+          if (uri.Length > 0 && tab.SelectedTab?.Controls.Count > 0 && tab.SelectedTab.Controls[0] is RM rm)
+            rm.LoadMagnet(uri);
+        }
+      };
+      currentToolStripMenuItem.DropDownItems.Add(openMagnetItem);
       var loadFolderItem = new ToolStripMenuItem("Load folder of .torrents…");
       loadFolderItem.Click += (s, e) => LoadFolder();
       currentToolStripMenuItem.DropDownItems.Add(loadFolderItem);

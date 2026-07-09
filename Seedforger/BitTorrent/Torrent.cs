@@ -38,11 +38,28 @@ namespace Seedforger.BitTorrent {
 
     internal ValueDictionary Info => (ValueDictionary) Data["info"];
 
+    // Set for magnet/infohash-only torrents, where we have the hash but not the
+    // "info" dictionary to compute it from.
+    private byte[] overrideHash;
+
     internal byte[] InfoHash {
       get {
+        if (overrideHash != null) return overrideHash;
         SHA1 sha = new SHA1CryptoServiceProvider();
         return sha.ComputeHash(Data["info"].Encode());
       }
+    }
+
+    /// <summary>
+    /// Turns this into a "virtual" torrent built from a raw infohash and a
+    /// user-supplied total size (magnet links carry neither piece data nor size).
+    /// Enough to announce and scrape.
+    /// </summary>
+    internal void SetVirtual(byte[] infoHash, ulong length, string announce, string name) {
+      overrideHash = infoHash;
+      totalLength = length;
+      if (!string.IsNullOrEmpty(announce)) Announce = announce;
+      if (!string.IsNullOrEmpty(name)) Name = name;
     }
 
     internal string Name {

@@ -344,6 +344,46 @@ namespace Seedforger {
       }
     }
 
+    /// <summary>Loads a magnet link: takes its infohash + a tracker, asks for the
+    /// total size (magnets don't carry it) and builds a virtual torrent to announce.</summary>
+    internal void LoadMagnet(string magnetUri) {
+      var m = Magnet.Parse(magnetUri);
+      if (m == null || m.InfoHash == null) {
+        MessageBox.Show("Invalid magnet link (a btih infohash is required).", "Seedforger " + version);
+        return;
+      }
+
+      string tracker = null;
+      foreach (var t in m.Trackers) {
+        if (t.StartsWith("http")) { tracker = t; break; }
+      }
+      if (tracker == null && m.Trackers.Count > 0) tracker = m.Trackers[0];
+      if (tracker == null) {
+        MessageBox.Show("This magnet has no HTTP tracker, so it can't be announced here.", "Seedforger " + version);
+        return;
+      }
+
+      using (var sizePrompt = new Prompt("Torrent size",
+               "Magnet links don't carry the size.\nEnter the total size in MB:", "1024")) {
+        if (sizePrompt.ShowDialog() != DialogResult.OK) return;
+        if (!long.TryParse((sizePrompt.Result ?? "").Trim(), out var mb) || mb <= 0) {
+          MessageBox.Show("Please enter a valid size in MB.", "Seedforger " + version);
+          return;
+        }
+
+        var bytes = (ulong) mb * 1024UL * 1024UL;
+        var label = string.IsNullOrEmpty(m.Name) ? m.HashHex : m.Name;
+        currentTorrentFile = new Torrent();
+        currentTorrentFile.SetVirtual(m.InfoHash, bytes, tracker, m.Name);
+        torrentFile.Text = "(magnet) " + label;
+        trackerAddress.Text = tracker;
+        shaHash.Text = ToHexString(m.InfoHash);
+        txtTorrentSize.Text = FormatFileSize(bytes);
+        AddLogLine("Loaded magnet: " + label + " (" + m.Trackers.Count +
+                   " tracker(s), announcing to " + tracker + ")");
+      }
+    }
+
     private TorrentInfo GetCurrentTorrent() {
       Uri trackerUri;
       var torrent = new TorrentInfo(0, 0);
