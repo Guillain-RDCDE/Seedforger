@@ -46,7 +46,6 @@ namespace Seedforger {
     private static readonly Color Accent = Color.FromArgb(0x2F, 0x6F, 0xED);
     private static readonly Color Green = Color.FromArgb(0x1F, 0xA9, 0x6B);
     private static readonly Color Red = Color.FromArgb(0xE0, 0x3E, 0x3E);
-    private static readonly Color Neutral = Color.FromArgb(0x6B, 0x72, 0x80);
     private static readonly Color LogBack = Color.FromArgb(0x14, 0x16, 0x1A);
     private static readonly Color LogText = Color.FromArgb(0x8C, 0xE0, 0xB0);
 
@@ -99,14 +98,7 @@ namespace Seedforger {
       var p = Cur;
       switch (c) {
         case Button b:
-          b.FlatStyle = FlatStyle.Flat;
-          b.FlatAppearance.BorderSize = 0;
-          b.ForeColor = Color.White;
-          b.BackColor = SemanticColor(b.Text);
-          b.UseVisualStyleBackColor = false;
-          b.FlatAppearance.MouseOverBackColor = Lighten(b.BackColor, 0.10);
-          b.FlatAppearance.MouseDownBackColor = Darken(b.BackColor, 0.10);
-          b.Cursor = Cursors.Hand;
+          StyleButton(b);
           break;
         case TextBox tb:
           tb.BorderStyle = BorderStyle.FixedSingle;
@@ -173,13 +165,75 @@ namespace Seedforger {
       }
     }
 
-    private static Color SemanticColor(string text) {
+    // 1 = primary (green), 2 = danger (red), 0 = secondary (neutral ghost)
+    private static int ButtonKind(string text) {
       var t = (text ?? string.Empty).ToUpperInvariant();
-      if (t.Contains("START")) return Green;
-      if (t.Contains("STOP")) return Red;
-      if (t.Contains("DEFAULT")) return Neutral;
-      return Accent;
+      if (t.Contains("START")) return 1;
+      if (t.Contains("STOP")) return 2;
+      return 0;
     }
+
+    private static void StyleButton(Button b) {
+      b.FlatStyle = FlatStyle.Flat;
+      b.FlatAppearance.BorderSize = 0;
+      b.FlatAppearance.MouseOverBackColor = Color.Transparent; // drawn ourselves
+      b.FlatAppearance.MouseDownBackColor = Color.Transparent;
+      b.UseVisualStyleBackColor = false;
+      var back = b.Parent?.BackColor ?? Cur.Window;
+      b.BackColor = back;
+      b.ForeColor = back; // hide the default label; FlatButtonPaint draws it
+      b.Cursor = Cursors.Hand;
+      if (!(b.Tag is string s && s == "btn")) {
+        b.Tag = "btn";
+        b.Paint += FlatButtonPaint;
+        b.MouseEnter += (o, e) => ((Control) o).Invalidate();
+        b.MouseLeave += (o, e) => ((Control) o).Invalidate();
+      }
+    }
+
+    // Rounded, spaced "pill" buttons. Only start/stop are coloured; the rest are
+    // quiet neutral/ghost buttons so the row doesn't look like a block of colour.
+    private static void FlatButtonPaint(object sender, PaintEventArgs e) {
+      var b = (Button) sender;
+      var g = e.Graphics;
+      g.SmoothingMode = SmoothingMode.AntiAlias;
+      g.Clear(b.Parent?.BackColor ?? Cur.Window);
+
+      const int inset = 4;
+      var rect = new Rectangle(inset, inset, b.Width - 2 * inset - 1, b.Height - 2 * inset - 1);
+      if (rect.Width <= 2 || rect.Height <= 2) return;
+
+      var kind = ButtonKind(b.Text);
+      var hover = b.Enabled && b.ClientRectangle.Contains(b.PointToClient(Control.MousePosition));
+      var radius = Math.Min(10, rect.Height / 2);
+
+      using (var path = RoundedRect(rect, radius)) {
+        Color textc;
+        if (!b.Enabled) {
+          using (var bg = new SolidBrush(Blend(Cur.Window, Cur.Border, 0.5))) g.FillPath(bg, path);
+          textc = Cur.Subtle;
+        }
+        else if (kind == 0) { // ghost / secondary
+          using (var bg = new SolidBrush(hover ? Blend(Cur.Card, Accent, 0.12) : Cur.Card))
+            g.FillPath(bg, path);
+          using (var pen = new Pen(hover ? Accent : Cur.Border, 1.4f))
+            g.DrawPath(pen, path);
+          textc = hover ? Accent : Cur.Text;
+        }
+        else {
+          var fill = kind == 1 ? Green : Red;
+          if (hover) fill = Lighten(fill, 0.10);
+          using (var bg = new SolidBrush(fill)) g.FillPath(bg, path);
+          textc = Color.White;
+        }
+
+        TextRenderer.DrawText(g, b.Text, b.Font, rect, textc,
+          TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+      }
+    }
+
+    private static Color Blend(Color a, Color b, double t) => Color.FromArgb(
+      (int) (a.R + (b.R - a.R) * t), (int) (a.G + (b.G - a.G) * t), (int) (a.B + (b.B - a.B) * t));
 
     // Group boxes as flat rounded cards with a coloured bold header.
     private static void FlatGroupBoxPaint(object sender, PaintEventArgs e) {

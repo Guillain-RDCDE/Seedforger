@@ -42,6 +42,7 @@ It works **independently of your torrent client** — you don't even need one in
 
 ### A few common-sense tips
 - **Keep it believable.** Announcing that you seeded 900 GB in ten minutes is a great way to get flagged. Realistic speeds win.
+- One-click realistic speeds: **Settings → Connection profile** (ADSL, VDSL, fibre, cable, 4G, 5G…) fills the upload/download for you, so you look like a normal home line.
 - Leave **Realistic speed (ramp-up)** on (Settings menu) — it makes your fake speed climb and wobble like a real client instead of a robotic flat line.
 - Use a **current** client (qBittorrent, Transmission 4, Deluge 2). Old clients stand out.
 

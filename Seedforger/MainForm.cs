@@ -52,9 +52,32 @@ namespace Seedforger {
         ApplyThemeAll();
       };
 
+      var connectionMenuItem = new ToolStripMenuItem("Connection profile");
+      foreach (var profile in ConnectionProfiles.All) {
+        var prof = profile;
+        var item = new ToolStripMenuItem(prof.Name);
+        item.Click += (s, e) => ApplyConnectionProfile(prof);
+        connectionMenuItem.DropDownItems.Add(item);
+      }
+
+      // Inserted at index 0 in reverse so the final order is:
+      // Dark mode / Realistic speed / Connection profile / separator / (existing)
       settingsToolStripMenuItem.DropDownItems.Insert(0, new ToolStripSeparator());
+      settingsToolStripMenuItem.DropDownItems.Insert(0, connectionMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, realisticSpeedMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, darkModeMenuItem);
+    }
+
+    /// <summary>Fills the current tab's upload/download speed with believable
+    /// values for the chosen connection type (with a small ±8% jitter so it isn't
+    /// a suspiciously round, identical number every time).</summary>
+    private void ApplyConnectionProfile(ConnectionProfile p) {
+      if (tab.SelectedTab == null || tab.SelectedTab.Controls.Count == 0 ||
+          !(tab.SelectedTab.Controls[0] is RM rm)) return;
+      var r = new Random();
+      int Jitter(int v) => Math.Max(1, (int) (v * (0.92 + r.NextDouble() * 0.16)));
+      rm.UpdateTextBox(rm.uploadRate, Jitter(p.UpKBps).ToString());
+      rm.UpdateTextBox(rm.downloadRate, Jitter(p.DownKBps).ToString());
     }
 
     /// <summary>Apply the modern restyle to the main window and every open tab.</summary>
