@@ -690,6 +690,7 @@ namespace Seedforger
             "When leechers <",
             "When uploaded >",
             "When downloaded >",
+            "When ratio >",
             "When leechers/seeders <"});
       this.cmbStopAfter.Location = new System.Drawing.Point(177, 91);
       this.cmbStopAfter.Name = "cmbStopAfter";

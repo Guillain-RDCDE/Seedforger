@@ -477,6 +477,7 @@ namespace Seedforger {
       // Fresh ramp-up each start so speeds climb from zero like a real client.
       uploadShaper = new SpeedShaper(rand);
       downloadShaper = new SpeedShaper(rand);
+      effectiveInterval = 0;
       requestScrap = checkRequestScrap.Checked;
       UpdateScrapStats("", "", "");
       StartButton.Enabled = false;
@@ -500,6 +501,8 @@ namespace Seedforger {
       currentTorrent = GetCurrentTorrent();
       currentProxy = GetCurrentProxy();
       AddClientInfo();
+      foreach (var warning in Stealth.BelievabilityWarnings(currentTorrent.uploadRate / 1024, currentTorrent.downloadRate / 1024))
+        AddLogLine("[!] " + warning);
       OpenTcpListener();
       var myThread = new Thread(StartProcess) {
         Name = "startProcess() Thread"
@@ -883,7 +886,8 @@ namespace Seedforger {
         uploadCount.Text = FormatFileSize((ulong) torrentInfo.uploaded);
         long uploadedR;
         if (AppOptions.RealisticSpeed && uploadShaper != null)
-          uploadedR = uploadShaper.NextSecondBytes(torrentInfo.uploadRate);
+          uploadedR = uploadShaper.NextSecondBytes(
+            (long) (torrentInfo.uploadRate * Stealth.DiurnalFactor(DateTime.Now)));
         else
           uploadedR = torrentInfo.uploadRate + RandomSp(txtRandUpMin.Text, txtRandUpMax.Text, chkRandUP.Checked);
 
@@ -899,7 +903,8 @@ namespace Seedforger {
         {
           long downloadedR;
           if (AppOptions.RealisticSpeed && downloadShaper != null)
-            downloadedR = downloadShaper.NextSecondBytes(torrentInfo.downloadRate);
+            downloadedR = downloadShaper.NextSecondBytes(
+              (long) (torrentInfo.downloadRate * Stealth.DiurnalFactor(DateTime.Now)));
           else
             downloadedR = torrentInfo.downloadRate +
                           RandomSp(txtRandDownMin.Text, txtRandDownMax.Text, chkRandDown.Checked);
@@ -1013,6 +1018,14 @@ namespace Seedforger {
           if (currentTorrent.downloaded > int.Parse(txtStopValue.Text) * 1024 * 1024) StopButton_Click(null, null);
         }
 
+        if ((string) cmbStopAfter.SelectedItem == "When ratio >") {
+          if (currentTorrent.downloaded > 0 &&
+              currentTorrent.uploaded / (double) currentTorrent.downloaded >
+                double.Parse(txtStopValue.Text.Replace(',', '.'),
+                  System.Globalization.CultureInfo.InvariantCulture))
+            StopButton_Click(null, null);
+        }
+
         if ((string) cmbStopAfter.SelectedItem == "When leechers/seeders <") {
           if (Leechers / (double) Seeders < double.Parse(txtStopValue.Text)) StopButton_Click(null, null);
         }
@@ -1024,13 +1037,19 @@ namespace Seedforger {
 
     internal int TotalRunningTimeCounter;
 
+    // Announce interval with a small upward drift so we don't re-announce at the
+    // exact same second every time (see Stealth.JitterInterval). 0 = use the raw
+    // tracker interval (first cycle).
+    private int effectiveInterval;
+
     internal void serverUpdateTimer_Tick(object sender, EventArgs e) {
       if (updateProcessStarted) {
         if (haveInitialPeers) {
           UpdateCounters(currentTorrent);
         }
 
-        var num1 = currentTorrent.interval - temporaryIntervalCounter;
+        var target = effectiveInterval > 0 ? effectiveInterval : currentTorrent.interval;
+        var num1 = target - temporaryIntervalCounter;
         TotalRunningTimeCounter++;
         lblTotalTime.Text = ConvertToTime(TotalRunningTimeCounter);
         StopModule();
@@ -1041,6 +1060,8 @@ namespace Seedforger {
         else {
           RandomizeSpeeds();
           OpenTcpListener();
+          // Pick the (jittered) length of the next announce cycle.
+          effectiveInterval = Stealth.JitterInterval(currentTorrent.interval, rand);
           var thread1 = new Thread(ContinueProcess);
           temporaryIntervalCounter = 0;
           timerValue.Text = "0";
@@ -1682,6 +1703,12 @@ namespace Seedforger {
       if ((string) cmbStopAfter.SelectedItem == "When downloaded >") {
         lblStopAfter.Text = "Mb";
         txtStopValue.Text = "1024";
+        txtStopValue.Visible = true;
+      }
+
+      if ((string) cmbStopAfter.SelectedItem == "When ratio >") {
+        lblStopAfter.Text = "ratio";
+        txtStopValue.Text = "2";
         txtStopValue.Visible = true;
       }
 
