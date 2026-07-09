@@ -49,6 +49,7 @@ namespace Seedforger {
     public bool ActiveHoursEnabled { get; set; } = false;
     public int ActiveHoursStart { get; set; } = 8;
     public int ActiveHoursEnd { get; set; } = 24;
+    public string Language { get; set; } = "en";
 
     #endregion
 

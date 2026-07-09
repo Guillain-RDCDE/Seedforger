@@ -27,6 +27,9 @@ namespace Seedforger {
     internal static int ActiveHoursStart = 8;
     internal static int ActiveHoursEnd = 24;
 
+    /// <summary>UI language. Persisted in settings.json.</summary>
+    internal static Language Language = Language.English;
+
     /// <summary>Debug escape hatch: set SF_NOTHEME to disable the theme engine.</summary>
     internal static readonly bool ThemingEnabled =
       System.Environment.GetEnvironmentVariable("SF_NOTHEME") == null;

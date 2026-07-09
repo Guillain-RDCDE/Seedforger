@@ -19,6 +19,8 @@ namespace Seedforger {
     private ToolStripMenuItem realisticSpeedMenuItem;
     private ToolStripMenuItem darkModeMenuItem;
     private ToolStripMenuItem rotateClientMenuItem;
+    private ToolStripMenuItem langEnItem;
+    private ToolStripMenuItem langFrItem;
 
     internal MainForm() {
       InitializeComponent();
@@ -74,14 +76,23 @@ namespace Seedforger {
       var activeHoursItem = new ToolStripMenuItem("Active hours…");
       activeHoursItem.Click += (s, e) => SetActiveHours();
 
+      var languageMenuItem = new ToolStripMenuItem("Language");
+      langEnItem = new ToolStripMenuItem("English");
+      langFrItem = new ToolStripMenuItem("Français");
+      langEnItem.Click += (s, e) => SetLanguage(Language.English);
+      langFrItem.Click += (s, e) => SetLanguage(Language.French);
+      languageMenuItem.DropDownItems.Add(langEnItem);
+      languageMenuItem.DropDownItems.Add(langFrItem);
+
       // Inserted at index 0 in reverse so the final order is:
-      // Dark / Realistic / Randomize client / Connection profile / Active hours / sep / (existing)
+      // Language / Dark / Realistic / Randomize / Connection / Active hours / sep / (existing)
       settingsToolStripMenuItem.DropDownItems.Insert(0, new ToolStripSeparator());
       settingsToolStripMenuItem.DropDownItems.Insert(0, activeHoursItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, connectionMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, rotateClientMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, realisticSpeedMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, darkModeMenuItem);
+      settingsToolStripMenuItem.DropDownItems.Insert(0, languageMenuItem);
 
       // File menu: torrent tools
       currentToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
@@ -189,6 +200,25 @@ namespace Seedforger {
       }
     }
 
+    /// <summary>Translate the whole UI (main window + every open tab).</summary>
+    internal void ApplyLanguageAll() {
+      Localization.Apply(this);
+      foreach (TabPage page in tab.TabPages) {
+        if (page.Controls.Count > 0 && page.Controls[0] is RM rm) {
+          Localization.Apply(rm);
+        }
+      }
+    }
+
+    private void SetLanguage(Language lang) {
+      AppOptions.Language = lang;
+      langEnItem.Checked = lang == Language.English;
+      langFrItem.Checked = lang == Language.French;
+      Settings.Current.Language = Localization.Code(lang);
+      Settings.Current.Save();
+      ApplyLanguageAll();
+    }
+
     private void aboutToolStripMenuItem_Click(object sender, EventArgs e) {
       MessageBox.Show(
         $"{AppInfo.Name} v{AppInfo.Version}\n\n{AppInfo.SiteUrl}",
@@ -224,6 +254,7 @@ namespace Seedforger {
       tab_TabIndexChanged(null, null);
       trayIcon.Icon = Icon; // keep the tray icon in sync with the app icon
       ApplyThemeAll();
+      ApplyLanguageAll();
       // tab.Size = new Size(Width - 8, Height - 80);
     }
 
@@ -387,6 +418,9 @@ namespace Seedforger {
         AppOptions.ActiveHoursEnabled = s.ActiveHoursEnabled;
         AppOptions.ActiveHoursStart = s.ActiveHoursStart;
         AppOptions.ActiveHoursEnd = s.ActiveHoursEnd;
+        AppOptions.Language = Localization.Parse(s.Language);
+        langEnItem.Checked = AppOptions.Language == Language.English;
+        langFrItem.Checked = AppOptions.Language == Language.French;
         realisticSpeedMenuItem.Checked = AppOptions.RealisticSpeed;
         darkModeMenuItem.Checked = AppOptions.DarkMode;
         rotateClientMenuItem.Checked = AppOptions.RandomizeClientOnStart;

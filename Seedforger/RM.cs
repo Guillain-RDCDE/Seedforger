@@ -68,6 +68,7 @@ namespace Seedforger {
       GetPCInfo();
       ReadSettings();
       Theme.ApplyTo(this);
+      Localization.Apply(this);
     }
 
     internal void Form1_DragDrop(object sender, DragEventArgs e) {

@@ -165,9 +165,13 @@ namespace Seedforger {
       }
     }
 
-    // 1 = primary (green), 2 = danger (red), 0 = secondary (neutral ghost)
-    private static int ButtonKind(string text) {
-      var t = (text ?? string.Empty).ToUpperInvariant();
+    // 1 = primary (green), 2 = danger (red), 0 = secondary (neutral ghost).
+    // Keyed off the control Name so it survives UI translation of the label.
+    private static int ButtonKind(Button b) {
+      var n = (b.Name ?? string.Empty).ToUpperInvariant();
+      if (n.Contains("START")) return 1;
+      if (n.Contains("STOP")) return 2;
+      var t = (b.Text ?? string.Empty).ToUpperInvariant();
       if (t.Contains("START")) return 1;
       if (t.Contains("STOP")) return 2;
       return 0;
@@ -203,7 +207,7 @@ namespace Seedforger {
       var rect = new Rectangle(inset, inset, b.Width - 2 * inset - 1, b.Height - 2 * inset - 1);
       if (rect.Width <= 2 || rect.Height <= 2) return;
 
-      var kind = ButtonKind(b.Text);
+      var kind = ButtonKind(b);
       var hover = b.Enabled && b.ClientRectangle.Contains(b.PointToClient(Control.MousePosition));
       var radius = Math.Min(10, rect.Height / 2);
 
