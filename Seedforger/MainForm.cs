@@ -103,7 +103,24 @@ namespace Seedforger {
         if (tab.SelectedTab?.Controls.Count > 0 && tab.SelectedTab.Controls[0] is RM rm) rm.TestAnnounce();
       };
       currentToolStripMenuItem.DropDownItems.Add(testAnnounceItem);
+      var graphItem = new ToolStripMenuItem("Live graph…");
+      graphItem.Click += (s, e) => {
+        if (graphForm == null || graphForm.IsDisposed) {
+          graphForm = new GraphForm(() => CurrentRM);
+          graphForm.Show(this);
+        }
+        else {
+          graphForm.Activate();
+        }
+      };
+      currentToolStripMenuItem.DropDownItems.Add(graphItem);
     }
+
+    private GraphForm graphForm;
+
+    /// <summary>The RM control on the currently selected tab (null if none).</summary>
+    internal RM CurrentRM =>
+      tab.SelectedTab != null && tab.SelectedTab.Controls.Count > 0 ? tab.SelectedTab.Controls[0] as RM : null;
 
     /// <summary>Lets the user set an "active hours" window during which seeding
     /// uploads; outside it the speed drops to 0 (like the PC is idle).</summary>

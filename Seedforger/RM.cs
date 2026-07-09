@@ -21,6 +21,14 @@ namespace Seedforger {
     private readonly Random rand = new Random((int) DateTime.Now.Ticks);
     private SpeedShaper uploadShaper;
     private SpeedShaper downloadShaper;
+
+    /// <summary>Rolling history of total uploaded bytes, sampled each second, for
+    /// the live graph.</summary>
+    internal readonly System.Collections.Generic.List<long> UploadHistory =
+      new System.Collections.Generic.List<long>();
+
+    /// <summary>The ratio as currently shown in the UI (may be "NaN").</summary>
+    internal string RatioText => lblTorrentRatio.Text;
     private int remWork;
     internal string DefaultDirectory = "";
     private const string DefaultClient = "qBittorrent";
@@ -1050,6 +1058,9 @@ namespace Seedforger {
           var data = torrentInfo.uploaded / (float) torrentInfo.downloaded;
           lblTorrentRatio.Text = SetPrecision(data.ToString(), 2);
         }
+
+        UploadHistory.Add(torrentInfo.uploaded);
+        if (UploadHistory.Count > 3600) UploadHistory.RemoveAt(0);
       }
       catch (Exception e) {
         AddLogLine(e.Message);
