@@ -10,6 +10,16 @@ namespace Seedforger {
 
     private const string FallbackClientName = "uTorrent 3.3.2";
 
+    /// <summary>Current, tracker-friendly clients used by the "randomize client
+    /// on start" rotation (avoids picking an ancient, easily-flagged version).</summary>
+    public static readonly string[] ModernClients = {
+      "qBittorrent 5.2.3",
+      "qBittorrent 4.6.7",
+      "Transmission 4.1.3",
+      "Deluge 2.1.1",
+      "libtorrent 2.1.0",
+    };
+
     private static List<ClientProfile> profiles;
 
     /// <summary>

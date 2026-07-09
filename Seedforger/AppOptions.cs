@@ -17,6 +17,10 @@ namespace Seedforger {
     /// <summary>Dark theme when true, light when false. Persisted in settings.json.</summary>
     internal static bool DarkMode = false;
 
+    /// <summary>When true, a random modern client fingerprint is picked on each
+    /// start, so the emulated client isn't the same every session.</summary>
+    internal static bool RandomizeClientOnStart = false;
+
     /// <summary>Debug escape hatch: set SF_NOTHEME to disable the theme engine.</summary>
     internal static readonly bool ThemingEnabled =
       System.Environment.GetEnvironmentVariable("SF_NOTHEME") == null;

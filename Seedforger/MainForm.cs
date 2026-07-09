@@ -18,6 +18,7 @@ namespace Seedforger {
 
     private ToolStripMenuItem realisticSpeedMenuItem;
     private ToolStripMenuItem darkModeMenuItem;
+    private ToolStripMenuItem rotateClientMenuItem;
 
     internal MainForm() {
       InitializeComponent();
@@ -52,6 +53,16 @@ namespace Seedforger {
         ApplyThemeAll();
       };
 
+      rotateClientMenuItem = new ToolStripMenuItem("Randomize client on start") {
+        CheckOnClick = true,
+        Checked = AppOptions.RandomizeClientOnStart,
+      };
+      rotateClientMenuItem.Click += (s, e) => {
+        AppOptions.RandomizeClientOnStart = rotateClientMenuItem.Checked;
+        Settings.Current.RandomizeClientOnStart = AppOptions.RandomizeClientOnStart;
+        Settings.Current.Save();
+      };
+
       var connectionMenuItem = new ToolStripMenuItem("Connection profile");
       foreach (var profile in ConnectionProfiles.All) {
         var prof = profile;
@@ -61,11 +72,36 @@ namespace Seedforger {
       }
 
       // Inserted at index 0 in reverse so the final order is:
-      // Dark mode / Realistic speed / Connection profile / separator / (existing)
+      // Dark mode / Realistic speed / Randomize client / Connection profile / sep / (existing)
       settingsToolStripMenuItem.DropDownItems.Insert(0, new ToolStripSeparator());
       settingsToolStripMenuItem.DropDownItems.Insert(0, connectionMenuItem);
+      settingsToolStripMenuItem.DropDownItems.Insert(0, rotateClientMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, realisticSpeedMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, darkModeMenuItem);
+
+      // File menu: torrent tools
+      currentToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
+      var loadFolderItem = new ToolStripMenuItem("Load folder of .torrents…");
+      loadFolderItem.Click += (s, e) => LoadFolder();
+      currentToolStripMenuItem.DropDownItems.Add(loadFolderItem);
+      var testAnnounceItem = new ToolStripMenuItem("Test announce (dry-run)");
+      testAnnounceItem.Click += (s, e) => {
+        if (tab.SelectedTab?.Controls.Count > 0 && tab.SelectedTab.Controls[0] is RM rm) rm.TestAnnounce();
+      };
+      currentToolStripMenuItem.DropDownItems.Add(testAnnounceItem);
+    }
+
+    /// <summary>Loads every .torrent file in a chosen folder, each in its own tab.</summary>
+    private void LoadFolder() {
+      using (var dlg = new FolderBrowserDialog { Description = "Pick a folder of .torrent files" }) {
+        if (dlg.ShowDialog() != DialogResult.OK) return;
+        var files = Directory.GetFiles(dlg.SelectedPath, "*.torrent");
+        if (files.Length == 0) {
+          MessageBox.Show("No .torrent files found in that folder.", AppInfo.Name);
+          return;
+        }
+        foreach (var f in files) Add(f);
+      }
     }
 
     /// <summary>Fills the current tab's upload/download speed with believable
@@ -284,8 +320,10 @@ namespace Seedforger {
         AppOptions.RealisticSpeed = s.RealisticSpeed;
         // First launch follows the OS theme; afterwards the user's choice sticks.
         AppOptions.DarkMode = Settings.IsFirstRun ? Theme.IsSystemDark() : s.DarkMode;
+        AppOptions.RandomizeClientOnStart = s.RandomizeClientOnStart;
         realisticSpeedMenuItem.Checked = AppOptions.RealisticSpeed;
         darkModeMenuItem.Checked = AppOptions.DarkMode;
+        rotateClientMenuItem.Checked = AppOptions.RandomizeClientOnStart;
         s.DarkMode = AppOptions.DarkMode;
         // Ensure the portable settings file exists next to the exe from the
         // first launch (mirrors the legacy key-creation on first read).
@@ -305,6 +343,7 @@ namespace Seedforger {
         s.CloseToTray = closeToTrayToolStripMenuItem.Checked;
         s.RealisticSpeed = AppOptions.RealisticSpeed;
         s.DarkMode = AppOptions.DarkMode;
+        s.RandomizeClientOnStart = AppOptions.RandomizeClientOnStart;
 
         s.Client = rmData.cmbClient.SelectedItem?.ToString() ?? s.Client;
         s.ClientVersion = rmData.cmbVersion.SelectedItem?.ToString() ?? s.ClientVersion;

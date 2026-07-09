@@ -440,6 +440,60 @@ namespace Seedforger {
 
     #region Buttons
 
+    /// <summary>
+    /// Sends a single "started" announce and logs the tracker's reply, without
+    /// starting the seeding loop. Handy to check a tracker accepts the current
+    /// client before committing to a real run.
+    /// </summary>
+    internal void TestAnnounce() {
+      if (trackerAddress.Text == "" || shaHash.Text == "" || txtTorrentSize.Text == "") {
+        MessageBox.Show("Please load a valid torrent first.", "Seedforger " + version);
+        return;
+      }
+
+      AddLogLine("");
+      AddLogLine("========== TEST ANNOUNCE (dry-run) ==========");
+      currentClient = TorrentClientFactory.GetClient(GetClientName());
+      currentTorrent = GetCurrentTorrent();
+      currentProxy = GetCurrentProxy();
+
+      var thread = new Thread(() => {
+        try {
+          var url = GetUrlString(currentTorrent, "&event=started");
+          var response = MakeWebRequestEx(new Uri(url));
+          if (response == null) {
+            AddLogLine(">> No response from tracker.");
+          }
+          else if (response.Dict == null) {
+            AddLogLine(">> Tracker replied but the response could not be decoded (see body above).");
+          }
+          else {
+            var failure = BEncode.String(response.Dict["failure reason"]);
+            if (!string.IsNullOrEmpty(failure)) AddLogLine(">> Tracker rejected the announce: " + failure);
+            else AddLogLine(">> OK - the tracker accepted this client/announce.");
+          }
+          AddLogLine("========== end test announce ==========");
+        }
+        catch (Exception ex) {
+          AddLogLine(">> Test announce failed: " + ex.Message);
+        }
+      }) { IsBackground = true, Name = "TestAnnounce Thread" };
+      thread.Start();
+    }
+
+    /// <summary>Picks a random modern client fingerprint and updates the combos.</summary>
+    private void RotateClient() {
+      var pick = TorrentClientFactory.ModernClients[rand.Next(TorrentClientFactory.ModernClients.Length)];
+      var sp = pick.IndexOf(' ');
+      if (sp <= 0) return;
+      var family = pick.Substring(0, sp);
+      var ver = pick.Substring(sp + 1);
+      if (!cmbClient.Items.Contains(family)) return;
+      cmbClient.SelectedItem = family; // rebuilds the version list
+      if (cmbVersion.Items.Contains(ver)) cmbVersion.SelectedItem = ver;
+      AddLogLine("Rotated client -> " + GetClientName());
+    }
+
     internal void StartButton_Click(object sender, EventArgs e) {
       if (!StartButton.Enabled) return;
       Seeders = -1;
@@ -497,6 +551,7 @@ namespace Seedforger {
       cmbStopAfter.Enabled = false;
       customPeersNum.Enabled = false;
       customPort.Enabled = false;
+      if (AppOptions.RandomizeClientOnStart) RotateClient();
       currentClient = TorrentClientFactory.GetClient(GetClientName());
       currentTorrent = GetCurrentTorrent();
       currentProxy = GetCurrentProxy();
