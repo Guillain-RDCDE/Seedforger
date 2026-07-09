@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Seedforger</RootNamespace>
+    <AssemblyName>Seedforger</AssemblyName>
+    <ApplicationIcon>Resources\Main.ico</ApplicationIcon>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+
+    <Product>Seedforger</Product>
+    <AssemblyTitle>Seedforger</AssemblyTitle>
+    <Description>The most powerful cheat/spoof torrent client simulator.</Description>
+    <Version>2.0.0</Version>
+    <Company>Seedforger</Company>
+    <Copyright>Copyright © 2026</Copyright>
+
+    <!-- Single-file publish defaults: dotnet publish -c Release -r win-x64 -->
+    <RuntimeIdentifier Condition="'$(PublishSingleFile)' == 'true'">win-x64</RuntimeIdentifier>
+    <SelfContained Condition="'$(PublishSingleFile)' == 'true'">false</SelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- BEncode/tracker parsing relies on legacy code pages (Windows-1252), no longer built-in on .NET Core/8. -->
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
