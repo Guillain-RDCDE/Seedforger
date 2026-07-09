@@ -52,6 +52,9 @@ It works **independently of your torrent client** — you don't even need one in
 
 ## 🔧 For power users & developers
 
+### 📖 How does any of this work?
+Read the deep-dive: **[How BitTorrent actually works](docs/how-bittorrent-works.md)** — bencode, the `.torrent` file, the infohash, peer IDs, the tracker & peer-wire protocols, magnets, encryption, how ratio is measured, and exactly where Seedforger plugs in.
+
 ### What's under the hood
 | Area | What Seedforger does |
 |---|---|
