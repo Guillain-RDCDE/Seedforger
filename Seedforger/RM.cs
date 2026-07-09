@@ -9,7 +9,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
-using Microsoft.Win32;
 using Seedforger.BitTorrent;
 using Seedforger.BytesRoads;
 
@@ -1433,77 +1432,70 @@ namespace Seedforger {
 
     internal void ReadSettings() {
       try {
-        var reg = Registry.CurrentUser.OpenSubKey("Software\\Seedforger", true);
-
-        // TorrentInfo torrent = new TorrentInfo(0, 0);
-        if (reg == null) {
-          // The key doesn't exist; create it / open it
-          Registry.CurrentUser.CreateSubKey("Software\\Seedforger");
-          return;
-        }
-
-        var Version = (string) reg.GetValue("Version", "none");
-        if (Version == "none") {
+        // First launch (no settings.json existed): reset to default values,
+        // mirroring the legacy "Version" == "none" marker behaviour.
+        if (Settings.IsFirstRun) {
           btnDefault_Click(null, null);
           return;
         }
 
-        chkNewValues.Checked = ItoB((int) reg.GetValue("NewValues", true));
+        var s = Settings.Current;
+
+        chkNewValues.Checked = s.NewValues;
         getNew = false;
-        cmbClient.SelectedItem = reg.GetValue("Client", DefaultClient);
+        cmbClient.SelectedItem = s.Client;
         getNew = false;
-        cmbVersion.SelectedItem = reg.GetValue("ClientVersion", DefaultClientVersion);
-        uploadRate.Text = (string) reg.GetValue("UploadRate", uploadRate.Text);
-        downloadRate.Text = (string) reg.GetValue("DownloadRate", downloadRate.Text);
-        fileSize.Text = (string) reg.GetValue("fileSize", "0");
+        cmbVersion.SelectedItem = s.ClientVersion;
+        uploadRate.Text = s.UploadRate;
+        downloadRate.Text = s.DownloadRate;
+        fileSize.Text = s.FileSize;
 
         // fileSize.Text = "0";
-        interval.Text = reg.GetValue("Interval", interval.Text).ToString();
-        DefaultDirectory = (string) reg.GetValue("Directory", DefaultDirectory);
-        checkTCPListen.Checked = ItoB((int) reg.GetValue("TCPlistener", BtoI(checkTCPListen.Checked)));
-        checkRequestScrap.Checked = ItoB((int) reg.GetValue("ScrapeInfo", BtoI(checkRequestScrap.Checked)));
+        interval.Text = s.Interval;
+        DefaultDirectory = s.Directory;
+        checkTCPListen.Checked = s.TCPlistener;
+        checkRequestScrap.Checked = s.ScrapeInfo;
 
         // Random value
-        chkRandUP.Checked = ItoB((int) reg.GetValue("GetRandUp", BtoI(chkRandUP.Checked)));
-        chkRandDown.Checked = ItoB((int) reg.GetValue("GetRandDown", BtoI(chkRandDown.Checked)));
-        txtRandUpMin.Text = (string) reg.GetValue("MinRandUp", txtRandUpMin.Text);
-        txtRandUpMax.Text = (string) reg.GetValue("MaxRandUp", txtRandUpMax.Text);
-        txtRandDownMin.Text = (string) reg.GetValue("MinRandDown", txtRandDownMin.Text);
-        txtRandDownMax.Text = (string) reg.GetValue("MaxRandDown", txtRandDownMax.Text);
+        chkRandUP.Checked = s.GetRandUp;
+        chkRandDown.Checked = s.GetRandDown;
+        txtRandUpMin.Text = s.MinRandUp;
+        txtRandUpMax.Text = s.MaxRandUp;
+        txtRandDownMin.Text = s.MinRandDown;
+        txtRandDownMax.Text = s.MaxRandDown;
 
         // Custom values
         if (chkNewValues.Checked == false) {
-          customKey.Text = (string) reg.GetValue("CustomKey", customKey.Text);
-          customPeerID.Text = (string) reg.GetValue("CustomPeerID", customPeerID.Text);
+          customKey.Text = s.CustomKey;
+          customPeerID.Text = s.CustomPeerID;
           lblGenStatus.Text = "Generation status: " + "using last saved values";
         }
         else {
           SetCustomValues();
         }
 
-        customPort.Text = (string) reg.GetValue("CustomPort", customPort.Text);
-        customPeersNum.Text = (string) reg.GetValue("CustomPeers", customPeersNum.Text);
+        customPort.Text = s.CustomPort;
+        customPeersNum.Text = s.CustomPeers;
 
         // Random value on next
-        checkRandomUpload.Checked = ItoB((int) reg.GetValue("GetRandUpNext", BtoI(checkRandomUpload.Checked)));
-        checkRandomDownload.Checked = ItoB((int) reg.GetValue("GetRandDownNext", BtoI(checkRandomDownload.Checked)));
-        RandomUploadFrom.Text = (string) reg.GetValue("MinRandUpNext", RandomUploadFrom.Text);
-        RandomUploadTo.Text = (string) reg.GetValue("MaxRandUpNext", RandomUploadTo.Text);
-        RandomDownloadFrom.Text = (string) reg.GetValue("MinRandDownNext", RandomDownloadFrom.Text);
-        RandomDownloadTo.Text = (string) reg.GetValue("MaxRandDownNext", RandomDownloadTo.Text);
+        checkRandomUpload.Checked = s.GetRandUpNext;
+        checkRandomDownload.Checked = s.GetRandDownNext;
+        RandomUploadFrom.Text = s.MinRandUpNext;
+        RandomUploadTo.Text = s.MaxRandUpNext;
+        RandomDownloadFrom.Text = s.MinRandDownNext;
+        RandomDownloadTo.Text = s.MaxRandDownNext;
 
         // Stop after...
-        cmbStopAfter.SelectedItem = reg.GetValue("StopWhen", "Never");
-        txtStopValue.Text = (string) reg.GetValue("StopAfter", txtStopValue.Text);
+        cmbStopAfter.SelectedItem = s.StopWhen;
+        txtStopValue.Text = s.StopAfter;
 
         // Proxy
-        comboProxyType.SelectedItem = reg.GetValue("ProxyType", comboProxyType.SelectedItem);
-        textProxyHost.Text = (string) reg.GetValue("ProxyAdress", textProxyHost.Text);
-        textProxyUser.Text = (string) reg.GetValue("ProxyUser", textProxyUser.Text);
-        textProxyPass.Text = (string) reg.GetValue("ProxyPass", textProxyPass.Text);
-        textProxyPort.Text = (string) reg.GetValue("ProxyPort", textProxyPort.Text);
-        checkIgnoreFailureReason.Checked =
-          ItoB((int) reg.GetValue("IgnoreFailureReason", BtoI(checkIgnoreFailureReason.Checked)));
+        comboProxyType.SelectedItem = s.ProxyType;
+        textProxyHost.Text = s.ProxyAdress;
+        textProxyUser.Text = s.ProxyUser;
+        textProxyPass.Text = s.ProxyPass;
+        textProxyPort.Text = s.ProxyPort;
+        checkIgnoreFailureReason.Checked = s.IgnoreFailureReason;
       }
       catch (Exception e) {
         AddLogLine("Error in ReadSettings(): " + e.Message);

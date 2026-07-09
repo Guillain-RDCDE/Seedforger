@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml;
-using Microsoft.Win32;
 
 namespace Seedforger {
   public partial class MainForm : Form {
@@ -236,17 +235,15 @@ namespace Seedforger {
     #endregion
 
     private void LoadSettings() {
-      var reg = Registry.CurrentUser.OpenSubKey("Software\\Seedforger", true);
-      if (reg == null) {
-        // The key doesn't exist; create it / open it
-        Registry.CurrentUser.CreateSubKey("Software\\Seedforger");
-        return;
-      }
-
       try {
-        checkShowTrayBaloon.Checked = ItoB((int) reg.GetValue("BallonTip", false));
-        chkMinimize.Checked = ItoB((int) reg.GetValue("MinimizeToTray", true));
-        closeToTrayToolStripMenuItem.Checked = ItoB((int) reg.GetValue("CloseToTray", true));
+        var s = Settings.Current;
+        checkShowTrayBaloon.Checked = s.BallonTip;
+        chkMinimize.Checked = s.MinimizeToTray;
+        closeToTrayToolStripMenuItem.Checked = s.CloseToTray;
+        AppOptions.RealisticSpeed = s.RealisticSpeed;
+        // Ensure the portable settings file exists next to the exe from the
+        // first launch (mirrors the legacy key-creation on first read).
+        s.Save();
       }
       catch {
       }
@@ -254,60 +251,59 @@ namespace Seedforger {
 
     private void SaveSettings(RM rmData) {
       try {
-        var reg = Registry.CurrentUser.OpenSubKey("Software\\Seedforger", true);
-        if (reg == null) {
-          // The key doesn't exist; create it / open it
-          reg = Registry.CurrentUser.CreateSubKey("Software\\Seedforger");
-        }
+        var s = Settings.Current;
 
-        reg.SetValue("NewValues", BtoI(rmData.chkNewValues.Checked), RegistryValueKind.DWord);
-        reg.SetValue("BallonTip", BtoI(checkShowTrayBaloon.Checked), RegistryValueKind.DWord);
-        reg.SetValue("MinimizeToTray", BtoI(chkMinimize.Checked), RegistryValueKind.DWord);
-        reg.SetValue("CloseToTray", BtoI(closeToTrayToolStripMenuItem.Checked), RegistryValueKind.DWord);
+        s.NewValues = rmData.chkNewValues.Checked;
+        s.BallonTip = checkShowTrayBaloon.Checked;
+        s.MinimizeToTray = chkMinimize.Checked;
+        s.CloseToTray = closeToTrayToolStripMenuItem.Checked;
+        s.RealisticSpeed = AppOptions.RealisticSpeed;
 
-        reg.SetValue("Client", rmData.cmbClient.SelectedItem, RegistryValueKind.String);
-        reg.SetValue("ClientVersion", rmData.cmbVersion.SelectedItem, RegistryValueKind.String);
-        reg.SetValue("UploadRate", rmData.uploadRate.Text, RegistryValueKind.String);
-        reg.SetValue("DownloadRate", rmData.downloadRate.Text, RegistryValueKind.String);
-        reg.SetValue("Interval", rmData.interval.Text, RegistryValueKind.String);
-        reg.SetValue("fileSize", rmData.fileSize.Text, RegistryValueKind.String);
-        reg.SetValue("Directory", rmData.DefaultDirectory, RegistryValueKind.String);
-        reg.SetValue("TCPlistener", BtoI(rmData.checkTCPListen.Checked), RegistryValueKind.DWord);
-        reg.SetValue("ScrapeInfo", BtoI(rmData.checkRequestScrap.Checked), RegistryValueKind.DWord);
+        s.Client = rmData.cmbClient.SelectedItem?.ToString() ?? s.Client;
+        s.ClientVersion = rmData.cmbVersion.SelectedItem?.ToString() ?? s.ClientVersion;
+        s.UploadRate = rmData.uploadRate.Text;
+        s.DownloadRate = rmData.downloadRate.Text;
+        s.Interval = rmData.interval.Text;
+        s.FileSize = rmData.fileSize.Text;
+        s.Directory = rmData.DefaultDirectory;
+        s.TCPlistener = rmData.checkTCPListen.Checked;
+        s.ScrapeInfo = rmData.checkRequestScrap.Checked;
 
         // Random value
-        reg.SetValue("GetRandUp", BtoI(rmData.chkRandUP.Checked), RegistryValueKind.DWord);
-        reg.SetValue("GetRandDown", BtoI(rmData.chkRandDown.Checked), RegistryValueKind.DWord);
-        reg.SetValue("MinRandUp", rmData.txtRandUpMin.Text, RegistryValueKind.String);
-        reg.SetValue("MaxRandUp", rmData.txtRandUpMax.Text, RegistryValueKind.String);
-        reg.SetValue("MinRandDown", rmData.txtRandDownMin.Text, RegistryValueKind.String);
-        reg.SetValue("MaxRandDown", rmData.txtRandDownMax.Text, RegistryValueKind.String);
+        s.GetRandUp = rmData.chkRandUP.Checked;
+        s.GetRandDown = rmData.chkRandDown.Checked;
+        s.MinRandUp = rmData.txtRandUpMin.Text;
+        s.MaxRandUp = rmData.txtRandUpMax.Text;
+        s.MinRandDown = rmData.txtRandDownMin.Text;
+        s.MaxRandDown = rmData.txtRandDownMax.Text;
 
         // Custom values
-        reg.SetValue("CustomKey", rmData.customKey.Text, RegistryValueKind.String);
-        reg.SetValue("CustomPeerID", rmData.customPeerID.Text, RegistryValueKind.String);
-        reg.SetValue("CustomPeers", rmData.customPeersNum.Text, RegistryValueKind.String);
-        reg.SetValue("CustomPort", rmData.customPort.Text, RegistryValueKind.String);
+        s.CustomKey = rmData.customKey.Text;
+        s.CustomPeerID = rmData.customPeerID.Text;
+        s.CustomPeers = rmData.customPeersNum.Text;
+        s.CustomPort = rmData.customPort.Text;
 
         // Stop after...
-        reg.SetValue("StopWhen", rmData.cmbStopAfter.SelectedItem, RegistryValueKind.String);
-        reg.SetValue("StopAfter", rmData.txtStopValue.Text, RegistryValueKind.String);
+        s.StopWhen = rmData.cmbStopAfter.SelectedItem?.ToString() ?? s.StopWhen;
+        s.StopAfter = rmData.txtStopValue.Text;
 
         // Proxy
-        reg.SetValue("ProxyType", rmData.comboProxyType.SelectedItem, RegistryValueKind.String);
-        reg.SetValue("ProxyAdress", rmData.textProxyHost.Text, RegistryValueKind.String);
-        reg.SetValue("ProxyUser", rmData.textProxyUser.Text, RegistryValueKind.String);
-        reg.SetValue("ProxyPass", rmData.textProxyPass.Text, RegistryValueKind.String);
-        reg.SetValue("ProxyPort", rmData.textProxyPort.Text, RegistryValueKind.String);
+        s.ProxyType = rmData.comboProxyType.SelectedItem?.ToString() ?? s.ProxyType;
+        s.ProxyAdress = rmData.textProxyHost.Text;
+        s.ProxyUser = rmData.textProxyUser.Text;
+        s.ProxyPass = rmData.textProxyPass.Text;
+        s.ProxyPort = rmData.textProxyPort.Text;
 
         // Random value on next
-        reg.SetValue("GetRandUpNext", BtoI(rmData.checkRandomUpload.Checked), RegistryValueKind.DWord);
-        reg.SetValue("GetRandDownNext", BtoI(rmData.checkRandomDownload.Checked), RegistryValueKind.DWord);
-        reg.SetValue("MinRandUpNext", rmData.RandomUploadFrom.Text, RegistryValueKind.String);
-        reg.SetValue("MaxRandUpNext", rmData.RandomUploadTo.Text, RegistryValueKind.String);
-        reg.SetValue("MinRandDownNext", rmData.RandomDownloadFrom.Text, RegistryValueKind.String);
-        reg.SetValue("MaxRandDownNext", rmData.RandomDownloadTo.Text, RegistryValueKind.String);
-        reg.SetValue("IgnoreFailureReason", BtoI(rmData.checkIgnoreFailureReason.Checked), RegistryValueKind.DWord);
+        s.GetRandUpNext = rmData.checkRandomUpload.Checked;
+        s.GetRandDownNext = rmData.checkRandomDownload.Checked;
+        s.MinRandUpNext = rmData.RandomUploadFrom.Text;
+        s.MaxRandUpNext = rmData.RandomUploadTo.Text;
+        s.MinRandDownNext = rmData.RandomDownloadFrom.Text;
+        s.MaxRandDownNext = rmData.RandomDownloadTo.Text;
+        s.IgnoreFailureReason = rmData.checkIgnoreFailureReason.Checked;
+
+        s.Save();
       }
       catch (Exception e) {
         // Log += "Error in SetSettings(): " + e.Message + "\n";
