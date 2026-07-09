@@ -25,6 +25,11 @@ namespace Seedforger {
     public IdSpec Key { get; set; }
     public string PeerIdPrefix { get; set; } = "";
     public IdSpec PeerIdRandom { get; set; }
+
+    /// <summary>Optional client-specific peer_id tail scheme. "transmission"
+    /// generates an 11-random + 1-checksum tail (see <see cref="PeerId"/>).
+    /// When set, it replaces <see cref="PeerIdRandom"/>.</summary>
+    public string PeerIdChecksum { get; set; }
     public string Headers { get; set; }
     public string Query { get; set; }
     public int DefNumWant { get; set; } = 200;

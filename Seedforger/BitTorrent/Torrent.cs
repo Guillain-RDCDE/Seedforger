@@ -139,6 +139,9 @@ namespace Seedforger.BitTorrent {
 
     internal int Pieces => pieceArray.Length;
 
+    /// <summary>Piece count, or 0 when unknown (e.g. a magnet/virtual torrent).</summary>
+    internal int PieceCount => pieceArray?.Length ?? 0;
+
     private void LoadTorrent() {
       if (Data.Contains("announce") == false) throw new IncompleteTorrentData("No tracker URL");
 

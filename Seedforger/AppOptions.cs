@@ -30,6 +30,10 @@ namespace Seedforger {
     /// <summary>UI language. Persisted in settings.json.</summary>
     internal static Language Language = Language.English;
 
+    /// <summary>When true, upload/download are scaled by the real swarm demand
+    /// (leechers/seeders from the tracker) so the numbers are physically plausible.</summary>
+    internal static bool SwarmAware = true;
+
     /// <summary>Debug escape hatch: set SF_NOTHEME to disable the theme engine.</summary>
     internal static readonly bool ThemingEnabled =
       System.Environment.GetEnvironmentVariable("SF_NOTHEME") == null;

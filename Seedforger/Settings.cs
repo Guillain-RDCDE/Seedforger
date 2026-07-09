@@ -50,6 +50,8 @@ namespace Seedforger {
     public int ActiveHoursStart { get; set; } = 8;
     public int ActiveHoursEnd { get; set; } = 24;
     public string Language { get; set; } = "en";
+    public bool SwarmAware { get; set; } = true;
+    public int GlobalUpstreamKBps { get; set; } = 0;
 
     #endregion
 

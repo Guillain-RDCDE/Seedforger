@@ -19,6 +19,7 @@ namespace Seedforger {
     private ToolStripMenuItem realisticSpeedMenuItem;
     private ToolStripMenuItem darkModeMenuItem;
     private ToolStripMenuItem rotateClientMenuItem;
+    private ToolStripMenuItem swarmAwareMenuItem;
     private ToolStripMenuItem langEnItem;
     private ToolStripMenuItem langFrItem;
 
@@ -65,6 +66,16 @@ namespace Seedforger {
         Settings.Current.Save();
       };
 
+      swarmAwareMenuItem = new ToolStripMenuItem("Swarm-aware speeds") {
+        CheckOnClick = true,
+        Checked = AppOptions.SwarmAware,
+      };
+      swarmAwareMenuItem.Click += (s, e) => {
+        AppOptions.SwarmAware = swarmAwareMenuItem.Checked;
+        Settings.Current.SwarmAware = AppOptions.SwarmAware;
+        Settings.Current.Save();
+      };
+
       var connectionMenuItem = new ToolStripMenuItem("Connection profile");
       foreach (var profile in ConnectionProfiles.All) {
         var prof = profile;
@@ -90,6 +101,7 @@ namespace Seedforger {
       settingsToolStripMenuItem.DropDownItems.Insert(0, activeHoursItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, connectionMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, rotateClientMenuItem);
+      settingsToolStripMenuItem.DropDownItems.Insert(0, swarmAwareMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, realisticSpeedMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, darkModeMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, languageMenuItem);
@@ -188,6 +200,10 @@ namespace Seedforger {
       int Jitter(int v) => Math.Max(1, (int) (v * (0.92 + r.NextDouble() * 0.16)));
       rm.UpdateTextBox(rm.uploadRate, Jitter(p.UpKBps).ToString());
       rm.UpdateTextBox(rm.downloadRate, Jitter(p.DownKBps).ToString());
+      // The profile also caps the *total* upload across every tab (one uplink).
+      Bandwidth.GlobalUpKBps = p.UpKBps;
+      Settings.Current.GlobalUpstreamKBps = p.UpKBps;
+      Settings.Current.Save();
     }
 
     /// <summary>Apply the modern restyle to the main window and every open tab.</summary>
@@ -419,8 +435,11 @@ namespace Seedforger {
         AppOptions.ActiveHoursStart = s.ActiveHoursStart;
         AppOptions.ActiveHoursEnd = s.ActiveHoursEnd;
         AppOptions.Language = Localization.Parse(s.Language);
+        AppOptions.SwarmAware = s.SwarmAware;
+        Bandwidth.GlobalUpKBps = s.GlobalUpstreamKBps;
         langEnItem.Checked = AppOptions.Language == Language.English;
         langFrItem.Checked = AppOptions.Language == Language.French;
+        swarmAwareMenuItem.Checked = AppOptions.SwarmAware;
         realisticSpeedMenuItem.Checked = AppOptions.RealisticSpeed;
         darkModeMenuItem.Checked = AppOptions.DarkMode;
         rotateClientMenuItem.Checked = AppOptions.RandomizeClientOnStart;
@@ -444,6 +463,7 @@ namespace Seedforger {
         s.RealisticSpeed = AppOptions.RealisticSpeed;
         s.DarkMode = AppOptions.DarkMode;
         s.RandomizeClientOnStart = AppOptions.RandomizeClientOnStart;
+        s.SwarmAware = AppOptions.SwarmAware;
 
         s.Client = rmData.cmbClient.SelectedItem?.ToString() ?? s.Client;
         s.ClientVersion = rmData.cmbVersion.SelectedItem?.ToString() ?? s.ClientVersion;

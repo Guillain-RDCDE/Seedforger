@@ -243,6 +243,15 @@ namespace Seedforger {
                 text1.IndexOf(encoding1.GetString(currentTorrentFile.InfoHash)) >= 0) {
               var buffer2 = CreateHandshakeResponse();
               stream1.Write(buffer2, 0, buffer2.Length);
+              // Look like a complete but stingy seeder: full bitfield, then choke.
+              var pieces = currentTorrentFile.PieceCount;
+              if (pieces > 0) {
+                var bitfield = PeerWire.FullBitfieldMessage(pieces);
+                stream1.Write(bitfield, 0, bitfield.Length);
+                var choke = PeerWire.ChokeMessage();
+                stream1.Write(choke, 0, choke.Length);
+                AddLogLine("Answered a peer as a full seeder (bitfield + choke)");
+              }
             }
 
             socket1.Close();
@@ -268,7 +277,7 @@ namespace Seedforger {
       var num1 = 0;
       var encoding1 = Encoding.GetEncoding(0x6faf);
       var text1 = "BitTorrent protocol";
-      var buffer1 = new byte[0x100];
+      var buffer1 = new byte[68]; // 1 + 19 + 8 + 20 + 20
       buffer1[num1++] = (byte) text1.Length;
       encoding1.GetBytes(text1, 0, text1.Length, buffer1, num1);
       num1 += text1.Length;
@@ -581,6 +590,7 @@ namespace Seedforger {
       uploadShaper = new SpeedShaper(rand);
       downloadShaper = new SpeedShaper(rand);
       effectiveInterval = 0;
+      Bandwidth.RegisterActive();
       requestScrap = checkRequestScrap.Checked;
       UpdateScrapStats("", "", "");
       StartButton.Enabled = false;
@@ -629,6 +639,7 @@ namespace Seedforger {
         TotalRunningTimeCounter = 0;
         lblTotalTime.Text = "00:00";
         if (StartButton.Enabled) return;
+        Bandwidth.UnregisterActive();
         StartButton.Enabled = true;
         StopButton.Enabled = false;
         manualUpdateButton.Enabled = false;
@@ -991,9 +1002,10 @@ namespace Seedforger {
         long uploadedR;
         if (AppOptions.RealisticSpeed && uploadShaper != null)
           uploadedR = uploadShaper.NextSecondBytes(
-            (long) (torrentInfo.uploadRate * SpeedFactor()));
+            (long) (torrentInfo.uploadRate * UploadSpeedFactor()));
         else
           uploadedR = torrentInfo.uploadRate + RandomSp(txtRandUpMin.Text, txtRandUpMax.Text, chkRandUP.Checked);
+        uploadedR = Bandwidth.CapUpload(uploadedR);
 
         if (uploadedR < 0) {
           uploadedR = 0;
@@ -1008,7 +1020,7 @@ namespace Seedforger {
           long downloadedR;
           if (AppOptions.RealisticSpeed && downloadShaper != null)
             downloadedR = downloadShaper.NextSecondBytes(
-              (long) (torrentInfo.downloadRate * SpeedFactor()));
+              (long) (torrentInfo.downloadRate * DownloadSpeedFactor()));
           else
             downloadedR = torrentInfo.downloadRate +
                           RandomSp(txtRandDownMin.Text, txtRandDownMax.Text, chkRandDown.Checked);
@@ -1078,6 +1090,21 @@ namespace Seedforger {
           !Stealth.InActiveHours(now, AppOptions.ActiveHoursStart, AppOptions.ActiveHoursEnd))
         return 0.0;
       return Stealth.DiurnalFactor(now);
+    }
+
+    /// <summary>Upload multiplier: time-of-day/active-hours times the swarm
+    /// demand (you can only feed the leechers that actually exist).</summary>
+    private double UploadSpeedFactor() {
+      var f = SpeedFactor();
+      if (AppOptions.SwarmAware) f *= SwarmModel.UploadFactor(Leechers, Seeders);
+      return f;
+    }
+
+    /// <summary>Download multiplier: bounded by how many seeders can feed you.</summary>
+    private double DownloadSpeedFactor() {
+      var f = SpeedFactor();
+      if (AppOptions.SwarmAware) f *= SwarmModel.DownloadFactor(Seeders);
+      return f;
     }
 
     private static string SetPrecision(string data, int prec) {

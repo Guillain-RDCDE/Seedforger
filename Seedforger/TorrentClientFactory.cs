@@ -110,7 +110,7 @@ namespace Seedforger {
         HttpProtocol = p.HttpProtocol,
         HashUpperCase = p.HashUpperCase,
         Key = GenerateIdString(p.Key),
-        PeerID = p.PeerIdPrefix + (p.PeerIdRandom != null ? GenerateIdString(p.PeerIdRandom) : ""),
+        PeerID = p.PeerIdPrefix + GeneratePeerIdTail(p),
         Headers = p.Headers,
         Query = p.Query,
         DefNumWant = p.DefNumWant,
@@ -153,6 +153,12 @@ namespace Seedforger {
     }
 
     #endregion
+
+    private static string GeneratePeerIdTail(ClientProfile p) {
+      if (string.Equals(p.PeerIdChecksum, "transmission", System.StringComparison.OrdinalIgnoreCase))
+        return PeerId.TransmissionTail(System.Random.Shared);
+      return p.PeerIdRandom != null ? GenerateIdString(p.PeerIdRandom) : string.Empty;
+    }
 
     private static string GenerateIdString(IdSpec spec) {
       if (spec == null) {
