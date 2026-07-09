@@ -63,6 +63,30 @@ namespace Seedforger {
       }
     }
 
+    /// <summary>
+    /// Writes a `clients.sample.json` next to the executable (once) so users can
+    /// see the exact override format. It is NOT loaded automatically: copy it to
+    /// `clients.json` and edit to add or override client fingerprints without
+    /// recompiling.
+    /// </summary>
+    public static void ExportSampleIfMissing() {
+      try {
+        var path = Path.Combine(AppContext.BaseDirectory, "clients.sample.json");
+        if (File.Exists(path)) {
+          return;
+        }
+
+        var options = new JsonSerializerOptions {
+          WriteIndented = true,
+          DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+        };
+        File.WriteAllText(path, JsonSerializer.Serialize(DefaultClientProfiles.All, options));
+      }
+      catch {
+        // Read-only directory or similar: a sample file is a convenience, not critical.
+      }
+    }
+
     public static TorrentClient GetClient(string name) {
       var profile = Profiles.FirstOrDefault(p => p.FullName == name)
                     ?? Profiles.FirstOrDefault(p => p.FullName == FallbackClientName)
