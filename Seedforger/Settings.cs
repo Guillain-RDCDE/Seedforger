@@ -44,6 +44,7 @@ namespace Seedforger {
     public bool MinimizeToTray { get; set; } = true;
     public bool CloseToTray { get; set; } = true;
     public bool RealisticSpeed { get; set; } = true;
+    public bool DarkMode { get; set; } = false;
 
     #endregion
 

@@ -14,6 +14,9 @@ namespace Seedforger {
     /// </summary>
     internal static bool RealisticSpeed = true;
 
+    /// <summary>Dark theme when true, light when false. Persisted in settings.json.</summary>
+    internal static bool DarkMode = false;
+
     /// <summary>Debug escape hatch: set SF_NOTHEME to disable the theme engine.</summary>
     internal static readonly bool ThemingEnabled =
       System.Environment.GetEnvironmentVariable("SF_NOTHEME") == null;

@@ -17,6 +17,7 @@ namespace Seedforger {
     private bool trayIconBalloonIsUp;
 
     private ToolStripMenuItem realisticSpeedMenuItem;
+    private ToolStripMenuItem darkModeMenuItem;
 
     internal MainForm() {
       InitializeComponent();
@@ -34,10 +35,26 @@ namespace Seedforger {
         CheckOnClick = true,
         Checked = AppOptions.RealisticSpeed,
       };
-      realisticSpeedMenuItem.Click += (s, e) => { AppOptions.RealisticSpeed = realisticSpeedMenuItem.Checked; };
+      realisticSpeedMenuItem.Click += (s, e) => {
+        AppOptions.RealisticSpeed = realisticSpeedMenuItem.Checked;
+        Settings.Current.RealisticSpeed = AppOptions.RealisticSpeed;
+        Settings.Current.Save();
+      };
+
+      darkModeMenuItem = new ToolStripMenuItem("Dark mode") {
+        CheckOnClick = true,
+        Checked = AppOptions.DarkMode,
+      };
+      darkModeMenuItem.Click += (s, e) => {
+        AppOptions.DarkMode = darkModeMenuItem.Checked;
+        Settings.Current.DarkMode = AppOptions.DarkMode;
+        Settings.Current.Save();
+        ApplyThemeAll();
+      };
 
       settingsToolStripMenuItem.DropDownItems.Insert(0, new ToolStripSeparator());
       settingsToolStripMenuItem.DropDownItems.Insert(0, realisticSpeedMenuItem);
+      settingsToolStripMenuItem.DropDownItems.Insert(0, darkModeMenuItem);
     }
 
     /// <summary>Apply the modern restyle to the main window and every open tab.</summary>
@@ -242,6 +259,11 @@ namespace Seedforger {
         chkMinimize.Checked = s.MinimizeToTray;
         closeToTrayToolStripMenuItem.Checked = s.CloseToTray;
         AppOptions.RealisticSpeed = s.RealisticSpeed;
+        // First launch follows the OS theme; afterwards the user's choice sticks.
+        AppOptions.DarkMode = Settings.IsFirstRun ? Theme.IsSystemDark() : s.DarkMode;
+        realisticSpeedMenuItem.Checked = AppOptions.RealisticSpeed;
+        darkModeMenuItem.Checked = AppOptions.DarkMode;
+        s.DarkMode = AppOptions.DarkMode;
         // Ensure the portable settings file exists next to the exe from the
         // first launch (mirrors the legacy key-creation on first read).
         s.Save();
@@ -259,6 +281,7 @@ namespace Seedforger {
         s.MinimizeToTray = chkMinimize.Checked;
         s.CloseToTray = closeToTrayToolStripMenuItem.Checked;
         s.RealisticSpeed = AppOptions.RealisticSpeed;
+        s.DarkMode = AppOptions.DarkMode;
 
         s.Client = rmData.cmbClient.SelectedItem?.ToString() ?? s.Client;
         s.ClientVersion = rmData.cmbVersion.SelectedItem?.ToString() ?? s.ClientVersion;
