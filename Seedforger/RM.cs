@@ -1223,6 +1223,10 @@ namespace Seedforger {
     }
 
     private TrackerResponse MakeWebRequestEx(Uri reqUri) {
+      if (reqUri.Scheme == "https") {
+        return MakeHttpsRequestEx(reqUri);
+      }
+
       var usedEnc = Encoding.GetEncoding(0x4e4);
       SocketEx sock = null;
       TrackerResponse trackerResponse;
@@ -1300,6 +1304,59 @@ namespace Seedforger {
 
       // if (null != sock) sock.Close();
       // else return null;
+    }
+
+    /// <summary>
+    /// HTTPS transport for modern trackers. Wraps a raw TCP connection in TLS but
+    /// keeps the exact hand-built HTTP request (same header order / User-Agent) so
+    /// wire fidelity is preserved. Proxying HTTPS is not supported yet; when a proxy
+    /// is configured we refuse rather than connect directly and leak the real IP.
+    /// </summary>
+    private TrackerResponse MakeHttpsRequestEx(Uri reqUri) {
+      if (currentProxy.ProxyType != ProxyType.None) {
+        AddLogLine("HTTPS through a proxy is not supported yet - aborting to avoid leaking your real IP. " +
+                   "Use an HTTP tracker URL with the proxy, or disable the proxy for HTTPS trackers.");
+        return null;
+      }
+
+      var usedEnc = Encoding.GetEncoding(0x4e4);
+      try {
+        var host = reqUri.Host;
+        var port = reqUri.Port;
+        var path = reqUri.PathAndQuery;
+        AddLogLine("Connecting to tracker (" + host + ") over TLS on port " + port);
+
+        var cmd = "GET " + path + " " + currentClient.HttpProtocol + "\r\n" +
+                  currentClient.Headers.Replace("{host}", host) + "\r\n";
+        AddLogLine("======== Sending Command to Tracker (TLS) ========");
+        AddLogLine(cmd);
+
+        var responseBytes = HttpsTransport.Fetch(host, port, cmd, usedEnc);
+        if (responseBytes.Length == 0) {
+          AddLogLine("Error : Tracker Response is empty");
+          return null;
+        }
+
+        using (var memStream = new MemoryStream(responseBytes)) {
+          var trackerResponse = new TrackerResponse(memStream);
+          if (trackerResponse.doRedirect) {
+            return MakeWebRequestEx(new Uri(trackerResponse.RedirectionURL));
+          }
+
+          AddLogLine("======== Tracker Response ========");
+          AddLogLine(trackerResponse.Headers);
+          if (trackerResponse.Dict == null) {
+            AddLogLine("*** Failed to decode tracker response :");
+            AddLogLine(trackerResponse.Body);
+          }
+
+          return trackerResponse;
+        }
+      }
+      catch (Exception ex) {
+        AddLogLine("HTTPS Exception: " + ex.Message);
+        return null;
+      }
     }
 
     internal void RemainingWork_Tick(object sender, EventArgs e) {
