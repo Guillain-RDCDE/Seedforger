@@ -6,11 +6,13 @@
 
 A modern, from-the-ground-up .NET 8 revival of the classic *RatioMaster*.
 
+![Seedforger](.github/social-preview.png)
+
 [![CI](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml/badge.svg)](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-![Seedforger](preview.png)
+<img src="preview.png" width="540" alt="Seedforger interface (light theme)">
 
 </div>
 
