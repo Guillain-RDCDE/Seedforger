@@ -26,7 +26,10 @@ namespace Seedforger {
         return;
       }
 
-      Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+      // The legacy WinForms layout was designed for system-DPI scaling (the old
+      // manifest used dpiAware=true). PerMonitorV2 mis-scales the hand-placed
+      // controls on high-DPI screens, so keep the original System-aware behaviour.
+      Application.SetHighDpiMode(HighDpiMode.SystemAware);
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
       Application.Run(new MainForm());

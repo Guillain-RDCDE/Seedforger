@@ -476,7 +476,6 @@ namespace Seedforger
       this.Controls.Add(this.tab);
       this.Controls.Add(this.menu);
       this.Controls.Add(this.Status);
-      this.IsMdiContainer = true;
       this.MainMenuStrip = this.menu;
       this.MaximizeBox = false;
       this.MaximumSize = new System.Drawing.Size(980, 2000);

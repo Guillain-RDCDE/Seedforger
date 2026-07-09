@@ -17,12 +17,38 @@ namespace Seedforger {
     private int allit;
     private bool trayIconBalloonIsUp;
 
+    private ToolStripMenuItem realisticSpeedMenuItem;
+
     internal MainForm() {
       InitializeComponent();
       Icon = System.Drawing.Icon.ExtractAssociatedIcon(typeof(MainForm).Assembly.Location);
       Text = AppInfo.Title;
+      // The legacy build could restore an off-screen position; always start centered.
+      StartPosition = FormStartPosition.CenterScreen;
 
+      BuildOptionsMenu();
       LoadSettings();
+    }
+
+    private void BuildOptionsMenu() {
+      realisticSpeedMenuItem = new ToolStripMenuItem("Realistic speed (ramp-up)") {
+        CheckOnClick = true,
+        Checked = AppOptions.RealisticSpeed,
+      };
+      realisticSpeedMenuItem.Click += (s, e) => { AppOptions.RealisticSpeed = realisticSpeedMenuItem.Checked; };
+
+      settingsToolStripMenuItem.DropDownItems.Insert(0, new ToolStripSeparator());
+      settingsToolStripMenuItem.DropDownItems.Insert(0, realisticSpeedMenuItem);
+    }
+
+    /// <summary>Apply the modern restyle to the main window and every open tab.</summary>
+    internal void ApplyThemeAll() {
+      Theme.Apply(this);
+      foreach (TabPage page in tab.TabPages) {
+        if (page.Controls.Count > 0 && page.Controls[0] is RM rm) {
+          Theme.ApplyTo(rm);
+        }
+      }
     }
 
     private void aboutToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -58,6 +84,7 @@ namespace Seedforger {
       Add("");
       lblIp.Text = Functions.GetIp();
       tab_TabIndexChanged(null, null);
+      ApplyThemeAll();
       // tab.Size = new Size(Width - 8, Height - 80);
     }
 
