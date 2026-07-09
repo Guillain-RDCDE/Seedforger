@@ -83,6 +83,7 @@ namespace Seedforger {
       Add("");
       lblIp.Text = Functions.GetIp();
       tab_TabIndexChanged(null, null);
+      trayIcon.Icon = Icon; // keep the tray icon in sync with the app icon
       ApplyThemeAll();
       // tab.Size = new Size(Width - 8, Height - 80);
     }
