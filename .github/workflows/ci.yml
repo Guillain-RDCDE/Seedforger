@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore Seedforger.sln
+
+      - name: Build
+        run: dotnet build Seedforger.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test Seedforger.Tests/Seedforger.Tests.csproj -c Release --no-build
