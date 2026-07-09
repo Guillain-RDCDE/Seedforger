@@ -375,15 +375,24 @@ Concretely, for each announce it:
    **active-hours** window (`Stealth`), **interval jitter** so announces aren't
    clockwork, optional **client rotation**, and a **believability guard** that
    warns on physically implausible speeds.
+4. Ties the numbers to **swarm reality** — reads the tracker's leecher/seeder
+   counts and scales upload/download so you only "feed" demand that exists
+   (`SwarmModel`), and caps your **total** upload across tabs to one uplink
+   (`Bandwidth`).
+5. Optionally acts as a **connectable, complete seeder** if a peer connects to
+   the advertised port: it answers the handshake, sends a full bitfield and
+   chokes (`PeerWire`) — visible and legitimate, transferring nothing.
 
 Mapping the anti-cheat table (§12) to Seedforger's features:
 
 | Anti-cheat signal | Seedforger countermeasure |
 |-------------------|---------------------------|
-| Client whitelist | accurate, current fingerprints (`-qB5230-`, `-TR4130-`, …) + rotation |
-| Impossible speed | connection profiles (ADSL→fibre) + believability warnings |
-| Announce cadence | interval jitter (drift later, never earlier than the tracker's `interval`) |
-| Flat/robotic stats | ramp-up + smoothed variation + day/night + active hours |
+| Client whitelist | accurate, current fingerprints (`-qB5230-`, `-TR4130-`, …), **client rotation**, and client-specific quirks like **Transmission's peer_id checksum** |
+| Impossible speed | **connection profiles** (ADSL→fibre) + **believability warnings** + a **global upstream budget** shared across all tabs (one uplink) |
+| **Uploading to nobody** | **swarm-aware speeds**: read the tracker's leecher/seeder counts and scale accordingly — 0 leechers ⇒ a trickle, your share diluted by competing seeders |
+| Announce cadence | **interval jitter** (drift later, never earlier than the tracker's `interval`) |
+| Flat/robotic stats | **ramp-up** + smoothed variation + **day/night** rhythm + **active hours** |
+| Ghost peer / not connectable | **connectable seeder**: answer inbound handshakes with a full **bitfield** then **choke** — connectable and complete, transferring nothing |
 
 None of this makes fake stats *undetectable* — a tracker that correlates against
 real peer connections, or requires client-reported checksums, can still catch it.

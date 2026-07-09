@@ -65,6 +65,10 @@ Read the deep-dive: **[How BitTorrent actually works](docs/how-bittorrent-works.
 | **Portable settings** | Everything is stored in `settings.json` next to the exe. **No registry**, fully portable. |
 | **Proxy** | SOCKS4 / 4a / 5 and HTTP-CONNECT for HTTP trackers. |
 | **Stealth** | Announce-interval jitter, a day/night speed rhythm, an **active-hours** window, believability warnings, and **client rotation** each start. |
+| **Swarm-aware speeds** | Upload/download scaled by the tracker's **real leecher/seeder counts** — 0 leechers ⇒ a trickle (nobody to feed), your share diluted by competing seeders. Makes the numbers physically plausible. |
+| **Global upstream budget** | Picking a connection profile caps your **total** upload across *all* tabs — one uplink, shared fairly. |
+| **Connectable seeder** | Answers peer handshakes on your port with a **full bitfield then a choke** — a connectable, complete seeder to any monitoring peer, that transfers nothing. |
+| **Peer_id fidelity** | Reproduces client-specific quirks, incl. **Transmission's peer_id checksum**, so ids validate. |
 | **Connection profiles** | One-click believable speeds for ADSL / VDSL / cable / fibre 100-300-1G / 4G / 5G. |
 | **Auto-stop targets** | Stop on time, uploaded, downloaded, **ratio**, or seeders/leechers. |
 | **Magnet & batch** | Open **magnet links** (infohash-only), and load a whole folder of `.torrent`s into tabs. |
