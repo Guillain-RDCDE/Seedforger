@@ -30,9 +30,8 @@ It works **independently of your torrent client** — you don't even need one in
 **In plain words:** you give Seedforger a `.torrent` file and tell it *"pretend I'm uploading at 10 MB/s"*. It quietly tells the tracker that story, over and over, so your stats go up. That's the whole idea.
 
 ### Get it running
-1. Install the **[.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)** (one-time, free, from Microsoft).
-2. Download `Seedforger.exe` from the [Releases](../../releases) page *(or build it yourself — see the developer section)*.
-3. Double-click it. No installation — it's a single portable app.
+1. Download **`Seedforger.exe`** from the [latest release](../../releases/latest).
+2. Double-click it. That's it — **no installation, no .NET runtime to install**, nothing. It's a single self-contained app you can drop anywhere (USB stick included).
 
 ### Use it
 1. **Browse…** and pick your `.torrent` file.
