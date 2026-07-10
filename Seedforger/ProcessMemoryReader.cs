@@ -23,9 +23,11 @@ namespace Seedforger {
     internal Process ReadProcess { get; set; }
 
     internal void CloseHandle() {
-      if (CloseHandle(m_hProcess) == 0) {
-        throw new Exception("CloseHandle failed");
-      }
+      // Best-effort cleanup: a failed handle close is not worth an exception
+      // (and it used to surface as an ugly "Error when parsing" line in the log).
+      if (m_hProcess == IntPtr.Zero) return;
+      CloseHandle(m_hProcess);
+      m_hProcess = IntPtr.Zero;
     }
 
     internal void OpenProcess() {

@@ -82,7 +82,7 @@ namespace Seedforger {
       }
 
       deployDefaultValues();
-      GetPCInfo();
+      LogStartupBanner();
       ReadSettings();
       Theme.ApplyTo(this);
       Localization.Apply(this);
@@ -185,18 +185,13 @@ namespace Seedforger {
       }
     }
 
-    internal void GetPCInfo() {
+    // A clean startup banner. (The old build dumped machine name, user name and
+    // the working directory here — noisy, and it leaks PII into screenshots.)
+    internal void LogStartupBanner() {
       try {
-        AddLogLine("CurrentDirectory: " + Environment.CurrentDirectory);
-        AddLogLine("HasShutdownStarted: " + Environment.HasShutdownStarted);
-        AddLogLine("MachineName: " + Environment.MachineName);
-        AddLogLine("OSVersion: " + Environment.OSVersion);
-        AddLogLine("ProcessorCount: " + Environment.ProcessorCount);
-        AddLogLine("UserDomainName: " + Environment.UserDomainName);
-        AddLogLine("UserInteractive: " + Environment.UserInteractive);
-        AddLogLine("UserName: " + Environment.UserName);
-        AddLogLine("Version: " + Environment.Version);
-        AddLogLine("WorkingSet: " + Environment.WorkingSet);
+        AddLogLine($"{AppInfo.Title} — ready.");
+        AddLogLine("Educational / security-research tool. Use only where you're allowed to.");
+        AddLogLine("Load a .torrent, pick a client, set your speed, then START.");
         AddLogLine("");
       }
       catch (Exception) {

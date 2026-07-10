@@ -14,22 +14,9 @@ A modern, from-the-ground-up **.NET 8** revival of the classic *RatioMaster* —
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-108%20passing-2ea043)](Seedforger.Tests)
 
-<table>
-  <tr>
-    <td><img src="docs/screenshots/main-dark.png" alt="Seedforger — dark theme" width="420"></td>
-    <td><img src="docs/screenshots/main-light.png" alt="Seedforger — light theme" width="420"></td>
-  </tr>
-  <tr>
-    <td align="center"><em>Dark theme — one tab per torrent</em></td>
-    <td align="center"><em>Light theme — same, your choice</em></td>
-  </tr>
-  <tr>
-    <td colspan="2" align="center"><img src="docs/screenshots/campaign-builder.png" alt="Visual campaign builder" width="320"></td>
-  </tr>
-  <tr>
-    <td colspan="2" align="center"><em>Visual campaign builder — set a goal, no JSON</em></td>
-  </tr>
-</table>
+<img src="docs/screenshots/main-dark.png" width="460" alt="Seedforger — one tab per torrent, live log, light & dark themes">
+
+<sub><em>One tab per torrent · realistic speeds · light & dark themes · <a href="docs/screenshots/campaign-builder.png">visual campaign builder</a></em></sub>
 
 </div>
 

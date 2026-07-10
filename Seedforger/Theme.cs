@@ -146,6 +146,10 @@ namespace Seedforger {
           rtb.BorderStyle = BorderStyle.None;
           rtb.BackColor = LogBack;
           rtb.ForeColor = LogText;
+          // Vertical-only: a squeezed RichTextBox otherwise shows a light
+          // horizontal scrollbar that reads as an ugly white band in dark mode.
+          rtb.WordWrap = true;
+          rtb.ScrollBars = RichTextBoxScrollBars.Vertical;
           break;
         case MenuStrip ms:
           ms.BackColor = p.Card;

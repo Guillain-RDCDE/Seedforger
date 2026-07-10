@@ -472,14 +472,14 @@ namespace Seedforger
       this.AllowDrop = true;
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(484, 371);
+      this.ClientSize = new System.Drawing.Size(484, 500);
       this.Controls.Add(this.tab);
       this.Controls.Add(this.menu);
       this.Controls.Add(this.Status);
       this.MainMenuStrip = this.menu;
       this.MaximizeBox = false;
       this.MaximumSize = new System.Drawing.Size(980, 2000);
-      this.MinimumSize = new System.Drawing.Size(500, 410);
+      this.MinimumSize = new System.Drawing.Size(500, 480);
       this.Name = "MainForm";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
