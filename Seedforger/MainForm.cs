@@ -148,17 +148,12 @@ namespace Seedforger {
       currentToolStripMenuItem.DropDownItems.Add(graphItem);
 
       currentToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
-      var runCampaignItem = new ToolStripMenuItem("Run campaign…");
+      var runCampaignItem = new ToolStripMenuItem("New campaign…");
       runCampaignItem.Click += (s, e) => {
-        using (var dlg = new OpenFileDialog {
-          Title = "Pick a campaign.json (see campaign.sample.json next to the exe)",
-          Filter = "Campaign (*.json)|*.json|All files (*.*)|*.*",
-        }) {
-          if (dlg.ShowDialog() != DialogResult.OK) return;
-          var c = Campaign.Load(dlg.FileName);
-          if (c == null) { MessageBox.Show("Couldn't read that campaign file.", AppInfo.Name); return; }
+        using (var wizard = new CampaignForm()) {
+          if (wizard.ShowDialog(this) != DialogResult.OK || wizard.Result == null) return;
           campaignRunner?.Stop();
-          campaignRunner = new CampaignRunner(this, c);
+          campaignRunner = new CampaignRunner(this, wizard.Result);
           campaignRunner.Start();
         }
       };

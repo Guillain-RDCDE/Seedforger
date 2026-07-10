@@ -69,7 +69,7 @@ Read the deep-dive: **[How BitTorrent actually works](docs/how-bittorrent-works.
 | **Global upstream budget** | Picking a connection profile caps your **total** upload across *all* tabs — one uplink, shared fairly. |
 | **Connectable seeder** | Answers peer handshakes on your port with a **full bitfield then a choke** — a connectable, complete seeder to any monitoring peer, that transfers nothing. |
 | **Real-seed engine** (advanced) | *File → Serve a real file*: a TCP **peer wire engine** that serves **genuine, SHA-1-verified** blocks from the downloaded file, with a governor that caps the announced upload to what was actually served — defeats monitoring peers that request-and-verify. See the [deep-dive §13½](docs/how-bittorrent-works.md#13-the-deep-end-actually-participating-in-the-swarm). |
-| **Campaign orchestrator** | *File → Run campaign*: declare a **goal** (ratio / GB by a deadline) + a believability profile + a torrent folder, and it drives the rest — **staggered** starts, upstream **budget split by real demand**, **pacing** so you don't finish suspiciously early, then auto-stops. Because "start 10 torrents at once, full speed" is itself a tell. |
+| **Campaign orchestrator** | *File → New campaign…* — a **visual builder** (no JSON): a **goal** (ratio / GB by a deadline) + a believability profile + a torrent folder, and it drives the rest — **staggered** starts, upstream **budget split by real demand**, **pacing** so you don't finish suspiciously early, then auto-stops. Because "start 10 torrents at once, full speed" is itself a tell. |
 | **Peer_id fidelity** | Reproduces client-specific quirks, incl. **Transmission's peer_id checksum**, so ids validate. |
 | **Connection profiles** | One-click believable speeds for ADSL / VDSL / cable / fibre 100-300-1G / 4G / 5G. |
 | **Auto-stop targets** | Stop on time, uploaded, downloaded, **ratio**, or seeders/leechers. |
@@ -106,7 +106,9 @@ On first launch Seedforger drops a **`clients.sample.json`** next to the exe. Co
 ```
 
 ### Campaigns (goal-seeking orchestrator)
-On first launch Seedforger drops a **`campaign.sample.json`**. Edit it, then *File → Run campaign*:
+*File → **New campaign…*** opens a visual builder — pick a goal (ratio / GB by a deadline), a connection profile, active hours, a torrent folder, and hit **Start** (or Save/Load). No JSON to hand-write.
+
+Under the hood it's a `campaign.json` (Save/Load in the dialog; a `campaign.sample.json` is also dropped next to the exe):
 
 ```json
 {
