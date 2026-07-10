@@ -661,6 +661,18 @@ namespace Seedforger {
     /// <summary>True once a torrent has been loaded into this tab.</summary>
     internal bool HasTorrentLoaded => !string.IsNullOrEmpty(trackerAddress.Text) && !string.IsNullOrEmpty(shaHash.Text);
 
+    /// <summary>
+    /// Lock the tab into believable seeder settings: complete (Finished = 100, so
+    /// left = 0) and reporting **zero** download. Call this last — after a
+    /// connection profile, which sets a download rate too — so a newbie never ends
+    /// up "downloading" while trying to build ratio. Must run on the UI thread.
+    /// </summary>
+    internal void ConfigureForSeeding() {
+      fileSize.Text = "100";
+      downloadRate.Text = "0";
+      checkRandomDownload.Checked = false;
+    }
+
     /// <summary>Picks a random modern client fingerprint and updates the combos.</summary>
     private void RotateClient() {
       var pick = TorrentClientFactory.ModernClients[rand.Next(TorrentClientFactory.ModernClients.Length)];

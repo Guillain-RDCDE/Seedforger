@@ -31,6 +31,7 @@ namespace Seedforger {
     private Step step = Step.Welcome;
     private AnnounceProbe probe;
     private bool probing;
+    private Label emphasise; // re-coloured after Theme.Apply, which flattens label colours
 
     private readonly Label title = new Label { AutoSize = false, Font = new Font("Segoe UI Semibold", 13f, FontStyle.Bold), Dock = DockStyle.Top, Height = 34 };
     private readonly Label subtitle = new Label { AutoSize = false, Dock = DockStyle.Top, Height = 44 };
@@ -107,8 +108,13 @@ namespace Seedforger {
 
     private void Finish() {
       try {
+        // Apply the connection profile first (it sets an upload cap AND a download
+        // rate), then lock in seeder mode so download is forced back to 0 — a
+        // newbie must never end up uploading AND downloading.
         owner.ApplyConnectionProfileByName(connectionCombo.SelectedItem?.ToString() ?? "");
-        AppOptions.SwarmAware = true;
+        Rm?.ConfigureForSeeding();
+        AppOptions.RealisticSpeed = true; // soft ramp-up: speeds climb from zero like a real client
+        AppOptions.SwarmAware = true;     // only claim upload in proportion to real demand
         Rm?.CampaignStart();
       }
       catch (Exception ex) { Warn("Couldn't start: " + ex.Message); return; }
@@ -121,6 +127,7 @@ namespace Seedforger {
     // ---- rendering ----
 
     private void Render() {
+      emphasise = null;
       body.Controls.Clear();
       backBtn.Enabled = step != Step.Welcome;
       nextBtn.Text = step == Step.Ready ? "Start seeding now" : "Next";
@@ -134,6 +141,9 @@ namespace Seedforger {
         case Step.Ready: RenderReady(); break;
       }
       Theme.Apply(this);
+      // Theme.Apply flattens every label to the body text colour; restore the
+      // warning's red afterwards so it actually reads as a warning.
+      if (emphasise != null) emphasise.ForeColor = Color.FromArgb(0xE0, 0x3E, 0x3E);
     }
 
     private Label Para(string text, int top, int height = 60) =>
@@ -246,8 +256,17 @@ namespace Seedforger {
         "Torrent:   " + name + "\n" +
         "Swarm:   " + (probe?.Leechers ?? 0) + " leechers · " + (probe?.Seeders ?? 0) + " seeders\n" +
         "Connection:   " + (connectionCombo.SelectedItem?.ToString() ?? "") + "\n\n" +
-        "Mode:   complete seeder (Finished 100%), downloads off, swarm-aware on.\n\n" +
-        "Clicking “Start seeding now” begins announcing. Leave it running during your active hours; the upload will build over the tracker's announce interval. Don't run the same torrent in qBittorrent at the same time.", 0, 300));
+        "Mode:   complete seeder (Finished 100%), download forced to 0, swarm-aware on.\n" +
+        "Speed ramps up gently from zero, like a real client — not a flat blast.", 0, 120));
+
+      var warn = new Label {
+        Left = 2, Top = 132, Width = body.Width > 20 ? body.Width - 12 : 480, Height = 110, AutoSize = false,
+        ForeColor = Color.FromArgb(0xE0, 0x3E, 0x3E),
+        Text = "⚠  Only continue if you actually HAVE this file.\n\n" +
+          "This swarm has real downloaders — and a private tracker seeds spies among them that will request real pieces. If you claim to seed a file you don't have, you can't deliver, and that's the surest way to get caught. Seed only what you truly possess. Don't run the same torrent in qBittorrent at the same time.",
+      };
+      body.Controls.Add(warn);
+      emphasise = warn;
     }
   }
 }
