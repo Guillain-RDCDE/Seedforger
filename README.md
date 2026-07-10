@@ -12,7 +12,7 @@ A modern, from-the-ground-up .NET 8 revival of the classic *RatioMaster*, built 
 [![Tests](https://img.shields.io/badge/tests-108%20passing-2ea043)](Seedforger.Tests)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-<img src="docs/screenshots/main-dark.png" width="460" alt="Seedforger main window">
+<img src="docs/screenshots/main-light.png" width="460" alt="Seedforger main window">
 
 </div>
 
