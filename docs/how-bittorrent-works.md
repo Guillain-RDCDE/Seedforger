@@ -404,6 +404,51 @@ It makes the tracker-visible story internally consistent and human-shaped.
 
 ---
 
+## 13½. The deep end: actually participating in the swarm
+
+An announce-only tool has one irreducible tell: a tracker can inject **monitoring
+peers** ("spies") into the swarm that don't just read your bitfield — they send
+`request` and check whether you deliver real, hash-valid blocks. If you claim a
+huge upload but no monitored peer ever received a byte from you, that's damning.
+
+The only way past active spies is to **serve real data**. But there's a beautiful
+statistical lever: *a spy only ever sees its own connection*. Your claimed total
+is upload to the **whole** swarm, which no single observer can measure. So:
+
+> **Serve real, hash-valid data at a consistent per-peer rate, and claim a total
+> that is (real served) × (a plausible peer count).** No single observer can
+> refute it — and the peer count is bounded by the swarm's real leecher count.
+
+Seedforger implements this as an optional TCP **peer wire engine** (see
+[`Seedforger/Peer/`](../Seedforger/Peer/)):
+
+- **Stage A — serve from a local file.** `FilePieceSource` reads blocks from the
+  real downloaded file and **verifies each piece's SHA-1** before serving it, so a
+  spy's `request` returns genuine, hash-checkable data (`PeerSession` handles the
+  handshake → bitfield → unchoke → `piece`).
+- **Stage B — relay on demand.** `RelayPieceSource` serves pieces you *don't*
+  hold by fetching them from a real seeder (`PeerClient`), verifying, caching and
+  relaying — a swarm proxy that never stores the whole file.
+- **Stage C — behave like a real peer.** `SeederChoke` round-robins the unchoke
+  slots (a seeder can't do tit-for-tat); the extension protocol (BEP 10) handshake
+  advertises `ut_pex` / `ut_metadata`, so extension probes see a modern client.
+- **Stage D — verifiable node-to-node transfer.** `PeerClient` performs a real
+  handshake + block download + hash-verify against another node — the same path
+  used for relay, and the thing a spy actually measures.
+- **The governor.** `Governor.CapAnnounced` keeps the announced upload ≤
+  `served × plausiblePeers`, so what you claim never outruns what you actually did.
+
+**The honest conclusion.** Past this point, "convincingly participating" *is*
+"being a real (if lazy) BitTorrent client that moves real data." The art reduces
+to **minimising** the real transfer (relay, cache, spy-targeting) and keeping the
+claim under the refutable threshold. It's elegant precisely because it converges
+on honesty — which is the right note for an educational exercise to end on.
+
+> uTP (µTP over UDP) and live PEX/metadata negotiation are intentionally left out:
+> the engine is TCP-only and validated over loopback, not against live swarms.
+
+---
+
 ## 14. References
 
 - BEP 3 — The BitTorrent Protocol Specification

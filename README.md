@@ -68,6 +68,7 @@ Read the deep-dive: **[How BitTorrent actually works](docs/how-bittorrent-works.
 | **Swarm-aware speeds** | Upload/download scaled by the tracker's **real leecher/seeder counts** — 0 leechers ⇒ a trickle (nobody to feed), your share diluted by competing seeders. Makes the numbers physically plausible. |
 | **Global upstream budget** | Picking a connection profile caps your **total** upload across *all* tabs — one uplink, shared fairly. |
 | **Connectable seeder** | Answers peer handshakes on your port with a **full bitfield then a choke** — a connectable, complete seeder to any monitoring peer, that transfers nothing. |
+| **Real-seed engine** (advanced) | *File → Serve a real file*: a TCP **peer wire engine** that serves **genuine, SHA-1-verified** blocks from the downloaded file, with a governor that caps the announced upload to what was actually served — defeats monitoring peers that request-and-verify. See the [deep-dive §13½](docs/how-bittorrent-works.md#13-the-deep-end-actually-participating-in-the-swarm). |
 | **Peer_id fidelity** | Reproduces client-specific quirks, incl. **Transmission's peer_id checksum**, so ids validate. |
 | **Connection profiles** | One-click believable speeds for ADSL / VDSL / cable / fibre 100-300-1G / 4G / 5G. |
 | **Auto-stop targets** | Stop on time, uploaded, downloaded, **ratio**, or seeders/leechers. |
