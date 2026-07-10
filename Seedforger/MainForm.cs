@@ -34,6 +34,25 @@ namespace Seedforger {
 
       BuildOptionsMenu();
       LoadSettings();
+      AddRepoStatusLink();
+    }
+
+    // A small, right-aligned link to the project repo in the status bar.
+    private void AddRepoStatusLink() {
+      var link = new ToolStripStatusLabel {
+        Text = "GitHub ↗",
+        IsLink = true,
+        Alignment = ToolStripItemAlignment.Right,
+        Font = new System.Drawing.Font("Segoe UI", 8f),
+        LinkColor = System.Drawing.Color.FromArgb(0x2F, 0x6F, 0xED),
+        Margin = new Padding(0, 0, 8, 0),
+        ToolTipText = AppInfo.SiteUrl,
+      };
+      link.Click += (s, e) => {
+        try { Process.Start(new ProcessStartInfo(AppInfo.SiteUrl) { UseShellExecute = true }); }
+        catch { /* no browser available */ }
+      };
+      Status.Items.Add(link);
     }
 
     private void BuildOptionsMenu() {

@@ -293,7 +293,10 @@ namespace Seedforger {
       internal FlatMenuRenderer() : base(new Colors()) { }
       protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e) { }
       protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e) {
-        e.TextColor = e.Item.Selected ? Color.White : Cur.Text;
+        // White on the accent highlight — for both the hovered (Selected) state
+        // and the open top-level menu (Pressed), otherwise the open menu's title
+        // rendered white-on-white and vanished.
+        e.TextColor = (e.Item.Selected || e.Item.Pressed) ? Color.White : Cur.Text;
         base.OnRenderItemText(e);
       }
       private sealed class Colors : ProfessionalColorTable {
@@ -302,8 +305,8 @@ namespace Seedforger {
         public override Color MenuItemSelectedGradientBegin => Accent;
         public override Color MenuItemSelectedGradientEnd => Accent;
         public override Color MenuItemBorder => Accent;
-        public override Color MenuItemPressedGradientBegin => Cur.Card;
-        public override Color MenuItemPressedGradientEnd => Cur.Card;
+        public override Color MenuItemPressedGradientBegin => Accent;
+        public override Color MenuItemPressedGradientEnd => Accent;
         public override Color ToolStripDropDownBackground => Cur.Card;
         public override Color ImageMarginGradientBegin => Cur.Card;
         public override Color ImageMarginGradientMiddle => Cur.Card;
