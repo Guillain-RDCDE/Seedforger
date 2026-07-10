@@ -32,8 +32,16 @@ It works **independently of your torrent client** — you don't even need one in
 **In plain words:** you give Seedforger a `.torrent` file and tell it *"pretend I'm uploading at 10 MB/s"*. It quietly tells the tracker that story, over and over, so your stats go up. That's the whole idea.
 
 ### Get it running
-1. Download **`Seedforger.exe`** from the [latest release](../../releases/latest).
-2. Double-click it. That's it — **no installation, no .NET runtime to install**, nothing. It's a single self-contained app you can drop anywhere (USB stick included).
+Grab a build from the [latest release](../../releases/latest) — pick the one that suits you:
+
+| Download | Size | Starts up | Needs |
+|---|---|---|---|
+| ⭐ **`Seedforger-lite.exe`** *(recommended)* | ~0.5 MB | **fastest** | the free [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0/runtime) (one-time install) |
+| **`Seedforger.exe`** | ~68 MB | slower to launch | **nothing at all** — fully self-contained |
+
+Either way it's a **single file, no installer**, that you can drop anywhere (USB stick included). Double-click and go.
+
+> **Why two?** The self-contained build carries the whole .NET runtime inside it, so it's big and your antivirus rescans all 68 MB on every launch — that's what makes it feel slow. The lite build is a tiny 0.5 MB and starts roughly twice as fast; it just asks you to install the .NET runtime once. If you're not sure whether you have .NET, download lite first — Windows will tell you (and hand you the installer) if it's missing.
 
 ### Use it
 1. **Browse…** and pick your `.torrent` file.
@@ -137,9 +145,15 @@ dotnet build Seedforger.sln -c Release
 # run the tests (xUnit)
 dotnet test Seedforger.Tests/Seedforger.Tests.csproj
 
-# single-file portable exe (framework-dependent; needs the .NET 8 Desktop runtime)
-dotnet publish Seedforger/Seedforger.csproj -c Release -p:PublishSingleFile=true
+# lite single-file exe — tiny & fast (needs the .NET 8 Desktop runtime installed)
+dotnet publish Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
+
+# self-contained single-file exe — bundles the runtime, needs nothing installed
+dotnet publish Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contained true \
+  -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true
 ```
+
+> **Startup tip:** don't reach for `-p:PublishReadyToRun=true` on the self-contained build — it more than doubles the file size (≈170 MB), and the extra bytes your antivirus has to rescan on every launch cost *more* startup time than R2R saves. The compressed self-contained build is the faster of the two; the lite build is faster still. Size, not JIT, dominates startup here.
 
 ### Project layout
 ```

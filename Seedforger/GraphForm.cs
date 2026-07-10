@@ -27,7 +27,7 @@ namespace Seedforger {
       BackColor = Bg;
       DoubleBuffered = true;
       StartPosition = FormStartPosition.CenterParent;
-      try { Icon = Icon.ExtractAssociatedIcon(typeof(GraphForm).Assembly.Location); }
+      try { Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath); }
       catch { /* ignore */ }
 
       timer = new Timer { Interval = 500 };

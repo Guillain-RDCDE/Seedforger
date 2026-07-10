@@ -35,7 +35,7 @@ namespace Seedforger {
       MaximizeBox = false; MinimizeBox = false;
       StartPosition = FormStartPosition.CenterParent;
       ClientSize = new Size(470, 520);
-      try { Icon = Icon.ExtractAssociatedIcon(typeof(CampaignForm).Assembly.Location); } catch { }
+      try { Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath); } catch { }
 
       goalCombo.Items.AddRange(new object[] { "Reach an upload total (GB)", "Reach a ratio" });
       goalCombo.SelectedIndexChanged += (s, e) => UpdateGoalUnit();

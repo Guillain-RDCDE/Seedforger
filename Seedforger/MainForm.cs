@@ -25,7 +25,9 @@ namespace Seedforger {
 
     internal MainForm() {
       InitializeComponent();
-      Icon = System.Drawing.Icon.ExtractAssociatedIcon(typeof(MainForm).Assembly.Location);
+      // Environment.ProcessPath resolves correctly even in a single-file bundle,
+      // where Assembly.Location is empty (and icon extraction would silently fail).
+      try { Icon = System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath); } catch { }
       Text = AppInfo.Title;
       // The legacy build could restore an off-screen position; always start centered.
       StartPosition = FormStartPosition.CenterScreen;
