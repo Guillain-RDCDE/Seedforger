@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -23,7 +24,10 @@ namespace Seedforger {
   /// </summary>
   internal sealed class GuideForm : Form {
 
-    private enum Step { Welcome, Choose, Analyze, Connection, Ready }
+    private enum Step { Welcome, HaveIt, Choose, Analyze, Connection, Ready }
+
+    private static readonly Color Red = Color.FromArgb(0xE0, 0x3E, 0x3E);
+    private static readonly Color Green = Color.FromArgb(0x1F, 0xA9, 0x6B);
 
     private readonly MainForm owner;
     private RM Rm => owner.CurrentRM;
@@ -31,7 +35,8 @@ namespace Seedforger {
     private Step step = Step.Welcome;
     private AnnounceProbe probe;
     private bool probing;
-    private Label emphasise; // re-coloured after Theme.Apply, which flattens label colours
+    // Re-applied after Theme.Apply, which flattens every label to the body colour.
+    private readonly List<(Label lbl, Color col)> recolours = new List<(Label, Color)>();
 
     private readonly Label title = new Label { AutoSize = false, Font = new Font("Segoe UI Semibold", 13f, FontStyle.Bold), Dock = DockStyle.Top, Height = 34 };
     private readonly Label subtitle = new Label { AutoSize = false, Dock = DockStyle.Top, Height = 44 };
@@ -48,7 +53,7 @@ namespace Seedforger {
       FormBorderStyle = FormBorderStyle.FixedDialog;
       MaximizeBox = false; MinimizeBox = false;
       StartPosition = FormStartPosition.CenterParent;
-      ClientSize = new Size(540, 470);
+      ClientSize = new Size(540, 508);
       try { Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath); } catch { }
 
       var header = new Panel { Dock = DockStyle.Top, Height = 82, Padding = new Padding(18, 12, 18, 0) };
@@ -81,7 +86,8 @@ namespace Seedforger {
 
     private void GoBack() {
       switch (step) {
-        case Step.Choose: step = Step.Welcome; break;
+        case Step.HaveIt: step = Step.Welcome; break;
+        case Step.Choose: step = Step.HaveIt; break;
         case Step.Analyze: step = Step.Choose; break;
         case Step.Connection: step = Step.Analyze; break;
         case Step.Ready: step = Step.Connection; break;
@@ -91,7 +97,8 @@ namespace Seedforger {
 
     private void GoNext() {
       switch (step) {
-        case Step.Welcome: step = Step.Choose; break;
+        case Step.Welcome: step = Step.HaveIt; break;
+        case Step.HaveIt: step = Step.Choose; break;
         case Step.Choose:
           if (Rm == null || !Rm.HasTorrentLoaded) { Warn("Load a .torrent first."); return; }
           step = Step.Analyze; break;
@@ -127,7 +134,7 @@ namespace Seedforger {
     // ---- rendering ----
 
     private void Render() {
-      emphasise = null;
+      recolours.Clear();
       body.Controls.Clear();
       backBtn.Enabled = step != Step.Welcome;
       nextBtn.Text = step == Step.Ready ? "Start seeding now" : "Next";
@@ -135,6 +142,7 @@ namespace Seedforger {
 
       switch (step) {
         case Step.Welcome: RenderWelcome(); break;
+        case Step.HaveIt: RenderHaveIt(); break;
         case Step.Choose: RenderChoose(); break;
         case Step.Analyze: RenderAnalyze(); break;
         case Step.Connection: RenderConnection(); break;
@@ -142,8 +150,8 @@ namespace Seedforger {
       }
       Theme.Apply(this);
       // Theme.Apply flattens every label to the body text colour; restore the
-      // warning's red afterwards so it actually reads as a warning.
-      if (emphasise != null) emphasise.ForeColor = Color.FromArgb(0xE0, 0x3E, 0x3E);
+      // accent/warning colours afterwards so they actually stand out.
+      foreach (var (lbl, col) in recolours) if (lbl != null && !lbl.IsDisposed) lbl.ForeColor = col;
     }
 
     private Label Para(string text, int top, int height = 60) =>
@@ -160,6 +168,32 @@ namespace Seedforger {
         "   4.  Set a believable speed for your connection.\n" +
         "   5.  Start — and let it seed.\n\n" +
         "Reminder: this is an educational tool. Faking ratio breaks most private trackers' rules and can get you banned. Use it only where you're allowed to.", 0, 300));
+    }
+
+    private void RenderHaveIt() {
+      title.Text = "Before anything — do you have it?";
+      subtitle.Text = "The one rule that keeps you safe. Read it.";
+
+      var q = new Label {
+        Text = "?", Left = 0, Top = 2, Width = body.Width > 20 ? body.Width - 12 : 480, Height = 82,
+        Font = new Font("Segoe UI", 62f, FontStyle.Bold), TextAlign = ContentAlignment.MiddleCenter,
+      };
+      body.Controls.Add(q);
+      recolours.Add((q, Green));
+
+      var lead = new Label {
+        Left = 2, Top = 90, Width = body.Width > 20 ? body.Width - 12 : 480, Height = 44, AutoSize = false,
+        Font = new Font("Segoe UI Semibold", 10.5f, FontStyle.Bold),
+        Text = "Ideally, you must have actually downloaded this file once — for real, through this tracker.",
+      };
+      body.Controls.Add(lead);
+
+      body.Controls.Add(Para(
+        "Why it matters:\n\n" +
+        "   •  When you really download a file, the tracker records that you completed it — it knows you legitimately have the data.\n\n" +
+        "   •  The swarm contains monitoring peers (spies the tracker plants). They connect to you and request real pieces.\n\n" +
+        "   •  Claim to seed a file you never downloaded and you have nothing to send back — you get caught, and it can mean a ban.\n\n" +
+        "The guide checks the swarm for you; it can't check your drive. That part is on you.", 140, 232));
     }
 
     private void RenderChoose() {
@@ -266,7 +300,7 @@ namespace Seedforger {
           "This swarm has real downloaders — and a private tracker seeds spies among them that will request real pieces. If you claim to seed a file you don't have, you can't deliver, and that's the surest way to get caught. Seed only what you truly possess. Don't run the same torrent in qBittorrent at the same time.",
       };
       body.Controls.Add(warn);
-      emphasise = warn;
+      recolours.Add((warn, Red));
     }
   }
 }
