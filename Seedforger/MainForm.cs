@@ -126,6 +126,15 @@ namespace Seedforger {
         if (tab.SelectedTab?.Controls.Count > 0 && tab.SelectedTab.Controls[0] is RM rm) rm.TestAnnounce();
       };
       currentToolStripMenuItem.DropDownItems.Add(testAnnounceItem);
+      var serveRealItem = new ToolStripMenuItem("Serve a real file (advanced)…");
+      serveRealItem.Click += (s, e) => {
+        var rm = CurrentRM;
+        if (rm == null) return;
+        using (var dlg = new OpenFileDialog { Title = "Pick the downloaded file that matches this torrent" }) {
+          if (dlg.ShowDialog() == DialogResult.OK) rm.EnableRealSeed(dlg.FileName);
+        }
+      };
+      currentToolStripMenuItem.DropDownItems.Add(serveRealItem);
       var graphItem = new ToolStripMenuItem("Live graph…");
       graphItem.Click += (s, e) => {
         if (graphForm == null || graphForm.IsDisposed) {

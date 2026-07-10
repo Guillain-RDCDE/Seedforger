@@ -11,6 +11,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Seedforger.BitTorrent;
 using Seedforger.BytesRoads;
+using Seedforger.Wire;
 
 namespace Seedforger {
   internal partial class RM : UserControl {
@@ -29,6 +30,11 @@ namespace Seedforger {
 
     /// <summary>The ratio as currently shown in the UI (may be "NaN").</summary>
     internal string RatioText => lblTorrentRatio.Text;
+
+    // Real-seed engine: when set, we serve genuine hash-valid pieces to peers and
+    // cap the announced upload to what we actually served.
+    private IPieceSource pieceSource;
+    private Governor governor;
     private int remWork;
     internal string DefaultDirectory = "";
     private const string DefaultClient = "qBittorrent";
@@ -228,6 +234,26 @@ namespace Seedforger {
         string text1;
         while (true) {
           socket1 = localListen.AcceptSocket();
+
+          // Real-seed mode: hand the connection to a full peer session that serves
+          // genuine hash-valid blocks (bitfield + choke + answer requests).
+          if (pieceSource != null && currentTorrentFile != null && governor != null) {
+            var s = socket1;
+            socket1 = null; // the session thread owns it now
+            var ih = currentTorrentFile.InfoHash;
+            var pid = MakeWirePeerId();
+            var cap = (int) Math.Min(int.MaxValue, Math.Max(0, currentTorrent.uploadRate));
+            var th = new Thread(() => {
+              try {
+                using (var ns = new NetworkStream(s, true))
+                  new PeerSession(ih, pid, pieceSource, governor, cap).Serve(ns);
+              }
+              catch { }
+            }) { IsBackground = true, Name = "PeerSession Thread" };
+            th.Start();
+            continue;
+          }
+
           var buffer1 = new byte[0x43];
           if (socket1.Connected) {
             var stream1 = new NetworkStream(socket1);
@@ -400,6 +426,53 @@ namespace Seedforger {
         AddLogLine("Loaded magnet: " + label + " (" + m.Trackers.Count +
                    " tracker(s), announcing to " + tracker + ")");
       }
+    }
+
+    /// <summary>
+    /// Arms the real-seed engine: from now on, peers that connect to our port get
+    /// genuine, hash-valid blocks read from <paramref name="filePath"/>, and the
+    /// announced upload is capped to what we actually serve (the governor). Needs
+    /// a real .torrent (piece hashes) and a file that matches it.
+    /// </summary>
+    internal void EnableRealSeed(string filePath) {
+      try {
+        if (currentTorrentFile == null || currentTorrentFile.PieceCount <= 0 ||
+            currentTorrentFile.PieceHashesRaw == null) {
+          MessageBox.Show("Load a .torrent first (magnets have no piece hashes to verify against).",
+            "Seedforger " + version);
+          return;
+        }
+
+        var hashes = FilePieceSource.SplitHashes(currentTorrentFile.PieceHashesRaw);
+        var src = new FilePieceSource(filePath, currentTorrentFile.PieceLength,
+          (long) currentTorrentFile.totalLength, hashes);
+        if (!src.HasPiece(0)) {
+          src.Dispose();
+          MessageBox.Show("That file doesn't match this torrent (piece 0 failed to verify).",
+            "Seedforger " + version);
+          return;
+        }
+
+        (pieceSource as IDisposable)?.Dispose();
+        pieceSource = src;
+        governor = new Governor();
+        AddLogLine("REAL SEED enabled: serving genuine hash-valid pieces from " + filePath);
+        AddLogLine("Announced upload is now governed by what we actually serve (spy-consistent).");
+      }
+      catch (Exception ex) {
+        AddLogLine("Real seed error: " + ex.Message);
+      }
+    }
+
+    // A raw 20-byte peer_id for the wire handshake, keeping the client-identifying
+    // ASCII prefix of the announced id (the part a whitelist checks) + random tail.
+    private byte[] MakeWirePeerId() {
+      var id = new byte[20];
+      var announced = currentClient?.PeerID ?? "-SF0001-";
+      var p = 0;
+      for (; p < announced.Length && p < 20 && announced[p] != '%'; p++) id[p] = (byte) announced[p];
+      for (; p < 20; p++) id[p] = (byte) rand.Next(48, 122);
+      return id;
     }
 
     private TorrentInfo GetCurrentTorrent() {
@@ -1012,6 +1085,13 @@ namespace Seedforger {
         }
 
         torrentInfo.uploaded += uploadedR;
+
+        // Real-seed mode: never claim more upload than we actually served (times a
+        // plausible peer count) — a monitoring peer can't refute that.
+        if (governor != null) {
+          var plausiblePeers = Leechers > 0 ? Leechers : 1;
+          torrentInfo.uploaded = governor.CapAnnounced(torrentInfo.uploaded, plausiblePeers);
+        }
 
         // modify Download Rate
         downloadCount.Text = FormatFileSize((ulong) torrentInfo.downloaded);

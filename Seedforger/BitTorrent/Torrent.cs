@@ -142,6 +142,17 @@ namespace Seedforger.BitTorrent {
     /// <summary>Piece count, or 0 when unknown (e.g. a magnet/virtual torrent).</summary>
     internal int PieceCount => pieceArray?.Length ?? 0;
 
+    /// <summary>Bytes per piece (from the .torrent). 0 for a virtual torrent.</summary>
+    internal long PieceLength => pieceLength;
+
+    /// <summary>The raw concatenated 20-byte SHA-1 piece hashes, or null.</summary>
+    internal byte[] PieceHashesRaw {
+      get {
+        try { return ((ValueString) ((ValueDictionary) Data["info"])["pieces"]).Bytes; }
+        catch { return null; }
+      }
+    }
+
     private void LoadTorrent() {
       if (Data.Contains("announce") == false) throw new IncompleteTorrentData("No tracker URL");
 
