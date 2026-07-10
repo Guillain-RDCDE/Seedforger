@@ -15,6 +15,7 @@ namespace Seedforger {
     // RM current;
     private int allit;
     private bool trayIconBalloonIsUp;
+    private bool trayHintShown;
 
     private ToolStripMenuItem realisticSpeedMenuItem;
     private ToolStripMenuItem darkModeMenuItem;
@@ -617,6 +618,15 @@ namespace Seedforger {
         WindowState = FormWindowState.Minimized;
         Hide();
         trayIcon.Visible = true;
+        // First time this session, tell the user where the app went — otherwise
+        // "close" looks like "quit" and reopening just says it's already running.
+        if (!trayHintShown) {
+          trayHintShown = true;
+          trayIcon.BalloonTipIcon = ToolTipIcon.Info;
+          trayIcon.BalloonTipTitle = AppInfo.Name + " is still running";
+          trayIcon.BalloonTipText = "Tucked away here by the clock. Double-click the icon to bring it back — or right-click it and choose Exit to really quit.";
+          try { trayIcon.ShowBalloonTip(5000); } catch { /* balloons can be disabled by the OS */ }
+        }
       }
       else Exit();
     }
