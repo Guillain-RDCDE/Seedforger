@@ -668,8 +668,8 @@ namespace Seedforger {
     /// up "downloading" while trying to build ratio. Must run on the UI thread.
     /// </summary>
     internal void ConfigureForSeeding() {
-      fileSize.Text = "100";
-      downloadRate.Text = "0";
+      UpdateTextBox(fileSize, "100");
+      UpdateTextBox(downloadRate, "0");
       checkRandomDownload.Checked = false;
     }
 
@@ -760,6 +760,8 @@ namespace Seedforger {
       remWork = 0;
       if ((string) cmbStopAfter.SelectedItem == "After time:") RemaningWork.Start();
       RequestScrapeFromTracker(currentTorrent);
+      // Toggling ReadOnly / rewriting fields above can revert their colours; re-assert the theme.
+      Theme.ApplyTo(this);
     }
 
     private void StopTimerAndCounters() {
@@ -799,6 +801,8 @@ namespace Seedforger {
         updateProcessStarted = false;
         RemaningWork.Stop();
         remWork = 0;
+        // Clearing ReadOnly above can revert input colours; re-assert the theme.
+        Theme.ApplyTo(this);
       }
     }
 
@@ -1401,6 +1405,9 @@ namespace Seedforger {
       }
       else {
         textbox.Text = text;
+        // Setting Text can revert the input's BackColor to its designer default
+        // (white), which breaks dark mode — re-assert the theme colour.
+        Theme.Restyle(textbox);
       }
     }
 

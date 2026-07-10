@@ -87,6 +87,12 @@ namespace Seedforger {
       root.Invalidate(true);
     }
 
+    /// <summary>Re-assert the theme on a single control — used after programmatic
+    /// value changes, which can revert an input's BackColor to its designer default.</summary>
+    internal static void Restyle(Control c) {
+      if (AppOptions.ThemingEnabled && c != null) Style(c);
+    }
+
     private static void StyleTree(Control parent) {
       foreach (Control c in parent.Controls) {
         Style(c);
