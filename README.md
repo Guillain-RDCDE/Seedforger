@@ -20,16 +20,14 @@ A modern, from-the-ground-up **.NET 8** revival of the classic *RatioMaster* —
     <td><img src="docs/screenshots/main-light.png" alt="Seedforger — light theme" width="420"></td>
   </tr>
   <tr>
-    <td align="center"><em>Dark theme — START / STOP / manual announce</em></td>
-    <td align="center"><em>Light theme — one tab per torrent</em></td>
+    <td align="center"><em>Dark theme — one tab per torrent</em></td>
+    <td align="center"><em>Light theme — same, your choice</em></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/campaign-builder.png" alt="Visual campaign builder" width="420"></td>
-    <td><img src="docs/screenshots/i18n-french.png" alt="French UI" width="420"></td>
+    <td colspan="2" align="center"><img src="docs/screenshots/campaign-builder.png" alt="Visual campaign builder" width="320"></td>
   </tr>
   <tr>
-    <td align="center"><em>Visual campaign builder — a goal, no JSON</em></td>
-    <td align="center"><em>Full English / French UI</em></td>
+    <td colspan="2" align="center"><em>Visual campaign builder — set a goal, no JSON</em></td>
   </tr>
 </table>
 
