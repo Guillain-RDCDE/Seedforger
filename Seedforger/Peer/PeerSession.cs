@@ -34,9 +34,16 @@ namespace Seedforger.Wire {
       if (raw == null || !PeerProtocol.TryParseHandshake(raw, out var hs)) return;
       if (!SameHash(hs.InfoHash, infoHash)) return;
 
-      stream.Write(PeerProtocol.BuildHandshake(infoHash, peerId), 0, PeerProtocol.HandshakeLength);
+      stream.Write(PeerProtocol.BuildHandshake(infoHash, peerId, ExtensionMessages.ReservedWithExtensions()),
+        0, PeerProtocol.HandshakeLength);
       var bf = BuildBitfield();
       stream.Write(bf, 0, bf.Length);
+      // If the peer advertises the extension protocol, reply with our extended
+      // handshake (advertising ut_pex / ut_metadata) like a modern client.
+      if (hs.Reserved != null && hs.Reserved.Length == 8 && (hs.Reserved[5] & 0x10) != 0) {
+        var eh = ExtensionMessages.ExtendedHandshake();
+        stream.Write(eh, 0, eh.Length);
+      }
       stream.Flush();
 
       var choked = true;
