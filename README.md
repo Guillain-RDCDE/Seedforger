@@ -69,6 +69,7 @@ Read the deep-dive: **[How BitTorrent actually works](docs/how-bittorrent-works.
 | **Global upstream budget** | Picking a connection profile caps your **total** upload across *all* tabs — one uplink, shared fairly. |
 | **Connectable seeder** | Answers peer handshakes on your port with a **full bitfield then a choke** — a connectable, complete seeder to any monitoring peer, that transfers nothing. |
 | **Real-seed engine** (advanced) | *File → Serve a real file*: a TCP **peer wire engine** that serves **genuine, SHA-1-verified** blocks from the downloaded file, with a governor that caps the announced upload to what was actually served — defeats monitoring peers that request-and-verify. See the [deep-dive §13½](docs/how-bittorrent-works.md#13-the-deep-end-actually-participating-in-the-swarm). |
+| **Campaign orchestrator** | *File → Run campaign*: declare a **goal** (ratio / GB by a deadline) + a believability profile + a torrent folder, and it drives the rest — **staggered** starts, upstream **budget split by real demand**, **pacing** so you don't finish suspiciously early, then auto-stops. Because "start 10 torrents at once, full speed" is itself a tell. |
 | **Peer_id fidelity** | Reproduces client-specific quirks, incl. **Transmission's peer_id checksum**, so ids validate. |
 | **Connection profiles** | One-click believable speeds for ADSL / VDSL / cable / fibre 100-300-1G / 4G / 5G. |
 | **Auto-stop targets** | Stop on time, uploaded, downloaded, **ratio**, or seeders/leechers. |
@@ -103,6 +104,26 @@ On first launch Seedforger drops a **`clients.sample.json`** next to the exe. Co
   }
 ]
 ```
+
+### Campaigns (goal-seeking orchestrator)
+On first launch Seedforger drops a **`campaign.sample.json`**. Edit it, then *File → Run campaign*:
+
+```json
+{
+  "Goal": "upload",                 // or "ratio"
+  "UploadGoalGB": 200,
+  "TargetRatio": 2.0,
+  "DeadlineHours": 336,             // spread over ~2 weeks (0 = as fast as credible)
+  "Connection": "Fibre  300 / 300 Mbps",
+  "UseActiveHours": true, "ActiveHoursStart": 8, "ActiveHoursEnd": 24,
+  "RotateClient": true,
+  "TorrentFolder": "C:\\torrents",
+  "RealFileFolder": "",            // optional: matching files to seed for real
+  "StaggerMinMinutes": 3, "StaggerMaxMinutes": 40, "MaxConcurrent": 6
+}
+```
+
+The orchestrator staggers the starts, splits the connection's upstream toward the torrents that actually have leechers, paces the total toward the deadline, and stops at the goal — because launching everything at once, flat out, is exactly what a bot looks like.
 
 ### Build from source
 Requires the **.NET 8 SDK** (`dotnet --version` ≥ 8).
