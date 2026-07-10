@@ -130,6 +130,12 @@ namespace Seedforger {
       settingsToolStripMenuItem.DropDownItems.Insert(0, darkModeMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, languageMenuItem);
 
+      // File menu: guided setup for newbies, pinned at the very top.
+      var guideItem = new ToolStripMenuItem("Guided setup (newbie mode)…");
+      guideItem.Click += (s, e) => { using (var g = new GuideForm(this)) g.ShowDialog(this); };
+      currentToolStripMenuItem.DropDownItems.Insert(0, new ToolStripSeparator());
+      currentToolStripMenuItem.DropDownItems.Insert(0, guideItem);
+
       // File menu: torrent tools
       currentToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
       var openMagnetItem = new ToolStripMenuItem("Open magnet…");

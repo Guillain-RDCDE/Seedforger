@@ -618,6 +618,49 @@ namespace Seedforger {
       thread.Start();
     }
 
+    /// <summary>
+    /// Sends a single dry-run announce as a complete seeder (Finished = 100, so
+    /// left = 0) and reports a structured verdict via <paramref name="onDone"/>.
+    /// The UI-reading prep runs on the calling (UI) thread; the blocking network
+    /// call runs on a background thread and the callback is marshalled back.
+    /// Used by the guided setup to loop until a usable torrent is found.
+    /// </summary>
+    internal void ProbeAsSeeder(Action<AnnounceProbe> onDone) {
+      // Force believable seeder settings: complete, and never report downloads.
+      UpdateTextBox(fileSize, "100");
+      UpdateTextBox(downloadRate, "0");
+      currentClient = TorrentClientFactory.GetClient(GetClientName());
+      currentTorrent = GetCurrentTorrent();
+      currentProxy = GetCurrentProxy();
+      var url = GetUrlString(currentTorrent, "&event=started");
+
+      var thread = new Thread(() => {
+        var probe = new AnnounceProbe();
+        try {
+          var response = MakeWebRequestEx(new Uri(url));
+          if (response == null) probe.Error = "No response from the tracker.";
+          else if (response.Dict == null) probe.Error = "The tracker replied, but the response couldn't be decoded.";
+          else {
+            probe.GotResponse = true;
+            var failure = response.Dict.Contains("failure reason") ? BEncode.String(response.Dict["failure reason"]) : null;
+            if (!string.IsNullOrEmpty(failure)) probe.FailureReason = failure;
+            else {
+              probe.Accepted = true;
+              if (response.Dict.Contains("complete")) probe.Seeders = BEncode.String(response.Dict["complete"]).ParseValidInt(-1);
+              if (response.Dict.Contains("incomplete")) probe.Leechers = BEncode.String(response.Dict["incomplete"]).ParseValidInt(-1);
+              if (response.Dict.Contains("interval")) probe.Interval = BEncode.String(response.Dict["interval"]).ParseValidInt(-1);
+            }
+          }
+        }
+        catch (Exception ex) { probe.Error = ex.Message; }
+        try { BeginInvoke((Action) (() => onDone(probe))); } catch { /* form closed */ }
+      }) { IsBackground = true, Name = "GuideProbe Thread" };
+      thread.Start();
+    }
+
+    /// <summary>True once a torrent has been loaded into this tab.</summary>
+    internal bool HasTorrentLoaded => !string.IsNullOrEmpty(trackerAddress.Text) && !string.IsNullOrEmpty(shaHash.Text);
+
     /// <summary>Picks a random modern client fingerprint and updates the combos.</summary>
     private void RotateClient() {
       var pick = TorrentClientFactory.ModernClients[rand.Next(TorrentClientFactory.ModernClients.Length)];

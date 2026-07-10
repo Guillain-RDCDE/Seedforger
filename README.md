@@ -60,7 +60,17 @@ Either way it's a **single file, no installer**, that you can drop anywhere (USB
 
 > **Why two?** The self-contained build carries the whole .NET runtime inside it, so it's big and your antivirus rescans all 68 MB on every launch — that's what makes it feel slow. The lite build is a tiny 0.5 MB and starts roughly twice as fast; it just asks you to install the .NET runtime once. If you're not sure whether you have .NET, download lite first — Windows will tell you (and hand you the installer) if it's missing.
 
-### Use it
+### Easiest start: guided setup 🧭
+New to this? Use **File → Guided setup (newbie mode)…**. It walks you through it one click at a time and, crucially, **asks the tracker whether each torrent will actually work** before you commit:
+
+1. Pick a `.torrent` you have.
+2. It sends a single seeder announce and reads the reply — *rejected? accepted? how many leechers?*
+3. If the torrent has **no one downloading** (nothing to upload to) or the tracker refuses you, it says so and sends you back to pick another — looping **until it finds one that will genuinely earn ratio**.
+4. It sets believable defaults (complete seeder, downloads off, swarm-aware, your connection speed) and starts.
+
+It's the same verification an expert does by hand — automated.
+
+### Or drive it yourself
 1. **Browse…** and pick your `.torrent` file.
 2. Set the **Upload Speed** (in kB/s) — how fast you want to "seed".
 3. Choose a **Client** to impersonate — **qBittorrent 5.2.3** is a great, modern default.
@@ -205,6 +215,7 @@ You don't need to read the protocol spec to get the shape of it.
 
 | | |
 |---|---|
+| **Guided setup (newbie mode)** | A step-by-step wizard that probes each torrent against the tracker — accepted? enough leechers? — and loops until it finds one that will actually earn ratio, then sets believable defaults and starts. |
 | **Light & dark themes** | Follows your OS on first launch (dark title bar via DWM); toggle in Settings. Owner-drawn flat cards + pill buttons. |
 | **English / French** | Full in-app localization, switchable at runtime. |
 | **Live graph** | *File → Live graph* — a dashboard tracing cumulative upload + ratio for the active tab. |
