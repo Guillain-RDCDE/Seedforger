@@ -31,6 +31,17 @@ namespace Seedforger {
     /// <summary>The ratio as currently shown in the UI (may be "NaN").</summary>
     internal string RatioText => lblTorrentRatio.Text;
 
+    // --- Accessors used by the campaign orchestrator ---
+    internal bool IsRunning => updateProcessStarted;
+    internal int LeecherCount => Leechers;
+    internal int SeederCount => Seeders;
+    internal long UploadedBytes => currentTorrent.uploaded;
+    internal long DownloadedBytes => currentTorrent.downloaded;
+    internal void SetUploadKBps(int kbps) => UpdateTextBox(uploadRate, kbps.ToString());
+    internal void CampaignStart() { if (!updateProcessStarted && StartButton.Enabled) StartButton_Click(null, null); }
+    internal void CampaignStop() { if (updateProcessStarted) StopButton_Click(null, null); }
+    internal string TorrentDisplayName { get { try { return currentTorrentFile?.Name ?? ""; } catch { return ""; } } }
+
     // Real-seed engine: when set, we serve genuine hash-valid pieces to peers and
     // cap the announced upload to what we actually served.
     private IPieceSource pieceSource;

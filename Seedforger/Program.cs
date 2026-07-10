@@ -16,8 +16,9 @@ namespace Seedforger {
       // are not registered by default on .NET Core/8.
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-      // Drop a template so users can discover the external override format.
+      // Drop templates so users can discover the override / campaign formats.
       TorrentClientFactory.ExportSampleIfMissing();
+      Campaign.ExportSampleIfMissing();
 
       singleInstanceMutex = new Mutex(true, @"Global\Seedforger.SingleInstance", out var createdNew);
       if (!createdNew) {

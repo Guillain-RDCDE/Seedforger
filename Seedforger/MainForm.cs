@@ -146,6 +146,26 @@ namespace Seedforger {
         }
       };
       currentToolStripMenuItem.DropDownItems.Add(graphItem);
+
+      currentToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
+      var runCampaignItem = new ToolStripMenuItem("Run campaign…");
+      runCampaignItem.Click += (s, e) => {
+        using (var dlg = new OpenFileDialog {
+          Title = "Pick a campaign.json (see campaign.sample.json next to the exe)",
+          Filter = "Campaign (*.json)|*.json|All files (*.*)|*.*",
+        }) {
+          if (dlg.ShowDialog() != DialogResult.OK) return;
+          var c = Campaign.Load(dlg.FileName);
+          if (c == null) { MessageBox.Show("Couldn't read that campaign file.", AppInfo.Name); return; }
+          campaignRunner?.Stop();
+          campaignRunner = new CampaignRunner(this, c);
+          campaignRunner.Start();
+        }
+      };
+      var stopCampaignItem = new ToolStripMenuItem("Stop campaign");
+      stopCampaignItem.Click += (s, e) => campaignRunner?.Stop();
+      currentToolStripMenuItem.DropDownItems.Add(runCampaignItem);
+      currentToolStripMenuItem.DropDownItems.Add(stopCampaignItem);
     }
 
     private GraphForm graphForm;
@@ -153,6 +173,18 @@ namespace Seedforger {
     /// <summary>The RM control on the currently selected tab (null if none).</summary>
     internal RM CurrentRM =>
       tab.SelectedTab != null && tab.SelectedTab.Controls.Count > 0 ? tab.SelectedTab.Controls[0] as RM : null;
+
+    // --- Hooks used by the campaign orchestrator ---
+    private CampaignRunner campaignRunner;
+
+    internal RM AddTorrentTab(string torrentPath) { Add(torrentPath); return CurrentRM; }
+
+    internal void ApplyConnectionProfileByName(string name) {
+      foreach (var p in ConnectionProfiles.All)
+        if (p.Name == name) { ApplyConnectionProfile(p); return; }
+    }
+
+    internal void CampaignLog(string message) => CurrentRM?.AddLogLine("[campaign] " + message);
 
     /// <summary>Lets the user set an "active hours" window during which seeding
     /// uploads; outside it the speed drops to 0 (like the PC is idle).</summary>
