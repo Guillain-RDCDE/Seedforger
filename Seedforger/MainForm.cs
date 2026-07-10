@@ -37,12 +37,15 @@ namespace Seedforger {
       AddRepoStatusLink();
     }
 
-    // A small, right-aligned link to the project repo in the status bar.
+    // A small link to the project repo, pinned to the far bottom-right of the
+    // status bar. A spring label eats the free space (ToolStripItemAlignment.Right
+    // doesn't truly right-justify in the StatusStrip's table layout), pushing the
+    // link hard against the right edge.
     private void AddRepoStatusLink() {
+      Status.Items.Add(new ToolStripStatusLabel { Spring = true });
       var link = new ToolStripStatusLabel {
         Text = "GitHub ↗",
         IsLink = true,
-        Alignment = ToolStripItemAlignment.Right,
         Font = new System.Drawing.Font("Segoe UI", 8f),
         LinkColor = System.Drawing.Color.FromArgb(0x2F, 0x6F, 0xED),
         Margin = new Padding(0, 0, 8, 0),
