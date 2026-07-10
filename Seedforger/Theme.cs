@@ -68,6 +68,7 @@ namespace Seedforger {
 
     internal static void Apply(Form form) {
       if (!AppOptions.ThemingEnabled) return;
+      EnsureAppDarkMode();
       form.SuspendLayout();
       form.Font = UiFont;
       form.BackColor = Cur.Window;
@@ -79,6 +80,7 @@ namespace Seedforger {
 
     internal static void ApplyTo(Control root) {
       if (!AppOptions.ThemingEnabled) return;
+      EnsureAppDarkMode();
       root.SuspendLayout();
       root.Font = UiFont;
       root.BackColor = Cur.Window;
@@ -124,6 +126,7 @@ namespace Seedforger {
               cb.DrawItem += ComboDrawItem;
             }
           }
+          ApplyNativeDark(cb); // dark drop-button
           break;
         case CheckBox _:
         case RadioButton _:
@@ -149,6 +152,7 @@ namespace Seedforger {
             tc.Tag = "flat";
             tc.DrawItem += TabDrawItem;
           }
+          ApplyNativeDark(tc); // strip honours the dark BackColor
           break;
         case TabPage tp:
           tp.BackColor = p.Window;
@@ -165,6 +169,7 @@ namespace Seedforger {
           // horizontal scrollbar that reads as an ugly white band in dark mode.
           rtb.WordWrap = true;
           rtb.ScrollBars = RichTextBoxScrollBars.Vertical;
+          ApplyNativeDark(rtb); // dark scrollbar
           break;
         case MenuStrip ms:
           ms.BackColor = p.Card;
@@ -341,6 +346,42 @@ namespace Seedforger {
         public override Color SeparatorDark => Cur.Border;
         public override Color SeparatorLight => Cur.Border;
       }
+    }
+
+    // ---- Native dark mode for controls Win32 draws itself (scrollbars, the
+    // combo drop button, the tab strip) — these ignore BackColor. ----
+    [DllImport("uxtheme.dll", EntryPoint = "#135", SetLastError = true)]
+    private static extern int SetPreferredAppMode(int mode); // 0=Default 1=AllowDark 2=ForceDark
+    [DllImport("uxtheme.dll", CharSet = CharSet.Unicode)]
+    private static extern int SetWindowTheme(IntPtr hWnd, string subApp, string subIdList);
+
+    private static bool appModeInitialised;
+
+    private static void EnsureAppDarkMode() {
+      if (appModeInitialised) return;
+      appModeInitialised = true;
+      try { SetPreferredAppMode(1); } catch { /* pre-1903 Windows: ignore */ }
+    }
+
+    // Give native controls a dark (or default) non-client rendering.
+    private static void ApplyNativeDark(Control c) {
+      try {
+        if (!c.IsHandleCreated) return;
+        var dark = AppOptions.DarkMode;
+        switch (c) {
+          case ComboBox _:
+            SetWindowTheme(c.Handle, dark ? "DarkMode_CFD" : "CFD", null);
+            break;
+          case TabControl _:
+            // Drop the visual style so the strip honours our dark BackColor.
+            SetWindowTheme(c.Handle, dark ? " " : "", dark ? " " : "");
+            break;
+          default: // scrollable controls: dark scrollbars
+            SetWindowTheme(c.Handle, dark ? "DarkMode_Explorer" : "Explorer", null);
+            break;
+        }
+      }
+      catch { /* older Windows: ignore */ }
     }
 
     // ---- DWM dark title bar (Windows 10 2004+/11) ----
