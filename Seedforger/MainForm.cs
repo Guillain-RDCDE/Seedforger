@@ -36,6 +36,23 @@ namespace Seedforger {
       BuildOptionsMenu();
       LoadSettings();
       AddRepoStatusLink();
+      StartUpdateCheck();
+    }
+
+    // Silent auto update-check at launch: only pops up if a newer release exists.
+    private void StartUpdateCheck() {
+      UpdateChecker.CheckInBackground((tag, url) => {
+        try {
+          BeginInvoke((Action) (() => {
+            var r = MessageBox.Show(
+              $"A new version {tag} is available — you have v{AppInfo.Version}.\n\nOpen the download page?",
+              AppInfo.Name + " — update available", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (r == DialogResult.Yes)
+              Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+          }));
+        }
+        catch { /* form gone */ }
+      });
     }
 
     // A small link to the project repo, pinned to the far bottom-right of the

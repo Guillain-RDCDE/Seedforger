@@ -109,6 +109,15 @@ namespace Seedforger {
           cb.FlatStyle = FlatStyle.Flat;
           cb.BackColor = p.Input;
           cb.ForeColor = p.InputText;
+          // A DropDownList combo ignores BackColor/ForeColor under visual styles
+          // and renders white — so owner-draw the item area in the theme colours.
+          if (cb.DropDownStyle != ComboBoxStyle.Simple) {
+            cb.DrawMode = DrawMode.OwnerDrawFixed;
+            if (!(cb.Tag is string cs && cs == "themed")) {
+              cb.Tag = "themed";
+              cb.DrawItem += ComboDrawItem;
+            }
+          }
           break;
         case CheckBox _:
         case RadioButton _:
@@ -238,6 +247,17 @@ namespace Seedforger {
         TextRenderer.DrawText(g, b.Text, b.Font, rect, textc,
           TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
       }
+    }
+
+    private static void ComboDrawItem(object sender, DrawItemEventArgs e) {
+      var cb = (ComboBox) sender;
+      var selected = (e.State & DrawItemState.Selected) != 0;
+      var back = selected ? Accent : Cur.Input;
+      var fore = selected ? Color.White : Cur.InputText;
+      using (var b = new SolidBrush(back)) e.Graphics.FillRectangle(b, e.Bounds);
+      var text = e.Index >= 0 ? cb.GetItemText(cb.Items[e.Index]) : cb.Text;
+      TextRenderer.DrawText(e.Graphics, text, cb.Font, e.Bounds, fore,
+        TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
     }
 
     private static Color Blend(Color a, Color b, double t) => Color.FromArgb(
