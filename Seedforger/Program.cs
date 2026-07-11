@@ -33,7 +33,12 @@ namespace Seedforger {
       Application.SetHighDpiMode(HighDpiMode.SystemAware);
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
-      Application.Run(new MainForm());
+      Theme.EnableDarkAppMode(); // enable per-window dark mode before any control exists
+      // The brand-new interface is opt-in while it reaches feature parity:
+      //   Seedforger.exe --new   (or File -> Try the new interface)
+      var args = Environment.GetCommandLineArgs();
+      if (args.Length > 1 && args[1] == "--new") Application.Run(new UI.NewMainForm());
+      else Application.Run(new MainForm());
 
       GC.KeepAlive(singleInstanceMutex);
     }

@@ -394,6 +394,9 @@ namespace Seedforger {
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int val, int size);
 
+    internal static void TrySetDarkTitleBarPublic(Form form) => TrySetDarkTitleBar(form, true);
+    internal static void EnableDarkAppMode() => EnsureAppDarkMode();
+
     private static void TrySetDarkTitleBar(Form form, bool dark) {
       try {
         if (!form.IsHandleCreated) return;

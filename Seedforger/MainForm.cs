@@ -148,6 +148,12 @@ namespace Seedforger {
       settingsToolStripMenuItem.DropDownItems.Insert(0, darkModeMenuItem);
       settingsToolStripMenuItem.DropDownItems.Insert(0, languageMenuItem);
 
+      // File menu: preview of the brand-new interface (work in progress).
+      var newUiItem = new ToolStripMenuItem("✨ Try the new interface (preview)…");
+      newUiItem.Click += (s, e) => { try { new UI.NewMainForm().Show(); } catch (Exception ex) { MessageBox.Show(ex.Message, AppInfo.Name); } };
+      currentToolStripMenuItem.DropDownItems.Insert(0, new ToolStripSeparator());
+      currentToolStripMenuItem.DropDownItems.Insert(0, newUiItem);
+
       // File menu: guided setup for newbies, pinned at the very top.
       var guideItem = new ToolStripMenuItem("Guided setup (newbie mode)…");
       guideItem.Click += (s, e) => { using (var g = new GuideForm(this)) g.ShowDialog(this); };

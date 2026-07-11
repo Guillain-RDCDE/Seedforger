@@ -38,9 +38,18 @@ namespace Seedforger {
     internal long UploadedBytes => currentTorrent.uploaded;
     internal long DownloadedBytes => currentTorrent.downloaded;
     internal void SetUploadKBps(int kbps) => UpdateTextBox(uploadRate, kbps.ToString());
+    internal void SetDownloadKBps(int kbps) => UpdateTextBox(downloadRate, kbps.ToString());
+    internal void SetFinishedPercent(int pct) => UpdateTextBox(fileSize, pct.ToString());
+    internal void SetClientSelection(string family, string version) {
+      if (family != null && cmbClient.Items.Contains(family)) cmbClient.SelectedItem = family; // rebuilds versions
+      if (version != null && cmbVersion.Items.Contains(version)) cmbVersion.SelectedItem = version;
+    }
     internal void CampaignStart() { if (!updateProcessStarted && StartButton.Enabled) StartButton_Click(null, null); }
     internal void CampaignStop() { if (updateProcessStarted) StopButton_Click(null, null); }
+    internal bool CanStart => StartButton.Enabled && !updateProcessStarted;
+    internal double Ratio { get { var d = currentTorrent.downloaded; return d > 0 ? (double) currentTorrent.uploaded / d : 0; } }
     internal string TorrentDisplayName { get { try { return currentTorrentFile?.Name ?? ""; } catch { return ""; } } }
+    internal string[] ClientFamilies { get { var a = new string[cmbClient.Items.Count]; for (var i = 0; i < a.Length; i++) a[i] = cmbClient.Items[i].ToString(); return a; } }
 
     // Real-seed engine: when set, we serve genuine hash-valid pieces to peers and
     // cap the announced upload to what we actually served.
@@ -225,8 +234,12 @@ namespace Seedforger {
         }
         catch (Exception) {
         }
+        try { LogLineAdded?.Invoke(this, $"[{DateTime.Now.ToString("T")}] {logLine}"); } catch { }
       }
     }
+
+    /// <summary>Raised (on the UI thread) for each log line — lets a new UI mirror the log.</summary>
+    internal event EventHandler<string> LogLineAdded;
 
     // A clean startup banner. (The old build dumped machine name, user name and
     // the working directory here — noisy, and it leaks PII into screenshots.)
