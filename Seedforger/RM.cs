@@ -120,6 +120,10 @@ namespace Seedforger {
       // The client now lives here, so drop the now-empty "Client:" label that
       // stayed behind in the advanced custom-fingerprint card.
       ClientLabel.Visible = false;
+
+      // Banish the old off-screen side panel entirely: its settings now live in
+      // the Advanced dialog, so widening the window must NOT resurrect it.
+      panAdvanced.Visible = false;
     }
 
     /// <summary>Opens the advanced settings (random ranges, custom fingerprint, proxy) in a modal dialog.</summary>

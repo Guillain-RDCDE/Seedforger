@@ -478,7 +478,7 @@ namespace Seedforger
       this.Controls.Add(this.Status);
       this.MainMenuStrip = this.menu;
       this.MaximizeBox = false;
-      this.MaximumSize = new System.Drawing.Size(980, 2000);
+      this.MaximumSize = new System.Drawing.Size(500, 2000);
       this.MinimumSize = new System.Drawing.Size(500, 480);
       this.Name = "MainForm";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
