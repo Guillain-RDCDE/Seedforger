@@ -84,8 +84,29 @@ namespace Seedforger {
       deployDefaultValues();
       LogStartupBanner();
       ReadSettings();
+      SurfaceClientSelector();
       Theme.ApplyTo(this);
       Localization.Apply(this);
+    }
+
+    /// <summary>
+    /// The client selector lived in the advanced side panel, off-screen unless the
+    /// window was widened to ~960px — so nobody could find "which client am I
+    /// impersonating?". Pull it into the visible Options card as a labelled row.
+    /// </summary>
+    private void SurfaceClientSelector() {
+      const int extra = 30;
+      panel1.Height += extra;      // panMain follows (Dock=Left); the log gives up the space
+      gbxOptions.Height += extra;  // room for one more row inside the Options card
+      var y = gbxOptions.Height - 27;
+      var label = new Label { Text = "Client:", AutoSize = true, Left = 8, Top = y + 3, Name = "lblClientMain" };
+      gbxOptions.Controls.Add(label);   // reparents from the advanced panel
+      cmbClient.Left = 70; cmbClient.Top = y; cmbClient.Width = 150;
+      cmbVersion.Left = 232; cmbVersion.Top = y; cmbVersion.Width = 130;
+      gbxOptions.Controls.Add(cmbClient);
+      gbxOptions.Controls.Add(cmbVersion);
+      cmbClient.BringToFront();
+      cmbVersion.BringToFront();
     }
 
     internal void Form1_DragDrop(object sender, DragEventArgs e) {
