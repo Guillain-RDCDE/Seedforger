@@ -21,38 +21,38 @@ namespace Seedforger {
     }
 
     private static readonly Palette Light = new Palette {
-      Window = Color.FromArgb(0xF6, 0xF7, 0xF9),
+      Window = Color.FromArgb(0xF4, 0xF5, 0xF7),
       Card = Color.White,
-      Border = Color.FromArgb(0xDD, 0xE1, 0xE6),
-      Text = Color.FromArgb(0x1F, 0x23, 0x28),
-      Subtle = Color.FromArgb(0x5B, 0x63, 0x6E),
-      Header = Color.FromArgb(0x2F, 0x6F, 0xED),
+      Border = Color.FromArgb(0xE5, 0xE8, 0xEC),
+      Text = Color.FromArgb(0x18, 0x1B, 0x20),
+      Subtle = Color.FromArgb(0x6B, 0x72, 0x80),
+      Header = Color.FromArgb(0x37, 0x41, 0x51),
       Input = Color.White,
-      InputText = Color.FromArgb(0x1F, 0x23, 0x28),
+      InputText = Color.FromArgb(0x18, 0x1B, 0x20),
     };
 
     private static readonly Palette Dark = new Palette {
-      Window = Color.FromArgb(0x1E, 0x20, 0x24),
-      Card = Color.FromArgb(0x2A, 0x2D, 0x33),
-      Border = Color.FromArgb(0x3A, 0x3E, 0x46),
-      Text = Color.FromArgb(0xE6, 0xE9, 0xEE),
-      Subtle = Color.FromArgb(0x9A, 0xA1, 0xAB),
-      Header = Color.FromArgb(0x5A, 0x9C, 0xFF),
-      Input = Color.FromArgb(0x33, 0x37, 0x3E),
-      InputText = Color.FromArgb(0xE6, 0xE9, 0xEE),
+      Window = Color.FromArgb(0x17, 0x18, 0x1B),
+      Card = Color.FromArgb(0x21, 0x23, 0x27),
+      Border = Color.FromArgb(0x2E, 0x31, 0x37),
+      Text = Color.FromArgb(0xE8, 0xEA, 0xED),
+      Subtle = Color.FromArgb(0x90, 0x96, 0xA0),
+      Header = Color.FromArgb(0xC6, 0xCA, 0xD2),
+      Input = Color.FromArgb(0x2A, 0x2D, 0x33),
+      InputText = Color.FromArgb(0xE8, 0xEA, 0xED),
     };
 
     // Semantic colours are shared by both themes.
-    private static readonly Color Accent = Color.FromArgb(0x2F, 0x6F, 0xED);
-    private static readonly Color Green = Color.FromArgb(0x1F, 0xA9, 0x6B);
-    private static readonly Color Red = Color.FromArgb(0xE0, 0x3E, 0x3E);
-    private static readonly Color LogBack = Color.FromArgb(0x14, 0x16, 0x1A);
-    private static readonly Color LogText = Color.FromArgb(0x8C, 0xE0, 0xB0);
+    private static readonly Color Accent = Color.FromArgb(0x3B, 0x82, 0xF6);
+    private static readonly Color Green = Color.FromArgb(0x10, 0xB9, 0x81);
+    private static readonly Color Red = Color.FromArgb(0xEF, 0x44, 0x44);
+    private static readonly Color LogBack = Color.FromArgb(0x10, 0x12, 0x15);
+    private static readonly Color LogText = Color.FromArgb(0x7E, 0xE0, 0xA6);
 
     internal static readonly Font UiFont =
       new Font("Segoe UI", 9f, FontStyle.Regular, GraphicsUnit.Point);
     private static readonly Font HeaderFont =
-      new Font("Segoe UI Semibold", 9.5f, FontStyle.Bold, GraphicsUnit.Point);
+      new Font("Segoe UI Semibold", 10f, FontStyle.Bold, GraphicsUnit.Point);
 
     internal static Palette Cur => AppOptions.DarkMode ? Dark : Light;
 
@@ -138,7 +138,7 @@ namespace Seedforger {
           c.ForeColor = p.Text;
           break;
         case GroupBox gb:
-          gb.BackColor = p.Window;
+          gb.BackColor = p.Card; // transparent child labels read the parent BackColor
           gb.ForeColor = p.Header;
           if (!(gb.Tag is string gs && gs == "flat")) {
             gb.Tag = "flat";
@@ -283,20 +283,22 @@ namespace Seedforger {
       var gb = (GroupBox) sender;
       var g = e.Graphics;
       g.SmoothingMode = SmoothingMode.AntiAlias;
-      g.Clear(gb.BackColor);
+      var parentBg = gb.Parent?.BackColor ?? Cur.Window;
+      g.Clear(parentBg); // rounded corners fall back to the window colour
 
       var headerH = gb.Font.Height;
       var rect = new Rectangle(0, headerH / 2, gb.Width - 1, gb.Height - headerH / 2 - 1);
-      using (var path = RoundedRect(rect, 8))
-      using (var pen = new Pen(Cur.Border, 1f))
-        g.DrawPath(pen, path);
+      using (var path = RoundedRect(rect, 10)) {
+        using (var fill = new SolidBrush(Cur.Card)) g.FillPath(fill, path); // filled card surface
+        using (var pen = new Pen(Cur.Border, 1f)) g.DrawPath(pen, path);
+      }
 
       if (!string.IsNullOrEmpty(gb.Text)) {
         var size = g.MeasureString(gb.Text, HeaderFont);
-        using (var bg = new SolidBrush(gb.BackColor))
-          g.FillRectangle(bg, 10, 0, size.Width + 6, headerH);
+        using (var bg = new SolidBrush(parentBg)) // break the outline for the title
+          g.FillRectangle(bg, 12, 0, size.Width + 8, headerH);
         using (var brush = new SolidBrush(Cur.Header))
-          g.DrawString(gb.Text, HeaderFont, brush, 12, 0);
+          g.DrawString(gb.Text, HeaderFont, brush, 15, 0);
       }
     }
 

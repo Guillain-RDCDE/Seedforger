@@ -19,6 +19,9 @@ namespace Seedforger {
       FormBorderStyle = FormBorderStyle.FixedDialog;
       MaximizeBox = false; MinimizeBox = false;
       StartPosition = FormStartPosition.CenterParent;
+      // The borrowed group boxes are already sized in the host's DPI pixels; don't
+      // let this form re-scale them, or the content gets clipped on hi-DPI screens.
+      AutoScaleMode = AutoScaleMode.None;
       try { Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath); } catch { }
 
       var host = new Panel { Dock = DockStyle.Fill };
@@ -44,9 +47,7 @@ namespace Seedforger {
       Controls.Add(bar);
       AcceptButton = close; CancelButton = close;
 
-      var size = new Size(maxRight + 24, top + bar.Height + 4);
-      MinimumSize = new Size(size.Width + 16, size.Height + 39); // outer size floor (border + caption)
-      ClientSize = size;
+      ClientSize = new Size(maxRight + 24, top + bar.Height + 4);
 
       FormClosed += (s, e) => {
         foreach (var b in borrowed) { b.ctl.Parent = b.parent; b.ctl.Location = b.loc; b.ctl.Anchor = b.anchor; }
