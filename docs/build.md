@@ -27,7 +27,7 @@ dotnet publish Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contain
 Seedforger/
 ├─ Program.cs                 entry point, single-instance, code-page provider
 ├─ TorrentClientFactory.cs    data-driven client lookup + clients.json merge
-├─ DefaultClientProfiles.cs   the 47 built-in client profiles
+├─ DefaultClientProfiles.cs   the 50 built-in client profiles
 ├─ ClientProfile.cs           profile model (peer_id recipe, headers, query, …)
 ├─ SpeedShaper.cs             realistic ramp-up / speed variation
 ├─ Stealth.cs · SwarmModel.cs · Bandwidth.cs   believability + swarm + budget

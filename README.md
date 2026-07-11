@@ -40,7 +40,7 @@ A single file, no installer. New users should start with **File → Guided setup
 
 ## Features
 
-- **Client impersonation** — a data-driven database of 47 clients with accurate `peer_id` and `User-Agent` fingerprints, verified against libtorrent's `generate_fingerprint` and each client's source. Optional client rotation and Transmission's `peer_id` checksum.
+- **Client impersonation** — a data-driven database of 50 clients with accurate `peer_id` and `User-Agent` fingerprints, verified against libtorrent's `generate_fingerprint` and each client's source. Optional client rotation and Transmission's `peer_id` checksum.
 - **Swarm-aware realism** — reported speeds scale with the tracker's live leecher/seeder counts; no demand means a trickle, not an implausible claim.
 - **Stealth** — a speed ramp-up with gentle variation, announce-interval jitter, a day/night rhythm, active-hours windows, and believability warnings.
 - **Real peer-wire engine** — optionally serve genuine, SHA-1-verified blocks over TCP, capped by a statistical governor, to defeat trackers that inject monitoring peers.

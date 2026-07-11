@@ -10,7 +10,7 @@ For *why* these matter, read [How it actually works](how-it-works.md); for the p
 
 | | |
 |---|---|
-| **Client database** | Data-driven profiles (**47 clients**), not a hard-coded switch. Add or override any client via an external [`clients.json`](configuration.md#custom--updated-fingerprints-without-rebuilding) — **no recompile**. |
+| **Client database** | Data-driven profiles (**50 clients**), not a hard-coded switch. Add or override any client via an external [`clients.json`](configuration.md#custom--updated-fingerprints-without-rebuilding) — **no recompile**. |
 | **Modern fingerprints** | qBittorrent `-qB`, Transmission `-TR`, Deluge `-DE`, libtorrent `-LT`, µTorrent, plus the whole legacy zoo. Verified against libtorrent's `generate_fingerprint` and each client's source. |
 | **peer_id fidelity** | Reproduces client-specific quirks, including **Transmission's peer_id checksum**, so ids validate byte-for-byte. |
 | **Client rotation** | Optionally pick a fresh modern client on every start, so you don't always look like the same machine. |
@@ -36,7 +36,7 @@ For *why* these matter, read [How it actually works](how-it-works.md); for the p
 
 ## 🔬 The real peer-wire engine (advanced)
 
-*File → Serve a real file* arms a genuine TCP **peer-wire engine** — the answer to trackers that inject monitoring peers which *request-and-verify*. See the [deep-dive §13½](how-bittorrent-works.md#13-the-deep-end-actually-participating-in-the-swarm).
+*File → Serve a real file* arms a genuine TCP **peer-wire engine** — the answer to trackers that inject monitoring peers which *request-and-verify*. See the [deep-dive §13½](how-bittorrent-works.md#deep-end).
 
 | Stage | What it does |
 |---|---|
@@ -78,6 +78,11 @@ See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orches
 | **Live graph** | *File → Live graph* — a dashboard tracing cumulative upload + ratio for the active tab. |
 | **Portable settings** | Everything lives in `settings.json` next to the exe. **No registry**, fully portable (USB-friendly). |
 
+<p align="center">
+  <img src="screenshots/main-dark.png" width="420" alt="Seedforger main window in the dark theme">
+  <br><sub><em>The dark theme — flat cards, pill buttons, a terminal-style log.</em></sub>
+</p>
+
 ## Emulated clients (built-in)
 
-qBittorrent · Transmission · Deluge · libtorrent · µTorrent · BitTorrent · BitComet · Vuze · Azureus · BitLord · ABC · BTuga · BitTornado · Burst · BitTyrant · BitSpirit · KTorrent · Gnome BT — several versions each, 47 profiles in all.
+qBittorrent · Transmission · Deluge · libtorrent · µTorrent · BitTorrent · BitComet · Vuze · Azureus · BitLord · ABC · BTuga · BitTornado · Burst · BitTyrant · BitSpirit · KTorrent · Gnome BT — several versions each, 50 profiles in all.

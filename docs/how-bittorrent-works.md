@@ -67,11 +67,11 @@ A `.torrent` is a bencoded dictionary. A minimal single-file torrent:
 
 ```
 d
-  8:announce      41:http://tracker.example.org:6969/announce
+  8:announce      40:http://tracker.example.org:6969/announce
   10:created by   12:Seedforger/1
   4:info d
       6:length      i1024000e
-      4:name        11:ubuntu.iso
+      4:name        10:ubuntu.iso
       12:piece length i262144e
       6:pieces      <20 * N raw bytes: SHA-1 of each piece>
   e
@@ -243,8 +243,9 @@ as HTTP, different framing. (Seedforger currently targets HTTP/HTTPS trackers.)
 ## 8. The peer wire protocol
 
 Once a client has peer addresses, it connects **TCP** (or µTP, a UDP-based
-transport) to each and runs the peer protocol. Seedforger does **not** do this —
-but understanding it is what makes clear why faking works at the tracker layer.
+transport) to each and runs the peer protocol. In its default announce-only mode
+Seedforger does **not** do this — understanding it is what makes clear why faking
+works at the tracker layer (the optional peer-wire engine of §13½ *does* speak it).
 
 ### 8.1 Handshake
 
@@ -361,9 +362,10 @@ from your announces. Public trackers usually don't care. **Private trackers** do
 
 ## 13. Where Seedforger sits
 
-Seedforger implements **only §6 — the tracker announce/scrape** — and nothing
-else. It never connects to peers (§8), transfers no data, and hashes no pieces.
-Concretely, for each announce it:
+By default Seedforger implements **only §6 — the tracker announce/scrape** — and
+nothing else: it never connects to peers (§8), transfers no data, and hashes no
+pieces. (The opt-in real peer-wire engine of §13½ changes that on purpose.)
+Concretely, for each default announce it:
 
 1. Builds a **real client fingerprint** — the exact `peer_id` prefix + random
    tail and matching `User-Agent` for a chosen, current client
@@ -404,6 +406,7 @@ It makes the tracker-visible story internally consistent and human-shaped.
 
 ---
 
+<a id="deep-end"></a>
 ## 13½. The deep end: actually participating in the swarm
 
 An announce-only tool has one irreducible tell: a tracker can inject **monitoring

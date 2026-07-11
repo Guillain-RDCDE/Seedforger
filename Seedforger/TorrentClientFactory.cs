@@ -14,8 +14,11 @@ namespace Seedforger {
     /// on start" rotation (avoids picking an ancient, easily-flagged version).</summary>
     public static readonly string[] ModernClients = {
       "qBittorrent 5.2.3",
+      "qBittorrent 5.1.4",
+      "qBittorrent 5.0.5",
       "qBittorrent 4.6.7",
       "Transmission 4.1.3",
+      "Transmission 4.0.6",
       "Deluge 2.1.1",
       "libtorrent 2.1.0",
     };

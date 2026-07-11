@@ -32,6 +32,12 @@ New to this? Use **File → Guided setup (newbie mode)…**. It walks you throug
 
 It's the same verification an expert does by hand — automated.
 
+<p align="center">
+  <img src="screenshots/guided-setup.png" width="380" alt="Guided setup — the one rule: do you have the file?">
+  &nbsp;
+  <img src="screenshots/guided-ready.png" width="380" alt="Guided setup — swarm checked, ready to seed">
+</p>
+
 ## 3. Or drive it yourself
 
 1. **Browse…** and pick your `.torrent` file.

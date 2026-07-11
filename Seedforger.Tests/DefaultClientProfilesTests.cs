@@ -6,8 +6,8 @@ namespace Seedforger.Tests {
   public class DefaultClientProfilesTests {
 
     [Fact]
-    public void All_ContainsExactly47Profiles() {
-      Assert.Equal(47, DefaultClientProfiles.All.Count);
+    public void All_ContainsExactly50Profiles() {
+      Assert.Equal(50, DefaultClientProfiles.All.Count);
     }
 
     [Fact]
