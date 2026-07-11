@@ -107,6 +107,24 @@ namespace Seedforger {
       gbxOptions.Controls.Add(cmbVersion);
       cmbClient.BringToFront();
       cmbVersion.BringToFront();
+
+      // Everything that used to be stranded off-screen (proxy, custom fingerprint)
+      // now lives behind one discoverable button.
+      var advanced = new Button {
+        Text = "Advanced…", Left = 372, Top = y - 1, Width = 100, Height = 26, Name = "GhostButton",
+      };
+      advanced.Click += (s, e) => ShowAdvanced();
+      gbxOptions.Controls.Add(advanced);
+      advanced.BringToFront();
+
+      // The client now lives here, so drop the now-empty "Client:" label that
+      // stayed behind in the advanced custom-fingerprint card.
+      ClientLabel.Visible = false;
+    }
+
+    /// <summary>Opens the advanced settings (random ranges, custom fingerprint, proxy) in a modal dialog.</summary>
+    internal void ShowAdvanced() {
+      using (var dlg = new AdvancedForm(gbxCustomClient, gbxProxy)) dlg.ShowDialog(FindForm());
     }
 
     internal void Form1_DragDrop(object sender, DragEventArgs e) {
