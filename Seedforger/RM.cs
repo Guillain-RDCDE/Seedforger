@@ -744,6 +744,7 @@ namespace Seedforger {
 
     internal void StartButton_Click(object sender, EventArgs e) {
       if (!StartButton.Enabled) return;
+      SecureDns.Log = AddLogLine; // route DNS-bypass notes to this tab's log
       Seeders = -1;
       Leechers = -1;
       if (trackerAddress.Text == "" || shaHash.Text == "" || txtTorrentSize.Text == "") {
@@ -1606,11 +1607,17 @@ namespace Seedforger {
         AddLogLine("Connecting to tracker (" + host + ") in port " + port);
         sock = CreateSocket();
         sock.PreAuthenticate = false;
+        // Bypass ISP DNS sinkholes when connecting directly (a proxy does its own DNS).
+        var connectHost = host;
+        if (currentProxy.ProxyType == ProxyType.None) {
+          var ip = SecureDns.Resolve(host);
+          if (ip != null) connectHost = ip.ToString();
+        }
         var num2 = 0;
         var flag1 = false;
         while (num2 < 5 && !flag1) {
           try {
-            sock.Connect(host, port);
+            sock.Connect(connectHost, port);
             flag1 = true;
             AddLogLine("Connected Successfully");
           }

@@ -111,8 +111,11 @@ namespace Seedforger.UI {
       var running = engine.IsRunning;
       startBtn.Enabled = !running;
       stopBtn.Enabled = running;
-      ratioValue.Text = engine.Ratio.ToString("0.00");
-      upValue.Text = RM.FormatFileSize((ulong) Math.Max(0, engine.UploadedBytes));
+      var up = Math.Max(0, engine.UploadedBytes);
+      var down = Math.Max(0, engine.DownloadedBytes);
+      // Seeding means downloaded stays 0 → the ratio is infinite, not zero.
+      ratioValue.Text = down > 0 ? ((double) up / down).ToString("0.00") : (up > 0 ? "∞" : "0.00");
+      upValue.Text = RM.FormatFileSize((ulong) up);
       var seed = engine.SeederCount; var leech = engine.LeecherCount;
       swarmValue.Text = (seed < 0 ? "–" : seed.ToString()) + "  /  " + (leech < 0 ? "–" : leech.ToString());
       stateValue.Text = running ? "Seeding" : "Idle";

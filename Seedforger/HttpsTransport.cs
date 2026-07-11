@@ -23,7 +23,9 @@ namespace Seedforger {
       using (var tcp = new TcpClient()) {
         tcp.SendTimeout = timeoutMs;
         tcp.ReceiveTimeout = timeoutMs;
-        tcp.Connect(host, port);
+        // Connect to the real IP (bypasses ISP DNS sinkholes); TLS SNI keeps the host.
+        var ip = SecureDns.Resolve(host);
+        if (ip != null) tcp.Connect(ip, port); else tcp.Connect(host, port);
 
         // Trackers occasionally use self-signed certs; be lenient like a torrent client.
         using (var ssl = new SslStream(tcp.GetStream(), false,
