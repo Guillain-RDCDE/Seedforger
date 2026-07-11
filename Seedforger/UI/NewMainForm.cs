@@ -341,12 +341,16 @@ namespace Seedforger.UI {
       browse.Click += (s, e) => Browse();
       torrentCard.Controls.Add(torrentField); torrentCard.Controls.Add(browse);
 
-      var clientCard = MakeCard(left, 104, "IMPERSONATE (which client)", 92);
-      StyleCombo(familyBox); familyBox.SetBounds(16, 40, 230, 30);
-      StyleCombo(versionBox); versionBox.SetBounds(258, 40, 120, 30);
-      advancedBtn.SetBounds(392, 39, 104, 32); advancedBtn.Font = Modern.F(9f); advancedBtn.TextColor = Modern.Text;
+      var clientCard = MakeCard(left, 104, "WHICH CLIENT TO IMPERSONATE", 96);
+      var appLbl = new Label { Text = "Client", Font = Modern.F(8.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(16, 36), BackColor = Modern.Card };
+      var verLbl = new Label { Text = "Version", Font = Modern.F(8.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(258, 36), BackColor = Modern.Card };
+      StyleCombo(familyBox); familyBox.SetBounds(16, 54, 230, 30);
+      StyleCombo(versionBox); versionBox.SetBounds(258, 54, 120, 30);
+      advancedBtn.SetBounds(392, 53, 104, 32); advancedBtn.Font = Modern.F(9f); advancedBtn.TextColor = Modern.Text;
       advancedBtn.Click += (s, e) => engine.ShowAdvanced();
       tips.SetToolTip(advancedBtn, "Custom fingerprint & proxy");
+      tips.SetToolTip(familyBox, "The torrent app you pretend to be (e.g. qBittorrent). The tracker sees this client.");
+      clientCard.Controls.Add(appLbl); clientCard.Controls.Add(verLbl);
       clientCard.Controls.Add(familyBox); clientCard.Controls.Add(versionBox); clientCard.Controls.Add(advancedBtn);
 
       var speedCard = MakeCard(left, 208, "SPEED & MODE", 96);
