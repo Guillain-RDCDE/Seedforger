@@ -152,7 +152,11 @@ namespace Seedforger {
             tc.Tag = "flat";
             tc.DrawItem += TabDrawItem;
           }
-          ApplyNativeDark(tc); // strip honours the dark BackColor
+          if (tc is DarkTabControl dtc) {
+            dtc.DarkStrip = AppOptions.DarkMode;
+            dtc.StripColor = p.Window;
+            dtc.Invalidate();
+          }
           break;
         case TabPage tp:
           tp.BackColor = p.Window;

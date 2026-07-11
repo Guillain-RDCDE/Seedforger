@@ -62,7 +62,7 @@ namespace Seedforger
       this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
       this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.tab = new System.Windows.Forms.TabControl();
+      this.tab = new Seedforger.DarkTabControl();
       this.Status = new System.Windows.Forms.StatusStrip();
       this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
       this.lblTabs = new System.Windows.Forms.ToolStripStatusLabel();
@@ -515,7 +515,7 @@ namespace Seedforger
         internal System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
         internal System.Windows.Forms.ToolStripMenuItem exitMenuItem;
         internal System.Windows.Forms.ToolStripMenuItem checkShowTrayBaloon;
-        internal System.Windows.Forms.TabControl tab;
+        internal Seedforger.DarkTabControl tab;
         internal System.Windows.Forms.StatusStrip Status;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
