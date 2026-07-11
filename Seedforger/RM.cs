@@ -46,6 +46,23 @@ namespace Seedforger {
     }
     internal void CampaignStart() { if (!updateProcessStarted && StartButton.Enabled) StartButton_Click(null, null); }
     internal void CampaignStop() { if (updateProcessStarted) StopButton_Click(null, null); }
+    /// <summary>Programmatic proxy setup (used by the command-line/headless mode).</summary>
+    internal void ConfigureProxy(string type, string host, int port, string user, string pass) {
+      var idx = (type ?? "none").Trim().ToLowerInvariant() switch {
+        "http" or "httpconnect" or "https" => 1,
+        "socks4" => 2,
+        "socks4a" => 3,
+        "socks5" => 4,
+        _ => 0,
+      };
+      comboProxyType.SelectedIndex = idx;
+      textProxyHost.Text = host ?? "";
+      textProxyPort.Text = port > 0 ? port.ToString() : "";
+      textProxyUser.Text = user ?? "";
+      textProxyPass.Text = pass ?? "";
+    }
+    /// <summary>Overrides the base announce interval (the tracker may still change it).</summary>
+    internal void SetAnnounceIntervalSeconds(int seconds) { if (seconds > 0) UpdateTextBox(interval, seconds.ToString()); }
     internal bool CanStart => StartButton.Enabled && !updateProcessStarted;
     internal double Ratio { get { var d = currentTorrent.downloaded; return d > 0 ? (double) currentTorrent.uploaded / d : 0; } }
     internal string TorrentDisplayName { get { try { return currentTorrentFile?.Name ?? ""; } catch { return ""; } } }

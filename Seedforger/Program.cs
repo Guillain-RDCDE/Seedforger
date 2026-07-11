@@ -16,6 +16,14 @@ namespace Seedforger {
       // are not registered by default on .NET Core/8.
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
+      // Command-line / headless mode: no window, no single-instance lock — an
+      // automation can drive the engine directly (Seedforger.exe --help).
+      var cliArgs = SkipExe(Environment.GetCommandLineArgs());
+      if (Cli.IsCliInvocation(cliArgs)) {
+        Environment.ExitCode = Cli.Run(cliArgs);
+        return;
+      }
+
       // Drop templates so users can discover the override / campaign formats.
       TorrentClientFactory.ExportSampleIfMissing();
       Campaign.ExportSampleIfMissing();
@@ -41,6 +49,14 @@ namespace Seedforger {
       else Application.Run(new MainForm());
 
       GC.KeepAlive(singleInstanceMutex);
+    }
+
+    /// <summary>Environment.GetCommandLineArgs()[0] is the exe path; drop it.</summary>
+    private static string[] SkipExe(string[] argv) {
+      if (argv == null || argv.Length <= 1) return System.Array.Empty<string>();
+      var rest = new string[argv.Length - 1];
+      System.Array.Copy(argv, 1, rest, 0, rest.Length);
+      return rest;
     }
   }
 }

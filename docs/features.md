@@ -77,10 +77,12 @@ See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orches
 | **English / French** | Full in-app localization, switchable at runtime. |
 | **Live graph** | *File → Live graph* — a dashboard tracing cumulative upload + ratio for the active tab. |
 | **Portable settings** | Everything lives in `settings.json` next to the exe. **No registry**, fully portable (USB-friendly). |
+| **New interface** | A flat, from-scratch UI (`--new`) driving the same engine, with a header that reaches guided setup, campaigns, tools and settings. |
+| **Command line** | A headless mode (`--cli` / `--test-announce`) that scripts cleanly for cron, CI or a server. See [Command line](cli.md). |
 
 <p align="center">
-  <img src="screenshots/main-dark.png" width="420" alt="Seedforger main window in the dark theme">
-  <br><sub><em>The dark theme — flat cards, pill buttons, a terminal-style log.</em></sub>
+  <img src="screenshots/main.png" width="460" alt="Seedforger — the new interface">
+  <br><sub><em>The new interface (<code>--new</code>) — flat cards, pill buttons, a header that reaches every feature, a terminal-style log.</em></sub>
 </p>
 
 ## Emulated clients (built-in)

@@ -12,7 +12,9 @@ A modern, from-the-ground-up .NET 8 revival of the classic *RatioMaster*, built 
 [![Tests](https://img.shields.io/badge/tests-108%20passing-2ea043)](Seedforger.Tests)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-<img src="docs/screenshots/main-light.png" width="460" alt="Seedforger main window">
+<img src="docs/screenshots/main.png" width="520" alt="Seedforger — the new interface">
+
+<sub>The new interface — run with <code>--new</code>. There's also a classic interface and a full command line.</sub>
 
 </div>
 
@@ -36,7 +38,9 @@ Grab a build from the [latest release](../../releases/latest):
 | **`Seedforger-lite.exe`** (recommended) | ~0.5 MB | the free [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0/runtime) |
 | **`Seedforger.exe`** | ~68 MB | nothing — fully self-contained |
 
-A single file, no installer. New users should start with **File → Guided setup**, which walks through the setup and verifies each torrent against the tracker before starting. See [Getting started](docs/getting-started.md).
+A single file, no installer. New users should start with **Guided setup**, which walks through the setup and verifies each torrent against the tracker before starting. See [Getting started](docs/getting-started.md).
+
+Three ways to run the same engine: the **classic interface** (default), the **new interface** (`Seedforger.exe --new`), and a **headless command line** for automation (`Seedforger.exe --help`) — see [Command line](docs/cli.md).
 
 ## Features
 
@@ -46,8 +50,8 @@ A single file, no installer. New users should start with **File → Guided setup
 - **Real peer-wire engine** — optionally serve genuine, SHA-1-verified blocks over TCP, capped by a statistical governor, to defeat trackers that inject monitoring peers.
 - **Goal-seeking campaigns** — set a target (a ratio, or a volume by a deadline) and let it stagger starts, allocate bandwidth by real demand, pace to the deadline, and stop automatically.
 - **Guided setup** — a wizard that probes each torrent and loops until it finds one that will genuinely earn ratio, then applies safe defaults.
-- **Connectivity** — HTTPS trackers over `SslStream`, SOCKS4/4a/5 and HTTP-CONNECT proxies, magnet links, and batch loading.
-- **Interface** — light and dark themes, English and French, a live upload/ratio graph, portable JSON settings (no registry), and a silent update check at launch.
+- **Connectivity** — HTTPS trackers over `SslStream`, SOCKS4/4a/5 and HTTP-CONNECT proxies, magnet links, batch loading, and DNS-over-HTTPS to defeat ISP tracker blocks.
+- **Interfaces** — a classic and a new flat interface (both light/dark, EN/FR), plus a **headless command line** for automation. A live upload/ratio graph, portable JSON settings (no registry), and a silent update check at launch.
 - **Tested** — 108 xUnit tests and green CI, including a loopback peer-wire integration test.
 
 The full catalogue is in [Features](docs/features.md).
@@ -63,11 +67,27 @@ The full model, without code, is in [How it actually works](docs/how-it-works.md
 | Page | Contents |
 |---|---|
 | [Getting started](docs/getting-started.md) | Install, guided setup, the rules that keep you safe, FAQ. |
+| [Command line](docs/cli.md) | Every flag for headless / scripted use. |
 | [How it actually works](docs/how-it-works.md) | The anti-cheat model and the believability response, no code. |
 | [Features](docs/features.md) | The complete feature catalogue. |
 | [Configuration](docs/configuration.md) | Custom fingerprints (`clients.json`) and campaigns (`campaign.json`). |
 | [Build from source](docs/build.md) | Build, publish, project layout, tests. |
 | [How BitTorrent actually works](docs/how-bittorrent-works.md) | A from-the-wire technical deep dive. |
+
+## Command line
+
+The same engine runs headless, so it scripts cleanly (cron, CI, a server). Full reference in [Command line](docs/cli.md).
+
+```bash
+# Dry-run one announce and print what the tracker says
+Seedforger.exe --test-announce -t movie.torrent --client qBittorrent
+
+# Seed headless at ~800 kB/s for two hours, then stop
+Seedforger.exe --cli -t movie.torrent -u 800 --duration 120
+
+# List every client/version you can impersonate
+Seedforger.exe --list-clients
+```
 
 ## Build
 
