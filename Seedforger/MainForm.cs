@@ -156,7 +156,7 @@ namespace Seedforger {
 
       // File menu: guided setup for newbies, pinned at the very top.
       var guideItem = new ToolStripMenuItem("Guided setup (newbie mode)…");
-      guideItem.Click += (s, e) => { using (var g = new GuideForm(this)) g.ShowDialog(this); };
+      guideItem.Click += (s, e) => { using (var g = new GuideForm(CurrentRM, ApplyConnectionProfileByName)) g.ShowDialog(this); };
       currentToolStripMenuItem.DropDownItems.Insert(0, new ToolStripSeparator());
       currentToolStripMenuItem.DropDownItems.Insert(0, guideItem);
 
@@ -231,6 +231,14 @@ namespace Seedforger {
     internal void ApplyConnectionProfileByName(string name) {
       foreach (var p in ConnectionProfiles.All)
         if (p.Name == name) { ApplyConnectionProfile(p); return; }
+    }
+
+    /// <summary>Runs a prepared campaign in this (multi-tab) window. Used by the new
+    /// UI, which owns a single engine and delegates multi-torrent orchestration here.</summary>
+    internal void RunCampaign(Campaign c) {
+      campaignRunner?.Stop();
+      campaignRunner = new CampaignRunner(this, c);
+      campaignRunner.Start();
     }
 
     internal void CampaignLog(string message) => CurrentRM?.AddLogLine("[campaign] " + message);

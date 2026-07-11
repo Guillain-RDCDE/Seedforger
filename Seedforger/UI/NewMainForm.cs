@@ -7,12 +7,14 @@ namespace Seedforger.UI {
   /// <summary>
   /// The brand-new interface. It owns the proven RM engine as a hidden child (so
   /// the battle-tested announce logic is reused untouched) and drives it through a
-  /// clean, flat, modern layout. Phase 1: the core seeding flow.
+  /// clean, flat, modern layout — with a header nav that reaches every feature
+  /// (guided mode, campaigns, tools, settings, help) instead of a 2000s menu bar.
   /// </summary>
   internal sealed class NewMainForm : Form {
 
     private readonly RM engine = new RM();
     private readonly Timer poll = new Timer { Interval = 500 };
+    private readonly ToolTip tips = new ToolTip { AutoPopDelay = 15000, InitialDelay = 300, ReshowDelay = 100 };
 
     private readonly Field torrentField = new Field();
     private readonly ComboBox familyBox = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
@@ -24,10 +26,13 @@ namespace Seedforger.UI {
     private readonly PillButton advancedBtn = new PillButton { Text = "Advanced…", Fill = Modern.CardHi };
 
     private readonly Label ratioValue = new Label();
+    private readonly Label ratioCaption = new Label();
     private readonly Label upValue = new Label();
     private readonly Label swarmValue = new Label();
     private readonly Label stateValue = new Label();
     private readonly RichTextBox log = new RichTextBox();
+
+    private GraphForm graphForm;
 
     internal NewMainForm() {
       Text = AppInfo.Title;
@@ -113,8 +118,9 @@ namespace Seedforger.UI {
       stopBtn.Enabled = running;
       var up = Math.Max(0, engine.UploadedBytes);
       var down = Math.Max(0, engine.DownloadedBytes);
-      // Seeding means downloaded stays 0 → the ratio is infinite, not zero.
-      ratioValue.Text = down > 0 ? ((double) up / down).ToString("0.00") : (up > 0 ? "∞" : "0.00");
+      // A pure seeder downloads nothing, so the ratio is mathematically infinite —
+      // showing "0.00" or "∞" both confuse. We show "—" and explain it in a tooltip.
+      ratioValue.Text = down > 0 ? ((double) up / down).ToString("0.00") : "—";
       upValue.Text = RM.FormatFileSize((ulong) up);
       var seed = engine.SeederCount; var leech = engine.LeecherCount;
       swarmValue.Text = (seed < 0 ? "–" : seed.ToString()) + "  /  " + (leech < 0 ? "–" : leech.ToString());
@@ -128,15 +134,185 @@ namespace Seedforger.UI {
       log.ScrollToCaret();
     }
 
-    // ---- layout ----
+    // ---- header + navigation ----
 
     private void BuildHeader() {
-      var header = new Panel { Dock = DockStyle.Top, Height = 60, BackColor = Modern.Bg };
+      var header = new Panel { Dock = DockStyle.Top, Height = 64, BackColor = Modern.Bg };
+
       var title = new Label { Text = "Seedforger", Font = Modern.Semibold(15f), ForeColor = Modern.Text, AutoSize = true, Location = new Point(22, 12), BackColor = Modern.Bg };
-      var sub = new Label { Text = "believable torrent stats — no bytes moved", Font = Modern.F(8.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(24, 35), BackColor = Modern.Bg };
-      header.Controls.Add(sub); header.Controls.Add(title);
+      var sub = new Label { Text = "believable torrent stats — no bytes moved", Font = Modern.F(8.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(24, 36), BackColor = Modern.Bg };
+
+      var nav = new FlowLayoutPanel {
+        Dock = DockStyle.Right, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
+        FlowDirection = FlowDirection.RightToLeft, WrapContents = false, BackColor = Modern.Bg,
+        Padding = new Padding(0, 17, 14, 0),
+      };
+      // RightToLeft: first added sits rightmost, so add in reverse visual order.
+      nav.Controls.Add(MakeNav("?", 40, ShowHelpMenu, "About & links"));
+      nav.Controls.Add(MakeNav("⚙", 40, ShowSettingsMenu, "Settings"));
+      nav.Controls.Add(MakeNav("Tools", 64, ShowToolsMenu, "Magnet, dry-run, live graph…"));
+      nav.Controls.Add(MakeNav("Campaigns", 94, _ => OpenCampaigns(), "Run many torrents on a schedule"));
+      nav.Controls.Add(MakeNav("Guided", 74, _ => OpenGuided(), "Step-by-step newbie mode"));
+
+      header.Controls.Add(nav);
+      header.Controls.Add(sub);
+      header.Controls.Add(title);
       Controls.Add(header);
     }
+
+    private NavButton MakeNav(string text, int width, Action<Control> onClick, string tip) {
+      var b = new NavButton(text) { Width = width, Margin = new Padding(3, 0, 3, 0) };
+      b.Click += (s, e) => onClick(b);
+      if (tip != null) tips.SetToolTip(b, tip);
+      return b;
+    }
+
+    private void ShowMenuUnder(Control anchor, ContextMenuStrip menu) =>
+      menu.Show(anchor, new Point(0, anchor.Height));
+
+    // ---- header actions ----
+
+    private void OpenGuided() {
+      using (var g = new GuideForm(engine, ApplyProfileToEngine)) g.ShowDialog(this);
+    }
+
+    private void OpenCampaigns() {
+      using (var wizard = new CampaignForm()) {
+        if (wizard.ShowDialog(this) != DialogResult.OK || wizard.Result == null) return;
+        // Campaigns are inherently multi-torrent; the classic multi-tab window owns
+        // that orchestration, so we open it to actually run the campaign.
+        MessageBox.Show(this,
+          "Campaigns run many torrents at once, so they open in the multi-torrent window.",
+          AppInfo.Name, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        var mf = new MainForm();
+        mf.Show();
+        mf.RunCampaign(wizard.Result);
+      }
+    }
+
+    private void ShowToolsMenu(Control anchor) {
+      var m = DarkMenu.Create();
+      m.Items.Add(DarkMenu.Item("Open magnet…", (s, e) => OpenMagnet()));
+      m.Items.Add(DarkMenu.Item("Load a .torrent…", (s, e) => Browse()));
+      m.Items.Add(new ToolStripSeparator());
+      m.Items.Add(DarkMenu.Item("Test announce (dry-run)", (s, e) => engine.TestAnnounce()));
+      m.Items.Add(DarkMenu.Item("Serve a real file (advanced)…", (s, e) => ServeReal()));
+      m.Items.Add(DarkMenu.Item("Live graph…", (s, e) => ShowGraph()));
+      ShowMenuUnder(anchor, m);
+    }
+
+    private void ShowSettingsMenu(Control anchor) {
+      var m = DarkMenu.Create();
+
+      var realistic = DarkMenu.Item("Realistic speed (ramp-up)", null, AppOptions.RealisticSpeed);
+      realistic.Click += (s, e) => { AppOptions.RealisticSpeed = realistic.Checked; Settings.Current.RealisticSpeed = realistic.Checked; Settings.Current.Save(); };
+      var swarm = DarkMenu.Item("Swarm-aware speeds", null, AppOptions.SwarmAware);
+      swarm.Click += (s, e) => { AppOptions.SwarmAware = swarm.Checked; Settings.Current.SwarmAware = swarm.Checked; Settings.Current.Save(); };
+      var rotate = DarkMenu.Item("Randomize client on start", null, AppOptions.RandomizeClientOnStart);
+      rotate.Click += (s, e) => { AppOptions.RandomizeClientOnStart = rotate.Checked; Settings.Current.RandomizeClientOnStart = rotate.Checked; Settings.Current.Save(); };
+      m.Items.Add(realistic); m.Items.Add(swarm); m.Items.Add(rotate);
+
+      m.Items.Add(new ToolStripSeparator());
+      var conn = DarkMenu.Item("Connection profile");
+      foreach (var p in ConnectionProfiles.All) {
+        var name = p.Name;
+        conn.DropDownItems.Add(DarkMenu.Item(name, (s, e) => ApplyProfileToEngine(name)));
+      }
+      if (conn.HasDropDownItems && conn.DropDown is ToolStripDropDownMenu dd) dd.Renderer = m.Renderer;
+      m.Items.Add(conn);
+      m.Items.Add(DarkMenu.Item("Active hours…", (s, e) => SetActiveHours()));
+
+      m.Items.Add(new ToolStripSeparator());
+      var lang = DarkMenu.Item("Language");
+      var en = DarkMenu.Item("English", (s, e) => SetLanguage(Language.English), AppOptions.Language == Language.English);
+      var fr = DarkMenu.Item("Français", (s, e) => SetLanguage(Language.French), AppOptions.Language == Language.French);
+      lang.DropDownItems.Add(en); lang.DropDownItems.Add(fr);
+      if (lang.DropDown is ToolStripDropDownMenu ld) ld.Renderer = m.Renderer;
+      m.Items.Add(lang);
+
+      ShowMenuUnder(anchor, m);
+    }
+
+    private void ShowHelpMenu(Control anchor) {
+      var m = DarkMenu.Create();
+      m.Items.Add(DarkMenu.Item("About " + AppInfo.Name, (s, e) => MessageBox.Show(this,
+        $"{AppInfo.Name} v{AppInfo.Version}\n\n{AppInfo.SiteUrl}", AppInfo.Name, MessageBoxButtons.OK, MessageBoxIcon.Information)));
+      m.Items.Add(DarkMenu.Item("Open the GitHub repo", (s, e) => OpenUrl(AppInfo.SiteUrl)));
+      ShowMenuUnder(anchor, m);
+    }
+
+    // ---- action helpers ----
+
+    private void OpenMagnet() {
+      using (var p = new Prompt("Open magnet", "Paste a magnet link:", "")) {
+        if (p.ShowDialog() != DialogResult.OK) return;
+        var uri = (p.Result ?? "").Trim();
+        if (uri.Length > 0) { try { engine.LoadMagnet(uri); torrentField.Box.Text = engine.TorrentDisplayName; } catch (Exception ex) { MessageBox.Show(this, ex.Message, AppInfo.Name); } }
+      }
+    }
+
+    private void ServeReal() {
+      using (var dlg = new OpenFileDialog { Title = "Pick the downloaded file that matches this torrent" }) {
+        if (dlg.ShowDialog(this) == DialogResult.OK) engine.EnableRealSeed(dlg.FileName);
+      }
+    }
+
+    private void ShowGraph() {
+      if (graphForm == null || graphForm.IsDisposed) { graphForm = new GraphForm(() => engine); graphForm.Show(this); }
+      else graphForm.Activate();
+    }
+
+    private void SetActiveHours() {
+      var current = AppOptions.ActiveHoursEnabled ? $"{AppOptions.ActiveHoursStart}-{AppOptions.ActiveHoursEnd}" : "";
+      using (var prompt = new Prompt("Active hours",
+               "Seed only between these hours (0-24), e.g. 8-24 or 22-6.\nLeave empty for 24/7:", current)) {
+        if (prompt.ShowDialog() != DialogResult.OK) return;
+        var text = (prompt.Result ?? "").Trim();
+        if (text.Length == 0) { AppOptions.ActiveHoursEnabled = false; }
+        else {
+          var parts = text.Split('-');
+          if (parts.Length != 2 || !int.TryParse(parts[0].Trim(), out var a) || !int.TryParse(parts[1].Trim(), out var b)
+              || a < 0 || a > 24 || b < 0 || b > 24) {
+            MessageBox.Show(this, "Use a format like 8-24 or 22-6.", AppInfo.Name); return;
+          }
+          AppOptions.ActiveHoursEnabled = true; AppOptions.ActiveHoursStart = a; AppOptions.ActiveHoursEnd = b;
+        }
+        var s = Settings.Current;
+        s.ActiveHoursEnabled = AppOptions.ActiveHoursEnabled;
+        s.ActiveHoursStart = AppOptions.ActiveHoursStart;
+        s.ActiveHoursEnd = AppOptions.ActiveHoursEnd;
+        s.Save();
+      }
+    }
+
+    private void SetLanguage(Language lang) {
+      AppOptions.Language = lang;
+      Settings.Current.Language = Localization.Code(lang);
+      Settings.Current.Save();
+    }
+
+    /// <summary>Applies a connection profile to our single engine (upload/download
+    /// caps with a small jitter, plus the global upstream budget), mirroring the
+    /// classic MainForm behaviour.</summary>
+    private void ApplyProfileToEngine(string name) {
+      ConnectionProfile prof = null;
+      foreach (var p in ConnectionProfiles.All) if (p.Name == name) { prof = p; break; }
+      if (prof == null) return;
+      var r = new Random();
+      int Jitter(int v) => Math.Max(1, (int) (v * (0.92 + r.NextDouble() * 0.16)));
+      engine.SetUploadKBps(Jitter(prof.UpKBps));
+      engine.SetDownloadKBps(Jitter(prof.DownKBps));
+      Bandwidth.GlobalUpKBps = prof.UpKBps;
+      Settings.Current.GlobalUpstreamKBps = prof.UpKBps;
+      Settings.Current.Save();
+      uploadField.Box.Text = prof.UpKBps.ToString();
+    }
+
+    private static void OpenUrl(string url) {
+      try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true }); } catch { }
+    }
+
+    // ---- content layout ----
 
     private void BuildLog() {
       var wrap = new Panel { Dock = DockStyle.Bottom, Height = 168, BackColor = Modern.Bg, Padding = new Padding(20, 6, 20, 16) };
@@ -170,6 +346,7 @@ namespace Seedforger.UI {
       StyleCombo(versionBox); versionBox.SetBounds(258, 40, 120, 30);
       advancedBtn.SetBounds(392, 39, 104, 32); advancedBtn.Font = Modern.F(9f); advancedBtn.TextColor = Modern.Text;
       advancedBtn.Click += (s, e) => engine.ShowAdvanced();
+      tips.SetToolTip(advancedBtn, "Custom fingerprint & proxy");
       clientCard.Controls.Add(familyBox); clientCard.Controls.Add(versionBox); clientCard.Controls.Add(advancedBtn);
 
       var speedCard = MakeCard(left, 208, "SPEED & MODE", 96);
@@ -192,9 +369,15 @@ namespace Seedforger.UI {
 
       ratioValue.Font = new Font(Modern.Family, 40f, FontStyle.Bold, GraphicsUnit.Point);
       ratioValue.ForeColor = Modern.Text; ratioValue.AutoSize = false; ratioValue.TextAlign = ContentAlignment.MiddleLeft;
-      ratioValue.SetBounds(16, 40, 270, 64); ratioValue.BackColor = Modern.Card; ratioValue.Text = "0.00";
+      ratioValue.SetBounds(16, 40, 270, 64); ratioValue.BackColor = Modern.Card; ratioValue.Text = "—";
       statsCard.Controls.Add(ratioValue);
-      statsCard.Controls.Add(new Label { Text = "RATIO", Font = Modern.F(8f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(18, 106), BackColor = Modern.Card });
+      ratioCaption.Text = "RATIO"; ratioCaption.Font = Modern.F(8f); ratioCaption.ForeColor = Modern.Muted;
+      ratioCaption.AutoSize = true; ratioCaption.Location = new Point(18, 106); ratioCaption.BackColor = Modern.Card;
+      statsCard.Controls.Add(ratioCaption);
+      // The "—" is not obvious, so explain it right on the numbers.
+      var ratioTip = "Ratio = uploaded ÷ downloaded.\nA seeder downloads nothing, so the ratio is infinite — shown as “—”.\nIt becomes a real number only if you simulate some download.";
+      tips.SetToolTip(ratioValue, ratioTip);
+      tips.SetToolTip(ratioCaption, ratioTip);
 
       AddStat(statsCard, 150, "Uploaded", upValue);
       AddStat(statsCard, 210, "Seeders / Leechers", swarmValue);

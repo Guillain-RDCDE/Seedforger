@@ -16,7 +16,7 @@ namespace Seedforger {
 
     internal AdvancedForm(params GroupBox[] boxes) {
       Text = "Advanced settings";
-      FormBorderStyle = FormBorderStyle.FixedDialog;
+      FormBorderStyle = FormBorderStyle.Sizable;
       MaximizeBox = false; MinimizeBox = false;
       StartPosition = FormStartPosition.CenterParent;
       // The borrowed group boxes are already sized in the host's DPI pixels; don't
@@ -24,7 +24,9 @@ namespace Seedforger {
       AutoScaleMode = AutoScaleMode.None;
       try { Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath); } catch { }
 
-      var host = new Panel { Dock = DockStyle.Fill };
+      // AutoScroll so a box that's wider/taller than the dialog is reachable rather
+      // than clipped off the right edge (the old fixed-size dialog cut content off).
+      var host = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
       Controls.Add(host);
 
       borrowed = new (Control, Control, Point, AnchorStyles)[boxes.Length];
@@ -38,7 +40,10 @@ namespace Seedforger {
         gb.Visible = true;
         gb.BringToFront();
         top += gb.Height + 12;                 // stack, using the box's own height
-        maxRight = Math.Max(maxRight, gb.Right);
+        // Account for anything a child pokes past the box's own right edge.
+        var boxRight = gb.Right;
+        foreach (Control child in gb.Controls) boxRight = Math.Max(boxRight, gb.Left + child.Right);
+        maxRight = Math.Max(maxRight, boxRight);
       }
 
       var close = new Button { Text = "Close", Width = 90, Height = 30, DialogResult = DialogResult.OK, Name = "GhostButton" };
@@ -47,7 +52,9 @@ namespace Seedforger {
       Controls.Add(bar);
       AcceptButton = close; CancelButton = close;
 
-      ClientSize = new Size(maxRight + 24, top + bar.Height + 4);
+      // +24 padding, +18 so a vertical scrollbar never overlaps the content.
+      ClientSize = new Size(maxRight + 24 + 18, top + bar.Height + 4);
+      MinimumSize = new Size(340, 240);
 
       FormClosed += (s, e) => {
         foreach (var b in borrowed) { b.ctl.Parent = b.parent; b.ctl.Location = b.loc; b.ctl.Anchor = b.anchor; }

@@ -29,8 +29,9 @@ namespace Seedforger {
     private static readonly Color Red = Color.FromArgb(0xE0, 0x3E, 0x3E);
     private static readonly Color Green = Color.FromArgb(0x1F, 0xA9, 0x6B);
 
-    private readonly MainForm owner;
-    private RM Rm => owner.CurrentRM;
+    private readonly RM rm;
+    private readonly Action<string> applyConnectionProfile;
+    private RM Rm => rm;
 
     private Step step = Step.Welcome;
     private AnnounceProbe probe;
@@ -47,8 +48,9 @@ namespace Seedforger {
 
     private readonly ComboBox connectionCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
 
-    internal GuideForm(MainForm owner) {
-      this.owner = owner;
+    internal GuideForm(RM rm, Action<string> applyConnectionProfile) {
+      this.rm = rm;
+      this.applyConnectionProfile = applyConnectionProfile;
       Text = "Guided setup";
       FormBorderStyle = FormBorderStyle.FixedDialog;
       MaximizeBox = false; MinimizeBox = false;
@@ -118,7 +120,7 @@ namespace Seedforger {
         // Apply the connection profile first (it sets an upload cap AND a download
         // rate), then lock in seeder mode so download is forced back to 0 — a
         // newbie must never end up uploading AND downloading.
-        owner.ApplyConnectionProfileByName(connectionCombo.SelectedItem?.ToString() ?? "");
+        applyConnectionProfile?.Invoke(connectionCombo.SelectedItem?.ToString() ?? "");
         Rm?.ConfigureForSeeding();
         AppOptions.RealisticSpeed = true; // soft ramp-up: speeds climb from zero like a real client
         AppOptions.SwarmAware = true;     // only claim upload in proportion to real demand

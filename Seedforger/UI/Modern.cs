@@ -104,6 +104,67 @@ namespace Seedforger.UI {
       (int) Math.Min(255, c.B + (255 - c.B) * f));
   }
 
+  /// <summary>A borderless header nav button: quiet text that lifts to accent on hover.</summary>
+  internal sealed class NavButton : Button {
+    private bool hover;
+    internal NavButton(string text) {
+      Text = text;
+      FlatStyle = FlatStyle.Flat; FlatAppearance.BorderSize = 0;
+      FlatAppearance.MouseOverBackColor = Color.Transparent;
+      FlatAppearance.MouseDownBackColor = Color.Transparent;
+      SetStyle(ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+      BackColor = Modern.Bg; Cursor = Cursors.Hand; AutoSize = false; Height = 30;
+      Font = Modern.F(9.5f);
+      MouseEnter += (s, e) => { hover = true; Invalidate(); };
+      MouseLeave += (s, e) => { hover = false; Invalidate(); };
+    }
+    protected override void OnPaint(PaintEventArgs e) {
+      var g = e.Graphics;
+      g.Clear(Parent?.BackColor ?? Modern.Bg);
+      if (hover) Modern.FillRound(g, ClientRectangle, 8, Modern.CardHi);
+      TextRenderer.DrawText(g, Text, Font, ClientRectangle, hover ? Modern.Text : Modern.Muted,
+        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+    }
+  }
+
+  /// <summary>A dark drop-down menu (context menu) matching the flat palette.</summary>
+  internal static class DarkMenu {
+    internal static ContextMenuStrip Create() {
+      var m = new ContextMenuStrip { Renderer = new Renderer(), BackColor = Modern.Card, ForeColor = Modern.Text, Font = Modern.F(9.5f), ShowImageMargin = false };
+      return m;
+    }
+    internal static ToolStripMenuItem Item(string text, EventHandler onClick = null, bool? check = null) {
+      var it = new ToolStripMenuItem(text) { ForeColor = Modern.Text };
+      if (check.HasValue) { it.CheckOnClick = true; it.Checked = check.Value; }
+      if (onClick != null) it.Click += onClick;
+      return it;
+    }
+    private sealed class Renderer : ToolStripProfessionalRenderer {
+      internal Renderer() : base(new Cols()) { }
+      protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e) { }
+      protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e) {
+        e.TextColor = (e.Item.Selected || e.Item.Pressed) ? Color.White : Modern.Text;
+        base.OnRenderItemText(e);
+      }
+      private sealed class Cols : ProfessionalColorTable {
+        public Cols() { UseSystemColors = false; }
+        public override Color MenuItemSelected => Modern.Accent;
+        public override Color MenuItemSelectedGradientBegin => Modern.Accent;
+        public override Color MenuItemSelectedGradientEnd => Modern.Accent;
+        public override Color MenuItemBorder => Modern.Accent;
+        public override Color MenuItemPressedGradientBegin => Modern.Accent;
+        public override Color MenuItemPressedGradientEnd => Modern.Accent;
+        public override Color ToolStripDropDownBackground => Modern.Card;
+        public override Color ImageMarginGradientBegin => Modern.Card;
+        public override Color ImageMarginGradientMiddle => Modern.Card;
+        public override Color ImageMarginGradientEnd => Modern.Card;
+        public override Color MenuBorder => Modern.Border;
+        public override Color SeparatorDark => Modern.Border;
+        public override Color SeparatorLight => Modern.Border;
+      }
+    }
+  }
+
   /// <summary>A borderless text box on a rounded, bordered surface — a modern input.</summary>
   internal sealed class Field : Panel {
     internal readonly TextBox Box = new TextBox { BorderStyle = BorderStyle.None };
