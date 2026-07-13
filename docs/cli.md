@@ -12,8 +12,7 @@ Seedforger.exe [mode] [options]
 
 | Flag | Effect |
 |---|---|
-| *(none)* | Launch the classic GUI. |
-| `--new` | Launch the new interface. |
+| *(none)* | Launch the graphical interface. |
 | `--cli`, `--headless`, `--nogui` | Run without a window (automation). Needs a torrent. |
 | `--test-announce`, `--dry-run` | Announce once as a seeder, print the tracker's answer, exit. |
 | `--list-clients` | List every client and version you can impersonate, exit. |

@@ -21,7 +21,7 @@ You don't need to read the protocol spec to get the shape of it. (When you *do* 
 **3. Seedforger's job is to pass every one of those checks.** It layers believability, from cheap to deep:
 
 - **Look like a real client** → accurate, *current* fingerprints (`-qB5230-`, `-TR4130-`, …), optional **client rotation**, even client-specific quirks like Transmission's `peer_id` checksum.
-- **Move at a believable speed** → **connection profiles** (ADSL→fibre) set sane limits, a **ramp-up + gentle wobble** replaces the flat line, and a **global upstream budget** makes all your tabs share one uplink like they'd share one real connection.
+- **Move at a believable speed** → **connection profiles** (ADSL→fibre) set sane limits, a **ramp-up + gentle wobble** replaces the flat line, and a **global upstream budget** makes all your torrents share one uplink like they'd share one real connection.
 - **Only feed demand that exists** → **swarm-aware speeds** read the tracker's live leecher/seeder counts. Zero leechers → you trickle (nobody to feed). Lots of competing seeders → your share is diluted. The physics line up.
 - **Keep timing human** → **interval jitter** (drift *later*, never earlier than the tracker allows), a **day/night rhythm**, and an **active-hours** window so you're not seeding at 4 a.m. every night forever.
 - **Be a connectable peer** → answer inbound handshakes on your port with a full **bitfield + choke**: a visible, complete seeder that happens to transfer nothing.

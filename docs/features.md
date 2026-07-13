@@ -36,7 +36,7 @@ For *why* these matter, read [How it actually works](how-it-works.md); for the p
 
 ## 🔬 The real peer-wire engine (advanced)
 
-*File → Serve a real file* arms a genuine TCP **peer-wire engine** — the answer to trackers that inject monitoring peers which *request-and-verify*. See the [deep-dive §13½](how-bittorrent-works.md#deep-end).
+*Tools → Serve a real file* arms a genuine TCP **peer-wire engine** — the answer to trackers that inject monitoring peers which *request-and-verify*. See the [deep-dive §13½](how-bittorrent-works.md#deep-end).
 
 | Stage | What it does |
 |---|---|
@@ -53,7 +53,7 @@ For *why* these matter, read [How it actually works](how-it-works.md); for the p
 | | |
 |---|---|
 | **Goal-seeking campaigns** | Give it an intent — *reach ratio 2.0* or *upload 200 GB by a deadline* — and it derives the actions over time. |
-| **Visual builder** | *File → New campaign…* opens a themed form: goal, connection profile, active hours, torrent folder, stagger, concurrency. **No JSON by hand.** |
+| **Visual builder** | The **Campaigns** button opens a themed form: goal, connection profile, active hours, torrent folder, stagger, concurrency. **No JSON by hand.** |
 | **Human pacing** | **Staggered** starts (launching everything at once is a tell), upstream **budget split by real demand**, **pacing** so you don't finish suspiciously early, then **auto-stop** at the goal. |
 
 See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orchestrator) for the `campaign.json` format.
@@ -66,7 +66,7 @@ See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orches
 | **Proxy** | SOCKS4 / 4a / 5 and HTTP-CONNECT for HTTP trackers. |
 | **Magnet & batch** | Open **magnet links** (infohash-only) and load a whole folder of `.torrent`s into tabs at once. |
 | **Auto-stop targets** | Stop on time, uploaded, downloaded, **ratio**, or seeders/leechers. |
-| **Dry-run** | *File → Test announce* sends a single announce and shows whether the tracker accepted it — before you commit. |
+| **Dry-run** | *Tools → Test announce* sends a single announce and shows whether the tracker accepted it — before you commit. |
 
 ## 🎨 Experience
 
@@ -75,14 +75,14 @@ See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orches
 | **Guided setup (newbie mode)** | A step-by-step wizard that probes each torrent against the tracker — accepted? enough leechers? — and loops until it finds one that will actually earn ratio, then sets believable defaults and starts. See [Getting started](getting-started.md#guided-setup). |
 | **Light & dark themes** | Follows your OS on first launch (dark title bar via DWM); toggle in Settings. Owner-drawn flat cards + pill buttons. |
 | **English / French** | Full in-app localization, switchable at runtime. |
-| **Live graph** | *File → Live graph* — a dashboard tracing cumulative upload + ratio for the active tab. |
+| **Live graph** | *Tools → Live graph* — a dashboard tracing cumulative upload + ratio for the running engine. |
 | **Portable settings** | Everything lives in `settings.json` next to the exe. **No registry**, fully portable (USB-friendly). |
-| **New interface** | A flat, from-scratch UI (`--new`) driving the same engine, with a header that reaches guided setup, campaigns, tools and settings. |
+| **Header navigation** | A flat, from-scratch UI whose header reaches guided setup, campaigns, tools and settings — no menu bar. |
 | **Command line** | A headless mode (`--cli` / `--test-announce`) that scripts cleanly for cron, CI or a server. See [Command line](cli.md). |
 
 <p align="center">
-  <img src="screenshots/main.png" width="460" alt="Seedforger — the new interface">
-  <br><sub><em>The new interface (<code>--new</code>) — flat cards, pill buttons, a header that reaches every feature, a terminal-style log.</em></sub>
+  <img src="screenshots/main.png" width="460" alt="Seedforger">
+  <br><sub><em>Flat cards, pill buttons, a header that reaches every feature, a terminal-style log.</em></sub>
 </p>
 
 ## Emulated clients (built-in)

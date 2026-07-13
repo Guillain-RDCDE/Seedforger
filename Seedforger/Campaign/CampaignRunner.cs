@@ -7,6 +7,17 @@ using System.Windows.Forms;
 namespace Seedforger {
 
   /// <summary>
+  /// What a campaign needs from its host UI: a way to bring a torrent online as a
+  /// (hidden) engine, apply a connection profile to it, and surface log lines.
+  /// Decouples the orchestrator from any specific window.
+  /// </summary>
+  internal interface ICampaignHost {
+    RM CreateEngine(string torrentPath);
+    void ApplyConnectionProfile(RM engine, string name);
+    void Log(string message);
+  }
+
+  /// <summary>
   /// Drives a <see cref="Campaign"/> on the UI thread: brings torrents online in a
   /// staggered, human way, splits the upstream budget toward torrents that have
   /// real demand, paces the total upload toward the deadline (so the goal isn't
@@ -17,7 +28,7 @@ namespace Seedforger {
 
     private sealed class Slot { public string Path; public int OffsetMin; public RM Rm; public bool Started; }
 
-    private readonly MainForm form;
+    private readonly ICampaignHost host;
     private readonly Campaign campaign;
     private readonly Timer timer;
     private readonly List<Slot> slots = new List<Slot>();
@@ -28,11 +39,11 @@ namespace Seedforger {
 
     internal bool Running { get; private set; }
 
-    internal CampaignRunner(MainForm form, Campaign campaign) {
-      this.form = form;
+    internal CampaignRunner(ICampaignHost host, Campaign campaign) {
+      this.host = host;
       this.campaign = campaign;
       timer = new Timer { Interval = 15000 };
-      timer.Tick += (s, e) => { try { Tick(); } catch (Exception ex) { form.CampaignLog("error: " + ex.Message); } };
+      timer.Tick += (s, e) => { try { Tick(); } catch (Exception ex) { host.Log("error: " + ex.Message); } };
     }
 
     internal void Start() {
@@ -65,7 +76,7 @@ namespace Seedforger {
       startTime = DateTime.Now;
       Running = true;
       done = false;
-      form.CampaignLog($"started: {files.Length} torrents, goal={campaign.Goal}, connection={campaign.Connection} ({globalUpKBps} kB/s budget)");
+      host.Log($"started: {files.Length} torrents, goal={campaign.Goal}, connection={campaign.Connection} ({globalUpKBps} kB/s budget)");
       timer.Start();
       Tick(); // kick the first torrent immediately (offset 0)
     }
@@ -74,7 +85,7 @@ namespace Seedforger {
       timer.Stop();
       Running = false;
       foreach (var s in slots) s.Rm?.CampaignStop();
-      form.CampaignLog("stopped by user");
+      host.Log("stopped by user");
     }
 
     private void Tick() {
@@ -93,7 +104,7 @@ namespace Seedforger {
         done = true;
         Running = false;
         timer.Stop();
-        form.CampaignLog("goal reached — campaign complete.");
+        host.Log("goal reached — campaign complete.");
         return;
       }
 
@@ -131,10 +142,10 @@ namespace Seedforger {
 
     private void StartSlot(Slot slot) {
       try {
-        var rm = form.AddTorrentTab(slot.Path);
+        var rm = host.CreateEngine(slot.Path);
         if (rm == null) { slot.Started = true; return; }
         slot.Rm = rm;
-        form.ApplyConnectionProfileByName(campaign.Connection);
+        host.ApplyConnectionProfile(rm, campaign.Connection);
 
         if (!string.IsNullOrEmpty(campaign.RealFileFolder) && Directory.Exists(campaign.RealFileFolder)) {
           var candidate = Path.Combine(campaign.RealFileFolder, rm.TorrentDisplayName);
@@ -143,11 +154,11 @@ namespace Seedforger {
 
         rm.CampaignStart();
         slot.Started = true;
-        form.CampaignLog("brought online: " + Path.GetFileName(slot.Path));
+        host.Log("brought online: " + Path.GetFileName(slot.Path));
       }
       catch (Exception ex) {
         slot.Started = true; // don't retry a broken torrent forever
-        form.CampaignLog("failed to start " + Path.GetFileName(slot.Path) + ": " + ex.Message);
+        host.Log("failed to start " + Path.GetFileName(slot.Path) + ": " + ex.Message);
       }
     }
 

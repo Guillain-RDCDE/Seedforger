@@ -38,7 +38,7 @@ Keep fingerprints accurate: a wrong `peer_id` gets *users* banned.
 
 ## Campaigns (goal-seeking orchestrator)
 
-*File → **New campaign…*** opens the [visual builder](screenshots/campaign-builder.png) — pick a goal (ratio / GB by a deadline), a connection profile, active hours, a torrent folder, and hit **Start** (or Save / Load). No JSON to hand-write.
+The **Campaigns** button opens the [visual builder](screenshots/campaign-builder.png) — pick a goal (ratio / GB by a deadline), a connection profile, active hours, a torrent folder, and hit **Start** (or Save / Load). No JSON to hand-write.
 
 Under the hood it's a `campaign.json` (Save/Load in the dialog; a `campaign.sample.json` is dropped next to the exe):
 

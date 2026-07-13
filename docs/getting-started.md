@@ -22,7 +22,7 @@ Either way it's a **single file, no installer**, that you can drop anywhere (USB
 <a id="guided-setup"></a>
 ## 2. Easiest start — guided setup 🧭
 
-New to this? Use **File → Guided setup (newbie mode)…**. It walks you through it one click at a time and, crucially, **asks the tracker whether each torrent will actually work** before you commit:
+New to this? Use the **Guided** button (newbie mode). It walks you through it one click at a time and, crucially, **asks the tracker whether each torrent will actually work** before you commit:
 
 1. It reminds you of the one rule: you should have **really downloaded the file once**, so the tracker knows you legitimately have it.
 2. Pick a `.torrent` you have.

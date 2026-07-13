@@ -34,8 +34,8 @@ namespace Seedforger {
     /// </summary>
     internal static bool IsFirstRun { get; private set; }
 
-    /// <summary>Shared instance so MainForm (app-level) and every RM tab
-    /// (per-tab) read/write the same file/object.</summary>
+    /// <summary>Shared instance so the app-level UI and every RM engine
+    /// read/write the same file/object.</summary>
     internal static Settings Current => current ??= Load();
 
     #region App-level options

@@ -1,20 +1,25 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace Seedforger.UI {
 
   /// <summary>
-  /// The brand-new interface. It owns the proven RM engine as a hidden child (so
-  /// the battle-tested announce logic is reused untouched) and drives it through a
+  /// The interface. It owns the proven RM engine as a hidden child (so the
+  /// battle-tested announce logic is reused untouched) and drives it through a
   /// clean, flat, modern layout — with a header nav that reaches every feature
-  /// (guided mode, campaigns, tools, settings, help) instead of a 2000s menu bar.
+  /// (guided mode, campaigns, tools, settings, help). It is also the campaign
+  /// host: multi-torrent runs live in hidden engines owned by this window.
   /// </summary>
-  internal sealed class NewMainForm : Form {
+  internal sealed class NewMainForm : Form, ICampaignHost {
 
     private readonly RM engine = new RM();
     private readonly Timer poll = new Timer { Interval = 500 };
     private readonly ToolTip tips = new ToolTip { AutoPopDelay = 15000, InitialDelay = 300, ReshowDelay = 100 };
+    private readonly List<Control> campaignHosts = new List<Control>();
+    private CampaignRunner campaignRunner;
 
     private readonly Field torrentField = new Field();
     private readonly ComboBox familyBox = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
@@ -45,6 +50,7 @@ namespace Seedforger.UI {
       Theme.EnableDarkAppMode();
       HandleCreated += (s, e) => Theme.TrySetDarkTitleBarPublic(this);
 
+      LoadPersistedSettings();
       BuildHeader();
       BuildLog();
       BuildContent();
@@ -54,6 +60,40 @@ namespace Seedforger.UI {
       poll.Tick += (s, e) => Refresh_();
       poll.Start();
       Refresh_();
+      StartUpdateCheck();
+    }
+
+    // Mirror the persisted settings into the process-wide options at launch.
+    private static void LoadPersistedSettings() {
+      try {
+        var s = Settings.Current;
+        AppOptions.RealisticSpeed = s.RealisticSpeed;
+        AppOptions.RandomizeClientOnStart = s.RandomizeClientOnStart;
+        AppOptions.ActiveHoursEnabled = s.ActiveHoursEnabled;
+        AppOptions.ActiveHoursStart = s.ActiveHoursStart;
+        AppOptions.ActiveHoursEnd = s.ActiveHoursEnd;
+        AppOptions.Language = Localization.Parse(s.Language);
+        AppOptions.SwarmAware = s.SwarmAware;
+        AppOptions.DarkMode = true; // the new interface is dark-only
+        Bandwidth.GlobalUpKBps = s.GlobalUpstreamKBps;
+        s.Save();
+      }
+      catch { /* first run / unreadable settings: keep defaults */ }
+    }
+
+    // Silent update-check at launch: only prompts if a newer release exists.
+    private void StartUpdateCheck() {
+      UpdateChecker.CheckInBackground((tag, url) => {
+        try {
+          BeginInvoke((Action) (() => {
+            var r = MessageBox.Show(this,
+              $"A new version {tag} is available — you have v{AppInfo.Version}.\n\nOpen the download page?",
+              AppInfo.Name + " — update available", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (r == DialogResult.Yes) OpenUrl(url);
+          }));
+        }
+        catch { /* form gone */ }
+      });
     }
 
     // ---- engine ----
@@ -179,15 +219,35 @@ namespace Seedforger.UI {
     private void OpenCampaigns() {
       using (var wizard = new CampaignForm()) {
         if (wizard.ShowDialog(this) != DialogResult.OK || wizard.Result == null) return;
-        // Campaigns are inherently multi-torrent; the classic multi-tab window owns
-        // that orchestration, so we open it to actually run the campaign.
-        MessageBox.Show(this,
-          "Campaigns run many torrents at once, so they open in the multi-torrent window.",
-          AppInfo.Name, MessageBoxButtons.OK, MessageBoxIcon.Information);
-        var mf = new MainForm();
-        mf.Show();
-        mf.RunCampaign(wizard.Result);
+        // Multi-torrent runs are orchestrated right here, in hidden engines this
+        // window hosts (see the ICampaignHost implementation below).
+        campaignRunner?.Stop();
+        campaignRunner = new CampaignRunner(this, wizard.Result);
+        AppendLog("[campaign] starting…");
+        campaignRunner.Start();
       }
+    }
+
+    // ---- ICampaignHost: multi-torrent orchestration in hidden engines ----
+
+    RM ICampaignHost.CreateEngine(string torrentPath) {
+      var rm = new RM();
+      var host = new Panel { Size = new Size(1, 1), Location = new Point(-4, -4), TabStop = false };
+      rm.Dock = DockStyle.None; rm.Location = new Point(0, 0);
+      host.Controls.Add(rm);
+      Controls.Add(host);
+      host.SendToBack();
+      _ = host.Handle; _ = rm.Handle;
+      rm.LoadTorrentFileInfo(torrentPath);
+      campaignHosts.Add(host);
+      return rm;
+    }
+
+    void ICampaignHost.ApplyConnectionProfile(RM rm, string name) => ApplyProfileTo(rm, name);
+
+    void ICampaignHost.Log(string message) {
+      if (log.InvokeRequired) { try { log.BeginInvoke((Action) (() => AppendLog("[campaign] " + message))); } catch { } }
+      else AppendLog("[campaign] " + message);
     }
 
     private void ShowToolsMenu(Control anchor) {
@@ -291,21 +351,28 @@ namespace Seedforger.UI {
       Settings.Current.Save();
     }
 
-    /// <summary>Applies a connection profile to our single engine (upload/download
-    /// caps with a small jitter, plus the global upstream budget), mirroring the
-    /// classic MainForm behaviour.</summary>
+    /// <summary>Applies a connection profile to the main engine (upload/download
+    /// caps with a small jitter, plus the global upstream budget) and reflects the
+    /// cap in the upload field.</summary>
     private void ApplyProfileToEngine(string name) {
+      var prof = ApplyProfileTo(engine, name);
+      if (prof != null) uploadField.Box.Text = prof.UpKBps.ToString();
+    }
+
+    /// <summary>Shared profile application, usable on any engine (main or a
+    /// hidden campaign engine). Returns the matched profile, or null.</summary>
+    private ConnectionProfile ApplyProfileTo(RM rm, string name) {
       ConnectionProfile prof = null;
-      foreach (var p in ConnectionProfiles.All) if (p.Name == name) { prof = p; break; }
-      if (prof == null) return;
+      foreach (var p in ConnectionProfiles.All) if (string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase)) { prof = p; break; }
+      if (prof == null) return null;
       var r = new Random();
       int Jitter(int v) => Math.Max(1, (int) (v * (0.92 + r.NextDouble() * 0.16)));
-      engine.SetUploadKBps(Jitter(prof.UpKBps));
-      engine.SetDownloadKBps(Jitter(prof.DownKBps));
+      rm.SetUploadKBps(Jitter(prof.UpKBps));
+      rm.SetDownloadKBps(Jitter(prof.DownKBps));
       Bandwidth.GlobalUpKBps = prof.UpKBps;
       Settings.Current.GlobalUpstreamKBps = prof.UpKBps;
       Settings.Current.Save();
-      uploadField.Box.Text = prof.UpKBps.ToString();
+      return prof;
     }
 
     private static void OpenUrl(string url) {
