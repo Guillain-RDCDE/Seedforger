@@ -73,8 +73,9 @@ See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orches
 | | |
 |---|---|
 | **Guided setup (newbie mode)** | A step-by-step wizard that probes each torrent against the tracker — accepted? enough leechers? — and loops until it finds one that will actually earn ratio, then sets believable defaults and starts. See [Getting started](getting-started.md#guided-setup). |
-| **Light & dark themes** | Follows your OS on first launch (dark title bar via DWM); toggle in Settings. Owner-drawn flat cards + pill buttons. |
-| **English / French** | Full in-app localization, switchable at runtime. |
+| **Flat dark interface** | A from-scratch dark UI: owner-drawn flat cards, pill buttons, a dark title bar (DWM), a terminal-style log. |
+| **English / French** | The whole interface follows the language toggle at runtime (*Settings → Language*). |
+| **Minimise / close to tray** | Tucks into the notification area on minimise or close (both toggleable), with a first-time hint so it never looks like it vanished. Restore or quit from the tray icon. |
 | **Live graph** | *Tools → Live graph* — a dashboard tracing cumulative upload + ratio for the running engine. |
 | **Portable settings** | Everything lives in `settings.json` next to the exe. **No registry**, fully portable (USB-friendly). |
 | **Header navigation** | A flat, from-scratch UI whose header reaches guided setup, campaigns, tools and settings — no menu bar. |

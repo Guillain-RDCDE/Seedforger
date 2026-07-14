@@ -51,7 +51,7 @@ Two ways to run the same engine: the **graphical interface** (default) and a **h
 - **Goal-seeking campaigns** — set a target (a ratio, or a volume by a deadline) and let it stagger starts, allocate bandwidth by real demand, pace to the deadline, and stop automatically.
 - **Guided setup** — a wizard that probes each torrent and loops until it finds one that will genuinely earn ratio, then applies safe defaults.
 - **Connectivity** — HTTPS trackers over `SslStream`, SOCKS4/4a/5 and HTTP-CONNECT proxies, magnet links, batch loading, and DNS-over-HTTPS to defeat ISP tracker blocks.
-- **Interface** — a flat, from-scratch UI whose header reaches every feature, plus a **headless command line** for automation. A live upload/ratio graph, portable JSON settings (no registry), and a silent update check at launch.
+- **Interface** — a flat, from-scratch UI whose header reaches every feature, in **English or French**, with **minimise/close to the system tray**, plus a **headless command line** for automation. A live upload/ratio graph, portable JSON settings (no registry), and a silent update check at launch.
 - **Tested** — 108 xUnit tests and green CI, including a loopback peer-wire integration test.
 
 The full catalogue is in [Features](docs/features.md).
