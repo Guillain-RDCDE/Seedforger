@@ -45,7 +45,7 @@ namespace Seedforger.BitTorrent {
     internal byte[] InfoHash {
       get {
         if (overrideHash != null) return overrideHash;
-        SHA1 sha = new SHA1CryptoServiceProvider();
+        using var sha = SHA1.Create();
         return sha.ComputeHash(Data["info"].Encode());
       }
     }

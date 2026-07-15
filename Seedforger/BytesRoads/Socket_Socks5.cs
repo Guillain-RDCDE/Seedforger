@@ -194,11 +194,12 @@ namespace Seedforger.BytesRoads {
       //------------------------------
       // Store IP address
       //
-      var ipAddr = ip.Address.Address;
-      cmd[4] = (byte) (ipAddr & 0x000000FF);
-      cmd[5] = (byte) ((ipAddr & 0x0000FF00) >> 8);
-      cmd[6] = (byte) ((ipAddr & 0x00FF0000) >> 16);
-      cmd[7] = (byte) ((ipAddr & 0xFF000000) >> 24);
+      // Network byte order (a.b.c.d) — GetAddressBytes returns exactly that.
+      var ipBytes = ip.Address.GetAddressBytes();
+      cmd[4] = ipBytes[0];
+      cmd[5] = ipBytes[1];
+      cmd[6] = ipBytes[2];
+      cmd[7] = ipBytes[3];
 
       //------------------------------
       // Store port

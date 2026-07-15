@@ -438,9 +438,9 @@ namespace Seedforger.BytesRoads {
           Connect_GetPrxHost_End,
           stateObj);
       }
-      catch (Exception e) {
+      catch (Exception) {
         SetProgress(false);
-        throw e;
+        throw; // preserve the original stack trace
       }
 
       return stateObj;

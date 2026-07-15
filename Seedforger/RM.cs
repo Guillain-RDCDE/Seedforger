@@ -715,13 +715,13 @@ namespace Seedforger {
           else if (response.Dict == null) probe.Error = "The tracker replied, but the response couldn't be decoded.";
           else {
             probe.GotResponse = true;
-            var failure = response.Dict.Contains("failure reason") ? BEncode.String(response.Dict["failure reason"]) : null;
-            if (!string.IsNullOrEmpty(failure)) probe.FailureReason = failure;
+            var r = Announce.FromDict(response.Dict);
+            if (!string.IsNullOrEmpty(r.Failure)) probe.FailureReason = r.Failure;
             else {
               probe.Accepted = true;
-              if (response.Dict.Contains("complete")) probe.Seeders = BEncode.String(response.Dict["complete"]).ParseValidInt(-1);
-              if (response.Dict.Contains("incomplete")) probe.Leechers = BEncode.String(response.Dict["incomplete"]).ParseValidInt(-1);
-              if (response.Dict.Contains("interval")) probe.Interval = BEncode.String(response.Dict["interval"]).ParseValidInt(-1);
+              probe.Seeders = r.Seeders;
+              probe.Leechers = r.Leechers;
+              probe.Interval = r.Interval;
             }
           }
         }
@@ -1079,55 +1079,32 @@ namespace Seedforger {
     }
 
     private string GetUrlString(TorrentInfo torrentInfo, string eventType) {
-      // Random random = new Random();
-      var uploaded = "0";
-      if (torrentInfo.uploaded > 0) {
-        torrentInfo.uploaded = RoundByDenominator(torrentInfo.uploaded, 0x4000);
-        uploaded = torrentInfo.uploaded.ToString();
-
-        // uploaded = Convert.ToString(torrentInfo.uploaded + random.Next(1, 1023));
-      }
-
-      var downloaded = "0";
-      if (torrentInfo.downloaded > 0) {
-        torrentInfo.downloaded = RoundByDenominator(torrentInfo.downloaded, 0x10);
-        downloaded = torrentInfo.downloaded.ToString();
-
-        // downloaded = Convert.ToString(torrentInfo.downloaded + random.Next(1, 1023));
-      }
-
-      if (torrentInfo.left > 0) {
-        torrentInfo.left = torrentInfo.totalsize - torrentInfo.downloaded;
-      }
-
-      var left = torrentInfo.left.ToString();
-      var key = torrentInfo.key;
-      var port = torrentInfo.port;
-      var peerId = torrentInfo.peerID;
-      var urlString = torrentInfo.tracker;
-      if (urlString.Contains("?")) {
-        urlString += "&";
-      }
-      else {
-        urlString += "?";
-      }
-
-      if (eventType.Contains("started")) urlString = urlString.Replace("&natmapped=1&localip={localip}", "");
-      if (!eventType.Contains("stopped")) urlString = urlString.Replace("&trackerid=48", "");
-      urlString += currentClient.Query;
-      urlString = urlString.Replace("{infohash}", HashUrlEncode(torrentInfo.hash, currentClient.HashUpperCase));
-      urlString = urlString.Replace("{peerid}", peerId);
-      urlString = urlString.Replace("{port}", port);
-      urlString = urlString.Replace("{uploaded}", uploaded);
-      urlString = urlString.Replace("{downloaded}", downloaded);
-      urlString = urlString.Replace("{left}", left);
-      urlString = urlString.Replace("{event}", eventType);
+      // Keep the legacy side-effects on the live torrent (the reported byte counts
+      // are rounded to believable boundaries), then hand the pure URL assembly to
+      // the unit-tested announce core. Re-rounding there is idempotent, so the wire
+      // output is byte-for-byte identical to the old inline code.
+      if (torrentInfo.uploaded > 0) torrentInfo.uploaded = RoundByDenominator(torrentInfo.uploaded, 0x4000);
+      if (torrentInfo.downloaded > 0) torrentInfo.downloaded = RoundByDenominator(torrentInfo.downloaded, 0x10);
+      if (torrentInfo.left > 0) torrentInfo.left = torrentInfo.totalsize - torrentInfo.downloaded;
       if (torrentInfo.numberOfPeers == "0" && !eventType.ToLower().Contains("stopped"))
         torrentInfo.numberOfPeers = "200";
-      urlString = urlString.Replace("{numwant}", torrentInfo.numberOfPeers);
-      urlString = urlString.Replace("{key}", key);
-      urlString = urlString.Replace("{localip}", Functions.GetIp());
-      return urlString;
+
+      return Announce.BuildUrl(new Announce.Params {
+        Tracker = torrentInfo.tracker,
+        QueryTemplate = currentClient.Query,
+        InfoHashHex = torrentInfo.hash,
+        PeerId = torrentInfo.peerID,
+        Port = torrentInfo.port,
+        Uploaded = torrentInfo.uploaded,
+        Downloaded = torrentInfo.downloaded,
+        Left = torrentInfo.left,
+        TotalSize = torrentInfo.totalsize,
+        Key = torrentInfo.key,
+        NumWant = torrentInfo.numberOfPeers,
+        Event = eventType,
+        LocalIp = Functions.GetIp(),
+        HashUpperCase = currentClient.HashUpperCase,
+      });
     }
 
     #endregion
@@ -1532,25 +1509,8 @@ namespace Seedforger {
       return ret;
     }
 
-    internal string HashUrlEncode(string decoded, bool upperCase) {
-      var ret = new StringBuilder();
-      var stringGen = new RandomStringGenerator();
-      try {
-        for (var i = 0; i < decoded.Length; i += 2) {
-          var tempChar =
-            // the only case in which something should not be escaped, is when it is alphanumeric,
-            // or it's in marks
-            // in all other cases, encode it.
-            (char) Convert.ToUInt16(decoded.Substring(i, 2), 16);
-          ret.Append(tempChar);
-        }
-      }
-      catch (Exception ex) {
-        AddLogLine(ex.ToString());
-      }
-
-      return stringGen.Generate(ret.ToString(), upperCase);
-    }
+    // Delegates to the WinForms-free, unit-tested announce core (byte-identical output).
+    internal string HashUrlEncode(string decoded, bool upperCase) => Announce.EncodeHash(decoded, upperCase);
 
     #endregion
 

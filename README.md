@@ -9,7 +9,7 @@ A modern, from-the-ground-up .NET 8 revival of the classic *RatioMaster*, built 
 [![CI](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml/badge.svg)](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![Release](https://img.shields.io/github/v/release/Guillain-RDCDE/Seedforger?color=2ea043&label=download)](../../releases/latest)
-[![Tests](https://img.shields.io/badge/tests-108%20passing-2ea043)](Seedforger.Tests)
+[![Tests](https://img.shields.io/badge/tests-118%20passing-2ea043)](Seedforger.Tests)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 <img src="docs/screenshots/main.png" width="520" alt="Seedforger">
@@ -52,7 +52,7 @@ Two ways to run the same engine: the **graphical interface** (default) and a **h
 - **Guided setup** — a wizard that probes each torrent and loops until it finds one that will genuinely earn ratio, then applies safe defaults.
 - **Connectivity** — HTTPS trackers over `SslStream`, SOCKS4/4a/5 and HTTP-CONNECT proxies, magnet links, batch loading, and DNS-over-HTTPS to defeat ISP tracker blocks.
 - **Interface** — a flat, from-scratch UI whose header reaches every feature, in **English or French**, with **minimise/close to the system tray**, plus a **headless command line** for automation. A live upload/ratio graph, portable JSON settings (no registry), and a silent update check at launch.
-- **Tested** — 108 xUnit tests and green CI, including a loopback peer-wire integration test.
+- **Tested** — 118 xUnit tests and green CI, including a loopback peer-wire integration test.
 
 The full catalogue is in [Features](docs/features.md).
 

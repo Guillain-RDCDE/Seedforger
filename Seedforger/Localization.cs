@@ -110,6 +110,10 @@ namespace Seedforger {
 
     internal static string Code(Language lang) => lang == Language.French ? "fr" : "en";
 
+    /// <summary>Picks the string for the current language (for dynamic text that
+    /// isn't a fixed control caption — e.g. the guided/campaign wizards).</summary>
+    internal static string Pick(string en, string fr) => AppOptions.Language == Language.French ? fr : en;
+
     /// <summary>Translates a control subtree to the current AppOptions.Language.</summary>
     internal static void Apply(Control root) {
       var fr = AppOptions.Language == Language.French;

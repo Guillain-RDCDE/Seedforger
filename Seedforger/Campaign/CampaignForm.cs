@@ -16,10 +16,10 @@ namespace Seedforger {
     private readonly Label goalUnit = new Label { AutoSize = true };
     private readonly NumericUpDown deadlineDays = new NumericUpDown { Minimum = 0, Maximum = 3650, Value = 14 };
     private readonly ComboBox connectionCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
-    private readonly CheckBox activeHoursCheck = new CheckBox { Text = "Only seed during hours", Checked = true, AutoSize = true };
+    private readonly CheckBox activeHoursCheck = new CheckBox { Text = P("Only seed during hours", "Seeder seulement pendant ces heures"), Checked = true, AutoSize = true };
     private readonly NumericUpDown hoursStart = new NumericUpDown { Minimum = 0, Maximum = 24, Value = 8 };
     private readonly NumericUpDown hoursEnd = new NumericUpDown { Minimum = 0, Maximum = 24, Value = 24 };
-    private readonly CheckBox rotateCheck = new CheckBox { Text = "Rotate client each start", Checked = true, AutoSize = true };
+    private readonly CheckBox rotateCheck = new CheckBox { Text = P("Rotate client each start", "Changer de client à chaque départ"), Checked = true, AutoSize = true };
     private readonly TextBox torrentFolder = new TextBox();
     private readonly TextBox realFolder = new TextBox();
     private readonly NumericUpDown staggerMin = new NumericUpDown { Minimum = 0, Maximum = 600, Value = 3 };
@@ -29,35 +29,37 @@ namespace Seedforger {
     /// <summary>The campaign to run, set when the user clicks Start.</summary>
     internal Campaign Result { get; private set; }
 
+    private static string P(string en, string fr) => Localization.Pick(en, fr);
+
     internal CampaignForm(Campaign preset = null) {
-      Text = "New campaign";
+      Text = P("New campaign", "Nouvelle campagne");
       FormBorderStyle = FormBorderStyle.FixedDialog;
       MaximizeBox = false; MinimizeBox = false;
       StartPosition = FormStartPosition.CenterParent;
       ClientSize = new Size(470, 520);
       try { Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath); } catch { }
 
-      goalCombo.Items.AddRange(new object[] { "Reach an upload total (GB)", "Reach a ratio" });
+      goalCombo.Items.AddRange(new object[] { P("Reach an upload total (GB)", "Atteindre un total d'upload (Go)"), P("Reach a ratio", "Atteindre un ratio") });
       goalCombo.SelectedIndexChanged += (s, e) => UpdateGoalUnit();
       foreach (var p in ConnectionProfiles.All) connectionCombo.Items.Add(p.Name);
 
       var y = 16;
-      AddRow("Goal", goalCombo, ref y);
-      AddRow("Target", Row(goalValue, 90, goalUnit), ref y);
-      AddRow("Spread over (days)", deadlineDays, ref y);
-      AddRow("Connection", connectionCombo, ref y);
+      AddRow(P("Goal", "Objectif"), goalCombo, ref y);
+      AddRow(P("Target", "Cible"), Row(goalValue, 90, goalUnit), ref y);
+      AddRow(P("Spread over (days)", "Étaler sur (jours)"), deadlineDays, ref y);
+      AddRow(P("Connection", "Connexion"), connectionCombo, ref y);
       AddRow("", activeHoursCheck, ref y);
-      AddRow("Active hours", Row(hoursStart, 60, new Label { Text = "to", AutoSize = true, Padding = new Padding(6, 6, 6, 0) }, hoursEnd, 60), ref y);
+      AddRow(P("Active hours", "Heures actives"), Row(hoursStart, 60, new Label { Text = P("to", "à"), AutoSize = true, Padding = new Padding(6, 6, 6, 0) }, hoursEnd, 60), ref y);
       AddRow("", rotateCheck, ref y);
-      AddRow("Torrent folder", FolderRow(torrentFolder, false), ref y);
-      AddRow("Real files (optional)", FolderRow(realFolder, false), ref y);
-      AddRow("Stagger (min)", Row(staggerMin, 60, new Label { Text = "to", AutoSize = true, Padding = new Padding(6, 6, 6, 0) }, staggerMax, 60), ref y);
-      AddRow("Max at once", maxConcurrent, ref y);
+      AddRow(P("Torrent folder", "Dossier des torrents"), FolderRow(torrentFolder, false), ref y);
+      AddRow(P("Real files (optional)", "Vrais fichiers (option)"), FolderRow(realFolder, false), ref y);
+      AddRow(P("Stagger (min)", "Décalage (min)"), Row(staggerMin, 60, new Label { Text = P("to", "à"), AutoSize = true, Padding = new Padding(6, 6, 6, 0) }, staggerMax, 60), ref y);
+      AddRow(P("Max at once", "Max simultanés"), maxConcurrent, ref y);
 
-      var start = new Button { Text = "Start campaign", Width = 130, Height = 30 };
-      var save = new Button { Text = "Save…", Width = 80, Height = 30 };
-      var load = new Button { Text = "Load…", Width = 80, Height = 30 };
-      var cancel = new Button { Text = "Cancel", Width = 80, Height = 30, DialogResult = DialogResult.Cancel };
+      var start = new Button { Text = P("Start campaign", "Lancer la campagne"), Width = 130, Height = 30 };
+      var save = new Button { Text = P("Save…", "Enregistrer…"), Width = 80, Height = 30 };
+      var load = new Button { Text = P("Load…", "Charger…"), Width = 80, Height = 30 };
+      var cancel = new Button { Text = P("Cancel", "Annuler"), Width = 80, Height = 30, DialogResult = DialogResult.Cancel };
       var bar = new FlowLayoutPanel {
         FlowDirection = FlowDirection.RightToLeft, Dock = DockStyle.Bottom, Height = 48, Padding = new Padding(8),
       };
@@ -106,16 +108,16 @@ namespace Seedforger {
       return Row(tb, 220, browse, 34);
     }
 
-    private void UpdateGoalUnit() => goalUnit.Text = goalCombo.SelectedIndex == 1 ? "ratio" : "GB";
+    private void UpdateGoalUnit() => goalUnit.Text = goalCombo.SelectedIndex == 1 ? P("ratio", "ratio") : P("GB", "Go");
 
     private bool Validate2() {
       if (!System.IO.Directory.Exists(torrentFolder.Text)) {
-        MessageBox.Show("Pick a folder that contains your .torrent files.", "Seedforger");
+        MessageBox.Show(P("Pick a folder that contains your .torrent files.", "Choisissez un dossier contenant vos fichiers .torrent."), "Seedforger");
         return false;
       }
       if (!double.TryParse(goalValue.Text.Replace(',', '.'),
             System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var v) || v <= 0) {
-        MessageBox.Show("Enter a valid target value.", "Seedforger");
+        MessageBox.Show(P("Enter a valid target value.", "Entrez une valeur cible valide."), "Seedforger");
         return false;
       }
       return true;
@@ -165,15 +167,15 @@ namespace Seedforger {
 
     private void DoSave() {
       if (!Validate2()) return;
-      using (var dlg = new SaveFileDialog { Filter = "Campaign (*.json)|*.json", FileName = "campaign.json" })
+      using (var dlg = new SaveFileDialog { Filter = P("Campaign (*.json)|*.json", "Campagne (*.json)|*.json"), FileName = "campaign.json" })
         if (dlg.ShowDialog() == DialogResult.OK) Build().Save(dlg.FileName);
     }
 
     private void DoLoad() {
-      using (var dlg = new OpenFileDialog { Filter = "Campaign (*.json)|*.json|All files (*.*)|*.*" }) {
+      using (var dlg = new OpenFileDialog { Filter = P("Campaign (*.json)|*.json|All files (*.*)|*.*", "Campagne (*.json)|*.json|Tous les fichiers (*.*)|*.*") }) {
         if (dlg.ShowDialog() != DialogResult.OK) return;
         var c = Campaign.Load(dlg.FileName);
-        if (c == null) { MessageBox.Show("Couldn't read that campaign file.", "Seedforger"); return; }
+        if (c == null) { MessageBox.Show(P("Couldn't read that campaign file.", "Impossible de lire ce fichier de campagne."), "Seedforger"); return; }
         Apply(c);
       }
     }

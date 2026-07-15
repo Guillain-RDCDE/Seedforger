@@ -47,3 +47,4 @@ node_modules/
 *.mdf
 *.ldf
 /RatioMaster/FodyWeavers.xsd
+publish/
