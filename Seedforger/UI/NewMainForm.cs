@@ -80,7 +80,7 @@ namespace Seedforger.UI {
     // ---- tray (minimize / close to the notification area) ----
 
     private void SetupTray() {
-      tray.Icon = Icon;
+      tray.Icon = Icon ?? System.Drawing.SystemIcons.Application;
       tray.Text = AppInfo.Title;
       var menu = DarkMenu.Create();
       var restore = DarkMenu.Item(T("tray.restore"), (s, e) => RestoreFromTray());
@@ -95,9 +95,14 @@ namespace Seedforger.UI {
         if (WindowState == FormWindowState.Minimized && Settings.Current.MinimizeToTray) HideToTray();
       };
       FormClosing += (s, e) => {
-        if (!reallyExit && e.CloseReason == CloseReason.UserClosing && Settings.Current.CloseToTray) {
+        // Tuck into the tray for a user-initiated close (X button, Alt+F4) — but
+        // never fight a real OS shutdown, task-manager kill or explicit app exit.
+        var systemClose = e.CloseReason == CloseReason.WindowsShutDown
+          || e.CloseReason == CloseReason.TaskManagerClosing
+          || e.CloseReason == CloseReason.ApplicationExitCall;
+        if (!reallyExit && !systemClose && Settings.Current.CloseToTray) {
           e.Cancel = true;
-          HideToTray();
+          try { HideToTray(); } catch { }
           return;
         }
         // Real exit: stop the main engine and any campaign engines cleanly.
