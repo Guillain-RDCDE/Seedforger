@@ -51,7 +51,8 @@ Two ways to run the same engine: the **graphical interface** (default) and a **h
 - **Goal-seeking campaigns** — set a target (a ratio, or a volume by a deadline) and let it stagger starts, allocate bandwidth by real demand, pace to the deadline, and stop automatically.
 - **Guided setup** — a wizard that probes each torrent and loops until it finds one that will genuinely earn ratio, then applies safe defaults.
 - **Connectivity** — HTTPS trackers over `SslStream`, SOCKS4/4a/5 and HTTP-CONNECT proxies, magnet links, batch loading, and DNS-over-HTTPS to defeat ISP tracker blocks.
-- **Interface** — a flat, from-scratch UI whose header reaches every feature, in **English or French**, with **minimise/close to the system tray**, plus a **headless command line** for automation. A live upload/ratio graph, portable JSON settings (no registry), and a silent update check at launch.
+- **Interface** — a flat, from-scratch Windows UI whose header reaches every feature, in **English or French**, with **minimise/close to the system tray**. A live upload/ratio graph, portable JSON settings (no registry), and a silent update check at launch.
+- **Cross-platform core + CLI** — the engine (`Seedforger.Core`) is WinForms-free, so the headless CLI runs on **Linux, macOS and Windows** (seedbox/server/CI). Verified on a live tracker and in CI on Ubuntu.
 - **Tested** — 118 xUnit tests and green CI, including a loopback peer-wire integration test.
 
 The full catalogue is in [Features](docs/features.md).
@@ -74,20 +75,25 @@ The full model, without code, is in [How it actually works](docs/how-it-works.md
 | [Build from source](docs/build.md) | Build, publish, project layout, tests. |
 | [How BitTorrent actually works](docs/how-bittorrent-works.md) | A from-the-wire technical deep dive. |
 
-## Command line
+## Command line — cross-platform
 
-The same engine runs headless, so it scripts cleanly (cron, CI, a server). Full reference in [Command line](docs/cli.md).
+The engine core is WinForms-free (`Seedforger.Core`), so the headless CLI
+(`Seedforger.Cli`) builds and runs on **Linux, macOS and Windows** — ideal for a
+seedbox, a server or CI. It ships as a self-contained single file (no runtime to
+install). Full reference in [Command line](docs/cli.md).
 
 ```bash
 # Dry-run one announce and print what the tracker says
-Seedforger.exe --test-announce -t movie.torrent --client qBittorrent
+./Seedforger.Cli --test-announce -t movie.torrent --client qBittorrent
 
 # Seed headless at ~800 kB/s for two hours, then stop
-Seedforger.exe --cli -t movie.torrent -u 800 --duration 120
+./Seedforger.Cli -t movie.torrent -u 800 --duration 120
 
 # List every client/version you can impersonate
-Seedforger.exe --list-clients
+./Seedforger.Cli --list-clients
 ```
+
+> The Windows GUI (`Seedforger.exe`) also accepts `--cli`/`--test-announce` for convenience.
 
 ## Build
 

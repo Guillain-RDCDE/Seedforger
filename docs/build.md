@@ -25,28 +25,25 @@ Or build both at once with **`build-release.cmd`** (Windows). It closes any runn
 
 ## Project layout
 
+Four projects: a portable **Core** (no WinForms), a cross-platform **CLI**, the Windows **GUI**, and the **tests**.
+
 ```
-Seedforger/
-├─ Program.cs                 entry point, single-instance, code-page provider
-├─ TorrentClientFactory.cs    data-driven client lookup + clients.json merge
-├─ DefaultClientProfiles.cs   the 50 built-in client profiles
-├─ ClientProfile.cs           profile model (peer_id recipe, headers, query, …)
-├─ SpeedShaper.cs             realistic ramp-up / speed variation
-├─ Stealth.cs · SwarmModel.cs · Bandwidth.cs   believability + swarm + budget
-├─ Announce.cs                WinForms-free announce core (URL + hash + parsing)
+Seedforger.Core/   (net8.0 — Windows/Linux/macOS, no WinForms)
+├─ SeedEngine.cs              headless announce/seed loop (the portable engine)
+├─ Announce.cs               announce URL + info_hash + response parsing
+├─ TrackerTransport.cs       HTTP (proxy) / HTTPS fetch, shared by GUI + CLI
 ├─ HttpsTransport.cs · SecureDns.cs   TLS transport + DNS-over-HTTPS
-├─ Cli.cs                     headless / scriptable command line
-├─ Settings.cs                portable JSON settings store
-├─ Theme.cs · Localization.cs · GraphForm.cs   themes, i18n, live graph
-├─ GuideForm.cs               guided setup (newbie mode) wizard
-├─ Peer/                      the real peer-wire engine (stages A–D + governor)
-├─ Campaign/                  orchestrator + visual builder (CampaignForm)
-├─ BitTorrent/                bencode + .torrent parsing
-├─ BytesRoads/                SOCKS / HTTP-CONNECT proxy sockets
-├─ UI/                        the flat interface (NewMainForm, Modern, UiStrings)
-└─ RM.cs                      the reused announce/peer engine (hosted invisibly)
-Seedforger.Tests/             118 xUnit tests
-docs/how-bittorrent-works.md  the from-the-wire deep-dive
+├─ TorrentClientFactory.cs · DefaultClientProfiles.cs   the 50 client fingerprints
+├─ SpeedShaper.cs · Stealth.cs · SwarmModel.cs · Bandwidth.cs   believability
+├─ Settings.cs · Language.cs  portable JSON settings + language enum
+├─ Peer/                     the real peer-wire engine (stages A–D + governor)
+├─ Campaign/{Campaign,CampaignPlanner}   campaign model + policy
+├─ BitTorrent/               bencode + .torrent parsing
+└─ BytesRoads/               SOCKS / HTTP-CONNECT proxy sockets
+
+Seedforger.Cli/    (net8.0 — the cross-platform headless command line)
+Seedforger/        (net8.0-windows — the WinForms GUI: RM, UI/, wizards, Theme…)
+Seedforger.Tests/  (net8.0 — 118 xUnit tests, run on Windows AND Linux in CI)
 ```
 
 ## Tests

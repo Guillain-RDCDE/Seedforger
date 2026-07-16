@@ -25,3 +25,32 @@ jobs:
 
       - name: Test
         run: dotnet test Seedforger.Tests/Seedforger.Tests.csproj -c Release --no-build
+
+  # The engine core + headless CLI are WinForms-free, so they build and the whole
+  # test suite runs on Linux — this is the cross-platform guarantee.
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build core + CLI
+        run: |
+          dotnet build Seedforger.Core/Seedforger.Core.csproj -c Release
+          dotnet build Seedforger.Cli/Seedforger.Cli.csproj -c Release
+
+      - name: Test on Linux
+        run: dotnet test Seedforger.Tests/Seedforger.Tests.csproj -c Release
+
+      - name: Publish self-contained Linux CLI
+        run: dotnet publish Seedforger.Cli/Seedforger.Cli.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o publish/cli-linux
+
+      - name: Smoke-test the CLI binary
+        run: |
+          chmod +x publish/cli-linux/Seedforger.Cli
+          ./publish/cli-linux/Seedforger.Cli --list-clients | head -5
+          ./publish/cli-linux/Seedforger.Cli --help | head -3

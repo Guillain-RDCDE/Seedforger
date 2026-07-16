@@ -1,10 +1,12 @@
 # Command line
 
-Seedforger runs the same proven announce engine with no window, so it scripts cleanly — cron, CI, a headless server, or just automating a routine. Everything the GUI does to a single torrent, the command line does too.
-
-> The executable is a Windows GUI app, so it attaches to the calling console when started from a terminal. Run it from `cmd`, PowerShell or a shell; output appears inline.
+Seedforger runs the same proven announce engine with no window, so it scripts cleanly — cron, CI, a headless server, or just automating a routine. The engine core is WinForms-free, so the dedicated CLI runs on **Linux, macOS and Windows** as a self-contained single file.
 
 ```
+# cross-platform CLI (Linux / macOS / Windows)
+./Seedforger.Cli [mode] [options]
+
+# on Windows, the GUI executable also accepts the same flags
 Seedforger.exe [mode] [options]
 ```
 
