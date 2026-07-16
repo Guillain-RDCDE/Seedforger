@@ -42,6 +42,9 @@ namespace Seedforger.App.ViewModels {
       poll.Tick += (s, e) => RefreshLive();
       poll.Start();
       RefreshLive();
+      // Field initializers ran before the language was loaded — refresh the placeholders.
+      TorrentDisplay = Seedforger.UI.UiStrings.Get("no_torrent");
+      StatusText = Seedforger.UI.UiStrings.Get("idle");
     }
 
     private static void TryLoadSettings() {
@@ -118,22 +121,77 @@ namespace Seedforger.App.ViewModels {
       catch (Exception ex) { AppendLog("Couldn't read that .torrent: " + ex.Message); }
     }
 
-    private void Start() {
-      if (torrent == null || IsRunning) return;
+    /// <summary>Proxy config from the Advanced dialog (default: none).</summary>
+    internal ProxyInfo Proxy = new ProxyInfo();
+
+    public bool HasTorrent => torrent != null;
+    internal SeedEngine CreateEngine() => torrent == null ? null : BuildEngine();
+    public void StartSeeding() => Start();
+
+    private SeedEngine BuildEngine() {
       var client = TorrentClientFactory.GetClient((SelectedFamily + " " + SelectedVersion).Trim());
       var finished = SelectedModeIndex == 0 ? 100 : 0;
       int.TryParse((UploadText ?? "").Trim(), out var up);
-      var down = finished >= 100 ? 0 : 0;
-      engine = new SeedEngine(torrent, client, new ProxyInfo(), up, down, finished) { Log = AppendLog };
+      return new SeedEngine(torrent, client, Proxy, up, 0, finished) { Log = AppendLog };
+    }
+
+    private void Start() {
+      if (torrent == null || IsRunning) return;
       SecureDns.Log = AppendLog;
-      engine.Start();
+      engine = BuildEngine();
       IsRunning = true;
+      // The announce is a blocking network call — keep the UI responsive.
+      System.Threading.Tasks.Task.Run(() => {
+        try { engine.Start(); } catch (Exception ex) { AppendLog("error: " + ex.Message); }
+      });
     }
 
     private void Stop() {
-      try { engine?.Stop(); } catch { }
       IsRunning = false;
+      var e = engine;
+      System.Threading.Tasks.Task.Run(() => { try { e?.Stop(); } catch { } });
     }
+
+    /// <summary>One-shot dry-run announce (seeder), logs the tracker's answer.</summary>
+    public void RunTestAnnounce() {
+      if (torrent == null) { AppendLog(Seedforger.UI.UiStrings.Get("no_torrent")); return; }
+      AppendLog("Dry-run: announcing once as a seeder…");
+      SecureDns.Log = AppendLog;
+      var probe = BuildEngine();
+      System.Threading.Tasks.Task.Run(() => {
+        try {
+          probe.Start();
+          System.Threading.Thread.Sleep(150);
+          probe.Stop();
+          if (probe.SeederCount >= 0)
+            AppendLog($"accepted — seeders {probe.SeederCount}, leechers {probe.LeecherCount}, interval {probe.IntervalSeconds}s");
+        }
+        catch (Exception ex) { AppendLog("error: " + ex.Message); }
+      });
+    }
+
+    public void SetLanguage(bool french) {
+      AppOptions.Language = french ? Language.French : Language.English;
+      try { Settings.Current.Language = french ? "fr" : "en"; Settings.Current.Save(); } catch { }
+      RebuildModes();
+      if (torrent == null) TorrentDisplay = Seedforger.UI.UiStrings.Get("no_torrent");
+      RefreshLive();
+      Raise(nameof(L)); // refresh every {Binding L[...]}
+    }
+
+    public bool Realistic {
+      get => AppOptions.RealisticSpeed;
+      set { AppOptions.RealisticSpeed = value; Save(s => s.RealisticSpeed = value); }
+    }
+    public bool SwarmAware {
+      get => AppOptions.SwarmAware;
+      set { AppOptions.SwarmAware = value; Save(s => s.SwarmAware = value); }
+    }
+    public bool RandomizeClient {
+      get => AppOptions.RandomizeClientOnStart;
+      set { AppOptions.RandomizeClientOnStart = value; Save(s => s.RandomizeClientOnStart = value); }
+    }
+    private static void Save(Action<Settings> apply) { try { apply(Settings.Current); Settings.Current.Save(); } catch { } }
 
     private void RefreshLive() {
       if (engine == null) return;
