@@ -46,6 +46,7 @@ Run `--list-clients` for the exact names and versions.
 | `--seed` | Seeder: Finished 100 %, download forced to 0. **Default.** |
 | `--leech` | Leecher: Finished 0 %. |
 | `--finished <0-100>` | Explicit finished percentage. |
+| `--serve-real <file>` | Serve genuine hash-valid pieces of a real, matching file — opens the announced port and answers monitoring peers with real data. |
 | `--connection <profile>` | Apply a connection profile's up/down caps (see `--help` for the list). |
 | `--interval <sec>` | Base announce interval (the tracker may override it). |
 
