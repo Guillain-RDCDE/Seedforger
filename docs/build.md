@@ -42,9 +42,12 @@ Seedforger.Core/   (net8.0 — Windows/Linux/macOS, no WinForms)
 └─ BytesRoads/               SOCKS / HTTP-CONNECT proxy sockets
 
 Seedforger.Cli/    (net8.0 — the cross-platform headless command line)
+Seedforger.App/    (net8.0 — the cross-platform Avalonia GUI: Views/, ViewModels/)
 Seedforger/        (net8.0-windows — the WinForms GUI: RM, UI/, wizards, Theme…)
 Seedforger.Tests/  (net8.0 — 118 xUnit tests, run on Windows AND Linux in CI)
 ```
+
+The Core, CLI and Avalonia GUI build and run on Windows, Linux and macOS; the WinForms app is Windows-only.
 
 ## Tests
 

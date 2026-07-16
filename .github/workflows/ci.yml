@@ -38,10 +38,11 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Build core + CLI
+      - name: Build core + CLI + Avalonia GUI
         run: |
           dotnet build Seedforger.Core/Seedforger.Core.csproj -c Release
           dotnet build Seedforger.Cli/Seedforger.Cli.csproj -c Release
+          dotnet build Seedforger.App/Seedforger.App.csproj -c Release
 
       - name: Test on Linux
         run: dotnet test Seedforger.Tests/Seedforger.Tests.csproj -c Release
