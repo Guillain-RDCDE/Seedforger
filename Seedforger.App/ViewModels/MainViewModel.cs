@@ -175,6 +175,21 @@ namespace Seedforger.App.ViewModels {
       });
     }
 
+    private CampaignEngine campaignEngine;
+    internal void RunCampaign(Campaign c) {
+      campaignEngine?.Stop();
+      SecureDns.Log = AppendLog;
+      campaignEngine = new CampaignEngine(c, AppendLog);
+      AppendLog("[campaign] starting…");
+      System.Threading.Tasks.Task.Run(() => {
+        try { campaignEngine.Start(); } catch (Exception ex) { AppendLog("campaign error: " + ex.Message); }
+      });
+    }
+    internal void StopCampaign() {
+      var c = campaignEngine;
+      System.Threading.Tasks.Task.Run(() => { try { c?.Stop(); } catch { } });
+    }
+
     public void SetLanguage(bool french) {
       AppOptions.Language = french ? Language.French : Language.English;
       try { Settings.Current.Language = french ? "fr" : "en"; Settings.Current.Save(); } catch { }

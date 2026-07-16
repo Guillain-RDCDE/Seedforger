@@ -66,8 +66,7 @@ namespace Seedforger.App.Views {
     }
 
     private void OnCampaigns(object sender, RoutedEventArgs e) {
-      _ = ShowInfo(T("nav.campaigns"),
-        "Campaigns run many torrents at once. In this cross-platform build, use the headless CLI or the Windows GUI for multi-torrent campaigns — a native campaign view is on the roadmap.");
+      new CampaignWindow(vm).ShowDialog(this);
     }
 
     private void OnTools(object sender, RoutedEventArgs e) {

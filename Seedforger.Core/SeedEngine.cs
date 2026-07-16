@@ -22,7 +22,7 @@ namespace Seedforger {
     private readonly Torrent torrent;
     private readonly TorrentClient client;
     private readonly ProxyInfo proxy;
-    private readonly int uploadKBps;
+    private int uploadKBps;
     private readonly int downloadKBps;
     private readonly int finishedPercent;
 
@@ -61,6 +61,8 @@ namespace Seedforger {
     public bool IsRunning => running;
     public double Ratio => downloaded > 0 ? (double) uploaded / downloaded : 0;
     public string TorrentName => torrent?.Name ?? "";
+    /// <summary>Adjust the reported upload rate at runtime (campaign allocation).</summary>
+    public void SetUploadKBps(int kbps) => uploadKBps = Math.Max(0, kbps);
 
     internal SeedEngine(Torrent torrent, TorrentClient client, ProxyInfo proxy,
                         int uploadKBps, int downloadKBps, int finishedPercent) {
