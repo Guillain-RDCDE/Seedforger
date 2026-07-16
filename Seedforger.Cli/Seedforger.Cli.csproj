@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- net8.0 (no -windows): runs on Windows, Linux and macOS. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Seedforger.Cli</RootNamespace>
+    <AssemblyName>Seedforger.Cli</AssemblyName>
+    <Version>2.15.0</Version>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Seedforger.Core\Seedforger.Core.csproj" />
+  </ItemGroup>
+
+</Project>
