@@ -84,6 +84,8 @@ namespace Seedforger.Cli {
       }
 
       var engine = new SeedEngine(torrent, client, proxy, upload, download, finished) { Log = log };
+      var real = opt.Value("--serve-real");
+      if (!string.IsNullOrEmpty(real)) engine.EnableRealSeed(System.IO.Path.GetFullPath(real));
       Console.WriteLine($"Seeding \"{torrent.Name}\" as {family} {version}" + (upload > 0 ? $" at ~{upload} kB/s" : "") + ".");
       engine.Start();
 
@@ -165,6 +167,8 @@ SPEED & MODE
   --download, -d <kB/s>        Reported download speed (leecher mode).
   --leech                      Leecher: Finished 0%.
   --finished <0-100>           Explicit finished percentage (default 100 = seeder).
+  --serve-real <file>          Serve genuine hash-valid pieces of a real file
+                               (defeats a tracker's monitoring peers).
 
 BELIEVABILITY
   --realistic on|off           Ramp-up + smooth variation (default on).

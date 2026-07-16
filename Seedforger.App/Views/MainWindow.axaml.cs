@@ -29,6 +29,20 @@ namespace Seedforger.App.Views {
 
     private async void OnBrowse(object sender, RoutedEventArgs e) => await BrowseTorrent();
 
+    private async Task ServeRealFile() {
+      try {
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions {
+          Title = T("dlg.serve_title"), AllowMultiple = false,
+        });
+        if (files != null)
+          foreach (var f in files) {
+            var path = f.TryGetLocalPath();
+            if (!string.IsNullOrEmpty(path)) { vm.RealSeedFile = path; break; }
+          }
+      }
+      catch { }
+    }
+
     private async Task BrowseTorrent() {
       try {
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions {
@@ -60,6 +74,7 @@ namespace Seedforger.App.Views {
       var mf = new MenuFlyout();
       mf.Items.Add(Item(T("menu.load_torrent"), async () => await BrowseTorrent()));
       mf.Items.Add(Item(T("menu.test_announce"), () => vm.RunTestAnnounce()));
+      mf.Items.Add(Item(T("menu.serve_real"), async () => await ServeRealFile()));
       mf.ShowAt((Control) sender);
     }
 

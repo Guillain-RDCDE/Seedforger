@@ -1,6 +1,8 @@
 using System;
 using System.Threading;
 using Seedforger.BitTorrent;
+using Seedforger.BytesRoads;
+using Seedforger.Wire;
 
 namespace Seedforger {
 
@@ -33,6 +35,12 @@ namespace Seedforger {
     private readonly Random rand = new Random();
     private readonly SpeedShaper upShaper;
     private readonly SpeedShaper downShaper;
+    private readonly byte[] wirePeerId;
+
+    // Optional real peer-wire serving (opens the announced port).
+    private IPieceSource pieceSource;
+    private Governor governor;
+    private PeerListener peerListener;
 
     private long uploaded;
     private long downloaded;
@@ -69,6 +77,7 @@ namespace Seedforger {
       port = new Random().Next(1025, 65535).ToString();
       upShaper = new SpeedShaper(rand);
       downShaper = new SpeedShaper(rand);
+      wirePeerId = MakeWirePeerId(client.PeerID, rand);
 
       // Mirror the GUI's finished→size mapping: 100% seeder reports left=0.
       var total = (long) torrent.totalLength;
@@ -78,10 +87,38 @@ namespace Seedforger {
       left = totalSize;
     }
 
+    /// <summary>Serve genuine, hash-verified pieces of a real downloaded file
+    /// (defeats a tracker's monitoring peers). Must be a file that matches this
+    /// torrent. Returns false if it doesn't verify.</summary>
+    public bool EnableRealSeed(string filePath) {
+      try {
+        if (torrent.PieceCount <= 0 || torrent.PieceHashesRaw == null) {
+          Log?.Invoke("Real seed needs a .torrent with piece hashes (magnets have none).");
+          return false;
+        }
+        var hashes = FilePieceSource.SplitHashes(torrent.PieceHashesRaw);
+        var src = new FilePieceSource(filePath, torrent.PieceLength, (long) torrent.totalLength, hashes);
+        if (!src.HasPiece(0)) { src.Dispose(); Log?.Invoke("That file doesn't match this torrent (piece 0 failed)."); return false; }
+        (pieceSource as IDisposable)?.Dispose();
+        pieceSource = src;
+        governor = new Governor();
+        Log?.Invoke("REAL SEED enabled: serving genuine hash-valid pieces from " + filePath);
+        return true;
+      }
+      catch (Exception ex) { Log?.Invoke("Real seed error: " + ex.Message); return false; }
+    }
+
     public void Start() {
       if (running) return;
       running = true;
       Bandwidth.RegisterActive();
+      // Open the announced port so a real, reachable peer sits behind the announce
+      // (real pieces if a file was verified, else a complete-but-choked seeder).
+      if (proxy.ProxyType == ProxyType.None && int.TryParse(port, out var p)) {
+        peerListener = new PeerListener(torrent, wirePeerId, pieceSource, governor,
+          () => uploadKBps * 1024, p, Log);
+        peerListener.Start();
+      }
       SendAnnounce("&event=started");
       // A 1-second counter tick advances the reported bytes with stealth shaping,
       // while the announce timer re-announces the accumulated totals on schedule.
@@ -92,6 +129,7 @@ namespace Seedforger {
     public void Stop() {
       if (!running) return;
       running = false;
+      try { peerListener?.Stop(); } catch { }
       try { counterTimer?.Dispose(); } catch { }
       try { announceTimer?.Dispose(); } catch { }
       counterTimer = null; announceTimer = null;
@@ -160,6 +198,17 @@ namespace Seedforger {
       if (r.Seeders >= 0) seeders = r.Seeders;
       if (r.Leechers >= 0) leechers = r.Leechers;
       if (r.Interval > 0) interval = r.Interval;
+    }
+
+    // A 20-byte wire peer_id: keep the client-identifying ASCII prefix (what a
+    // whitelist checks) then random bytes.
+    private static byte[] MakeWirePeerId(string announced, Random rand) {
+      var id = new byte[20];
+      announced ??= "-SF0001-";
+      var p = 0;
+      for (; p < announced.Length && p < 20 && announced[p] != '%'; p++) id[p] = (byte) announced[p];
+      for (; p < 20; p++) id[p] = (byte) rand.Next(48, 122);
+      return id;
     }
 
     private static string ToHex(byte[] bytes) {

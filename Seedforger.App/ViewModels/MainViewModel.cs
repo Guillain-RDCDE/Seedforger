@@ -128,11 +128,16 @@ namespace Seedforger.App.ViewModels {
     internal SeedEngine CreateEngine() => torrent == null ? null : BuildEngine();
     public void StartSeeding() => Start();
 
+    /// <summary>Optional real file to serve genuine pieces from (set via Tools).</summary>
+    internal string RealSeedFile;
+
     private SeedEngine BuildEngine() {
       var client = TorrentClientFactory.GetClient((SelectedFamily + " " + SelectedVersion).Trim());
       var finished = SelectedModeIndex == 0 ? 100 : 0;
       int.TryParse((UploadText ?? "").Trim(), out var up);
-      return new SeedEngine(torrent, client, Proxy, up, 0, finished) { Log = AppendLog };
+      var e = new SeedEngine(torrent, client, Proxy, up, 0, finished) { Log = AppendLog };
+      if (!string.IsNullOrEmpty(RealSeedFile)) e.EnableRealSeed(RealSeedFile);
+      return e;
     }
 
     private void Start() {
