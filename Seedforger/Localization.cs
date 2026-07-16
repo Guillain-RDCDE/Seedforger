@@ -3,8 +3,6 @@ using System.Windows.Forms;
 
 namespace Seedforger {
 
-  internal enum Language { English, French }
-
   /// <summary>
   /// Lightweight runtime localization. Walks the control/menu tree and swaps
   /// known English UI strings for their French translation (and back). Combo-box

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Cross-platform engine: no WinForms, so it builds & runs on Windows,
+         Linux and macOS. The GUI and the headless CLI both sit on top of this. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Seedforger</RootNamespace>
+    <AssemblyName>Seedforger.Core</AssemblyName>
+    <Version>2.15.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- BEncode/tracker parsing relies on legacy code pages (Windows-1252), no longer built-in on .NET Core/8. -->
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Seedforger" />
+    <InternalsVisibleTo Include="Seedforger.Tests" />
+    <InternalsVisibleTo Include="Seedforger.Cli" />
+    <InternalsVisibleTo Include="Seedforger.App" />
+  </ItemGroup>
+
+</Project>
