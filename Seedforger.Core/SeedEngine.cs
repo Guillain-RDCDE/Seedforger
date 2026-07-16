@@ -6,9 +6,11 @@ namespace Seedforger {
 
   /// <summary>
   /// A headless, WinForms-free seeding engine: announces to the tracker on the
-  /// believable schedule and keeps the reported byte counts moving, reusing the
-  /// exact same core as the GUI (Announce URL/parse + TrackerTransport). Runs on
-  /// Windows, Linux and macOS — this is what the command line drives.
+  /// believable schedule and advances the reported byte counts with the same
+  /// stealth shaping as the GUI — a gentle ramp-up, swarm-aware scaling, a
+  /// day/night rhythm, active-hours windows, a shared upstream budget and
+  /// announce-interval jitter. Reuses the exact same core as the CLI and the GUI
+  /// (Announce URL/parse + TrackerTransport). Runs on Windows, Linux and macOS.
   /// </summary>
   internal sealed class SeedEngine {
 
@@ -28,6 +30,10 @@ namespace Seedforger {
     private readonly string port;
     private readonly string numWant = "200";
 
+    private readonly Random rand = new Random();
+    private readonly SpeedShaper upShaper;
+    private readonly SpeedShaper downShaper;
+
     private long uploaded;
     private long downloaded;
     private long totalSize;
@@ -36,8 +42,8 @@ namespace Seedforger {
     private int leechers = -1;
     private int interval = 1800;
     private volatile bool running;
-    private Timer timer;
-    private DateTime lastTick;
+    private Timer announceTimer;
+    private Timer counterTimer;
 
     public long UploadedBytes => uploaded;
     public long DownloadedBytes => downloaded;
@@ -61,6 +67,8 @@ namespace Seedforger {
       peerId = client.PeerID;
       key = client.Key;
       port = new Random().Next(1025, 65535).ToString();
+      upShaper = new SpeedShaper(rand);
+      downShaper = new SpeedShaper(rand);
 
       // Mirror the GUI's finished→size mapping: 100% seeder reports left=0.
       var total = (long) torrent.totalLength;
@@ -73,40 +81,54 @@ namespace Seedforger {
     public void Start() {
       if (running) return;
       running = true;
+      Bandwidth.RegisterActive();
       SendAnnounce("&event=started");
-      lastTick = DateTime.UtcNow;
-      timer = new Timer(_ => Tick(), null, Math.Max(1, interval) * 1000, Timeout.Infinite);
+      // A 1-second counter tick advances the reported bytes with stealth shaping,
+      // while the announce timer re-announces the accumulated totals on schedule.
+      counterTimer = new Timer(_ => CounterTick(), null, 1000, 1000);
+      ScheduleNextAnnounce();
     }
 
     public void Stop() {
       if (!running) return;
       running = false;
-      try { timer?.Dispose(); } catch { }
-      timer = null;
+      try { counterTimer?.Dispose(); } catch { }
+      try { announceTimer?.Dispose(); } catch { }
+      counterTimer = null; announceTimer = null;
+      Bandwidth.UnregisterActive();
       SendAnnounce("&event=stopped");
     }
 
-    private void Tick() {
+    private void CounterTick() {
       if (!running) return;
       try {
-        var now = DateTime.UtcNow;
-        var elapsed = (now - lastTick).TotalSeconds;
-        lastTick = now;
+        // Upload target for this second, shaped like a real client.
+        long upTarget = uploadKBps * 1024L;
+        if (AppOptions.SwarmAware && leechers >= 0)
+          upTarget = (long) (upTarget * SwarmModel.UploadFactor(leechers, seeders < 0 ? 0 : seeders));
+        upTarget = (long) (upTarget * Stealth.DiurnalFactor(DateTime.Now));
+        if (AppOptions.ActiveHoursEnabled && !Stealth.InActiveHours(DateTime.Now, AppOptions.ActiveHoursStart, AppOptions.ActiveHoursEnd))
+          upTarget = 0;
+        upTarget = Bandwidth.CapUpload(upTarget);
+        uploaded += AppOptions.RealisticSpeed ? upShaper.NextSecondBytes(upTarget) : upTarget;
 
-        // Advance the reported counters at the configured rate.
-        uploaded += (long) (uploadKBps * 1024L * elapsed);
         if (finishedPercent < 100) {
-          var add = (long) (downloadKBps * 1024L * elapsed);
+          long downTarget = downloadKBps * 1024L;
+          if (AppOptions.SwarmAware && seeders >= 0)
+            downTarget = (long) (downTarget * SwarmModel.DownloadFactor(seeders));
+          var add = AppOptions.RealisticSpeed ? downShaper.NextSecondBytes(downTarget) : downTarget;
           downloaded += add;
           left = Math.Max(0, left - add);
         }
+      }
+      catch (Exception ex) { Log?.Invoke("counter error: " + ex.Message); }
+    }
 
-        SendAnnounce("");
-      }
-      catch (Exception ex) { Log?.Invoke("tick error: " + ex.Message); }
-      finally {
-        try { timer?.Change(Math.Max(1, interval) * 1000, Timeout.Infinite); } catch { }
-      }
+    private void ScheduleNextAnnounce() {
+      if (!running) return;
+      var next = Stealth.JitterInterval(Math.Max(1, interval), rand);
+      try { announceTimer?.Dispose(); } catch { }
+      announceTimer = new Timer(_ => { SendAnnounce(""); ScheduleNextAnnounce(); }, null, next * 1000, Timeout.Infinite);
     }
 
     private void SendAnnounce(string ev) {
