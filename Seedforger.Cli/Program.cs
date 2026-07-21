@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -25,26 +26,35 @@ namespace Seedforger.Cli {
       var dryRun = opt.Has("--test-announce", "--dry-run");
       var torrentPath = opt.Value("--torrent", "-t");
       var magnet = opt.Value("--magnet");
-      if (string.IsNullOrEmpty(torrentPath) && string.IsNullOrEmpty(magnet)) {
-        Console.Error.WriteLine("error: give a torrent with --torrent <file.torrent> (--magnet needs a size, GUI only).");
+      var folder = opt.Value("--folder");
+      var daemon = opt.Has("--daemon") || !string.IsNullOrEmpty(folder);
+
+      if (string.IsNullOrEmpty(torrentPath) && string.IsNullOrEmpty(magnet) && string.IsNullOrEmpty(folder)) {
+        Console.Error.WriteLine("error: give a torrent with --torrent <file.torrent>, or a folder with --folder <dir>.");
         Console.Error.WriteLine("       run with --help for the full list of options.");
         return 2;
       }
-      if (string.IsNullOrEmpty(torrentPath)) {
+      if (!string.IsNullOrEmpty(magnet) && string.IsNullOrEmpty(torrentPath) && string.IsNullOrEmpty(folder)) {
         Console.Error.WriteLine("error: --magnet isn't supported headless (magnets carry no size). Use --torrent.");
         return 2;
       }
-      torrentPath = Path.GetFullPath(torrentPath);
-      if (!File.Exists(torrentPath)) { Console.Error.WriteLine("error: torrent not found: " + torrentPath); return 2; }
+      if (!string.IsNullOrEmpty(torrentPath)) {
+        torrentPath = Path.GetFullPath(torrentPath);
+        if (!File.Exists(torrentPath)) { Console.Error.WriteLine("error: torrent not found: " + torrentPath); return 2; }
+      }
 
       // Believability toggles.
       AppOptions.RealisticSpeed = opt.Bool("--realistic", AppOptions.RealisticSpeed);
       AppOptions.SwarmAware = opt.Bool("--swarm-aware", AppOptions.SwarmAware);
       if (opt.Has("--randomize-client")) AppOptions.RandomizeClientOnStart = true;
 
-      Torrent torrent;
-      try { torrent = new Torrent(torrentPath); }
-      catch (Exception ex) { Console.Error.WriteLine("error: couldn't read that .torrent: " + ex.Message); return 2; }
+      // In daemon mode the DaemonHost loads its own torrents (one or a whole
+      // folder), so we don't need a single Torrent here.
+      Torrent torrent = null;
+      if (!daemon) {
+        try { torrent = new Torrent(torrentPath); }
+        catch (Exception ex) { Console.Error.WriteLine("error: couldn't read that .torrent: " + ex.Message); return 2; }
+      }
 
       // Impersonated client.
       var family = opt.Value("--client") ?? "qBittorrent";
@@ -65,6 +75,9 @@ namespace Seedforger.Cli {
 
       Action<string> log = opt.Has("--quiet", "-q") ? _ => { } : Console.WriteLine;
       SecureDns.Log = Console.WriteLine;
+
+      // Daemon: run one torrent or a whole folder 24/7 behind a live web dashboard.
+      if (daemon) return RunDaemon(opt, torrentPath, folder, family, version, upload, download, finished, proxy, log);
 
       if (dryRun) {
         Console.WriteLine("Dry-run: announcing once as a seeder…");
@@ -105,6 +118,90 @@ namespace Seedforger.Cli {
       engine.Stop();
       Console.WriteLine($"Done. Reported {FormatSize(Math.Max(0, engine.UploadedBytes))} uploaded.");
       return 0;
+    }
+
+    /// <summary>Runs one torrent or a whole folder headless behind a live web
+    /// dashboard, until Ctrl+C, a duration, or the page's stop button.</summary>
+    private static int RunDaemon(Options opt, string torrentPath, string folder, string family, string version,
+                                 int upload, int download, int finished, ProxyInfo proxy, Action<string> log) {
+      var paths = new List<string>();
+      if (!string.IsNullOrEmpty(folder)) {
+        var dir = Path.GetFullPath(folder);
+        if (!Directory.Exists(dir)) { Console.Error.WriteLine("error: folder not found: " + dir); return 2; }
+        paths.AddRange(Directory.GetFiles(dir, "*.torrent"));
+        if (paths.Count == 0) { Console.Error.WriteLine("error: no .torrent files in " + dir); return 2; }
+      }
+      else if (!string.IsNullOrEmpty(torrentPath)) {
+        paths.Add(torrentPath);
+      }
+      else {
+        Console.Error.WriteLine("error: daemon mode needs --torrent <file> or --folder <dir>.");
+        return 2;
+      }
+
+      var realSeed = opt.Value("--serve-real"); // a single file, or a folder to match by name
+      var randomize = opt.Has("--randomize-client") || AppOptions.RandomizeClientOnStart;
+      var host = new DaemonHost(log);
+      var rand = new Random();
+
+      foreach (var p in paths) {
+        Torrent t;
+        try { t = new Torrent(p); }
+        catch (Exception ex) { log("skipping " + Path.GetFileName(p) + ": " + ex.Message); continue; }
+        var client = PickClient(family, version, randomize, rand);
+        var engine = new SeedEngine(t, client, proxy, upload, download, finished) { Log = log };
+
+        if (!string.IsNullOrEmpty(realSeed)) {
+          string file = null;
+          if (Directory.Exists(realSeed)) {
+            var cand = Path.Combine(realSeed, t.Name);
+            if (File.Exists(cand)) file = cand;
+          }
+          else if (File.Exists(realSeed) && paths.Count == 1) file = realSeed;
+          if (file != null) engine.EnableRealSeed(Path.GetFullPath(file));
+        }
+        host.Add(engine);
+      }
+
+      if (host.Count == 0) { Console.Error.WriteLine("error: no usable torrents to seed."); return 2; }
+
+      var bind = opt.Value("--web-bind") ?? "127.0.0.1";
+      var port = opt.Int("--web-port", 8080);
+
+      var stopping = false;
+      Console.CancelKeyPress += (s, e) => { e.Cancel = true; if (!stopping) { stopping = true; host.SignalStop(); } };
+
+      try { host.Start(bind, port); }
+      catch (Exception ex) {
+        Console.Error.WriteLine($"error: couldn't start the dashboard on {bind}:{port} — {ex.Message}");
+        if (bind != "127.0.0.1")
+          Console.Error.WriteLine("       binding to a non-loopback address may need admin rights / a urlacl on Windows.");
+        host.Stop();
+        return 1;
+      }
+
+      Console.WriteLine($"Daemon: {host.Count} torrent(s) online. Dashboard → http://{(bind == "0.0.0.0" ? "127.0.0.1" : bind)}:{port}/");
+      Console.WriteLine("Press Ctrl+C to stop (or use the dashboard's Stop button).");
+      var minutes = opt.Int("--duration", 0);
+      host.WaitForStop(minutes);
+
+      Console.WriteLine("Stopping daemon…");
+      host.Stop();
+      Console.WriteLine("Daemon stopped.");
+      return 0;
+    }
+
+    private static TorrentClient PickClient(string family, string version, bool randomize, Random rand) {
+      if (randomize) {
+        var pool = TorrentClientFactory.ModernClients;
+        if (pool != null && pool.Length > 0)
+          return TorrentClientFactory.GetClient(pool[rand.Next(pool.Length)]);
+      }
+      if (string.IsNullOrEmpty(version)) {
+        var vers = TorrentClientFactory.GetVersions(family);
+        version = vers != null && vers.Count > 0 ? vers[0] : "";
+      }
+      return TorrentClientFactory.GetClient((family + " " + version).Trim());
     }
 
     private static string FormatSize(long bytes) {
@@ -151,11 +248,17 @@ USAGE
 
 TORRENT (required)
   --torrent, -t <file>         Path to a .torrent file.
+  --folder <dir>               Seed every .torrent in a folder (implies --daemon).
 
 MODES
   --test-announce, --dry-run   Announce once as a seeder, print the result, exit.
+  --daemon                     Run 24/7 behind a live web dashboard (seedbox/NAS).
   --list-clients               List every client/version you can impersonate.
   --help, -h                   Show this help.
+
+DAEMON / WEB DASHBOARD
+  --web-port <n>               Dashboard port (default 8080).
+  --web-bind <addr>            Bind address (default 127.0.0.1; 0.0.0.0 for LAN).
 
 IMPERSONATE
   --client <name>              e.g. qBittorrent, Transmission (default qBittorrent).
