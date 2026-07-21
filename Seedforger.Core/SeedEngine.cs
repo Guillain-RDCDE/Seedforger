@@ -111,6 +111,20 @@ namespace Seedforger {
     /// <summary>How many trackers this engine announces to (primary + announce-list).</summary>
     public int TrackerCount => trackers.Count;
 
+    /// <summary>The rule for firing a single <c>event=completed</c>: a leecher
+    /// (finished &lt; 100%) that has just reached zero bytes left, once only. Pure so
+    /// the believability rule is unit-tested without a tracker.</summary>
+    internal static bool ShouldAnnounceCompleted(int finishedPercent, long left, bool alreadySent)
+      => finishedPercent < 100 && left <= 0 && !alreadySent;
+
+    /// <summary>The re-announce base interval: never below the tracker's interval,
+    /// and never below its <c>min interval</c> when it sent one (a floor of 1s).</summary>
+    internal static int AnnounceBaseInterval(int interval, int minInterval) {
+      var b = Math.Max(1, interval);
+      if (minInterval > 0) b = Math.Max(b, minInterval);
+      return b;
+    }
+
     /// <summary>Serve genuine, hash-verified pieces of a real downloaded file
     /// (defeats a tracker's monitoring peers). Must be a file that matches this
     /// torrent. Returns false if it doesn't verify.</summary>
@@ -183,7 +197,7 @@ namespace Seedforger {
           var add = AppOptions.RealisticSpeed ? downShaper.NextSecondBytes(downTarget) : downTarget;
           downloaded += add;
           left = Math.Max(0, left - add);
-          if (left == 0 && !completedSent) {
+          if (ShouldAnnounceCompleted(finishedPercent, left, completedSent)) {
             completedSent = true;
             Log?.Invoke("download complete — announcing event=completed and switching to seeder.");
             ThreadPool.QueueUserWorkItem(_ => { try { SendAnnounce("&event=completed"); } catch { } });
@@ -197,9 +211,7 @@ namespace Seedforger {
       if (!running) return;
       // Never re-announce sooner than the tracker's own interval — and honour a
       // "min interval" floor when it sends one — then only ever drift *later*.
-      var baseInterval = Math.Max(1, interval);
-      if (minInterval > 0) baseInterval = Math.Max(baseInterval, minInterval);
-      var next = Stealth.JitterInterval(baseInterval, rand);
+      var next = Stealth.JitterInterval(AnnounceBaseInterval(interval, minInterval), rand);
       try { announceTimer?.Dispose(); } catch { }
       announceTimer = new Timer(_ => { SendAnnounce(""); ScheduleNextAnnounce(); }, null, next * 1000, Timeout.Infinite);
     }

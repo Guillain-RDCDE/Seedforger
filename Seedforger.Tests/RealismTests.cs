@@ -81,6 +81,27 @@ namespace Seedforger.Tests {
       finally { File.Delete(path); }
     }
 
+    // ---- event=completed rule ----
+
+    [Fact]
+    public void Completed_FiresOnceWhenALeecherReachesZero() {
+      Assert.False(SeedEngine.ShouldAnnounceCompleted(finishedPercent: 100, left: 0, alreadySent: true));  // a seeder never sends it
+      Assert.False(SeedEngine.ShouldAnnounceCompleted(finishedPercent: 50, left: 500, alreadySent: false)); // still downloading
+      Assert.True(SeedEngine.ShouldAnnounceCompleted(finishedPercent: 0, left: 0, alreadySent: false));      // just finished
+      Assert.False(SeedEngine.ShouldAnnounceCompleted(finishedPercent: 0, left: 0, alreadySent: true));      // only once
+    }
+
+    // ---- min interval floor ----
+
+    [Theory]
+    [InlineData(1800, -1, 1800)] // no min interval -> the tracker interval
+    [InlineData(1800, 900, 1800)] // min below interval -> interval wins
+    [InlineData(600, 900, 900)]  // min above interval -> min is the floor
+    [InlineData(0, -1, 1)]        // never below 1 second
+    public void AnnounceBaseInterval_FloorsCorrectly(int interval, int minInterval, int expected) {
+      Assert.Equal(expected, SeedEngine.AnnounceBaseInterval(interval, minInterval));
+    }
+
     [Fact]
     public void SeedEngine_SingleTracker_HasOneTracker() {
       var path = TorrentBuilder.Write("http://only.test/announce", null);
