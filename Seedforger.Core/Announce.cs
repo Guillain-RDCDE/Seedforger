@@ -102,6 +102,7 @@ namespace Seedforger {
       public int Seeders = -1;       // "complete"
       public int Leechers = -1;      // "incomplete"
       public int Interval = -1;
+      public int MinInterval = -1;   // "min interval" — the floor a client must not re-announce sooner than
       public int Downloaded = -1;    // "downloaded" (times completed), when present
       public bool Accepted => string.IsNullOrEmpty(Failure);
     }
@@ -114,6 +115,7 @@ namespace Seedforger {
       if (d.Contains("complete")) r.Seeders = BEncode.String(d["complete"]).ParseValidInt(-1);
       if (d.Contains("incomplete")) r.Leechers = BEncode.String(d["incomplete"]).ParseValidInt(-1);
       if (d.Contains("interval")) r.Interval = BEncode.String(d["interval"]).ParseValidInt(-1);
+      if (d.Contains("min interval")) r.MinInterval = BEncode.String(d["min interval"]).ParseValidInt(-1);
       if (d.Contains("downloaded")) r.Downloaded = BEncode.String(d["downloaded"]).ParseValidInt(-1);
       return r;
     }

@@ -42,6 +42,8 @@ namespace Seedforger {
     private Governor governor;
     private PeerListener peerListener;
 
+    private readonly System.Collections.Generic.List<string> trackers;
+
     private long uploaded;
     private long downloaded;
     private long totalSize;
@@ -49,6 +51,9 @@ namespace Seedforger {
     private int seeders = -1;
     private int leechers = -1;
     private int interval = 1800;
+    private int minInterval = -1;
+    private readonly bool startedAsLeecher;
+    private volatile bool completedSent;
     private volatile bool running;
     private Timer announceTimer;
     private Timer counterTimer;
@@ -61,6 +66,10 @@ namespace Seedforger {
     public bool IsRunning => running;
     public double Ratio => downloaded > 0 ? (double) uploaded / downloaded : 0;
     public string TorrentName => torrent?.Name ?? "";
+    /// <summary>The impersonated client's display name (e.g. "qBittorrent 5.2.3").</summary>
+    public string ClientName => client?.Name ?? "";
+    /// <summary>True once a real, hash-verified file is being served over the wire.</summary>
+    public bool RealSeedEnabled => pieceSource != null;
     /// <summary>Adjust the reported upload rate at runtime (campaign allocation).</summary>
     public void SetUploadKBps(int kbps) => uploadKBps = Math.Max(0, kbps);
 
@@ -87,7 +96,20 @@ namespace Seedforger {
                 : this.finishedPercent == 100 ? 0
                 : total * (100 - this.finishedPercent) / 100;
       left = totalSize;
+      startedAsLeecher = this.finishedPercent < 100;
+      // A seeder never needs to announce "completed"; a leecher sends it once it
+      // reaches left=0, exactly like a real client.
+      completedSent = !startedAsLeecher;
+
+      // Every tracker this torrent lists (BEP-12): the primary drives the reported
+      // swarm/interval, the rest are announced to best-effort — real multi-tracker
+      // behaviour. Falls back to the single Announce URL when there's no list.
+      trackers = new System.Collections.Generic.List<string>(torrent.AnnounceList);
+      if (trackers.Count == 0 && !string.IsNullOrEmpty(torrent.Announce)) trackers.Add(torrent.Announce);
     }
+
+    /// <summary>How many trackers this engine announces to (primary + announce-list).</summary>
+    public int TrackerCount => trackers.Count;
 
     /// <summary>Serve genuine, hash-verified pieces of a real downloaded file
     /// (defeats a tracker's monitoring peers). Must be a file that matches this
@@ -152,13 +174,20 @@ namespace Seedforger {
         upTarget = Bandwidth.CapUpload(upTarget);
         uploaded += AppOptions.RealisticSpeed ? upShaper.NextSecondBytes(upTarget) : upTarget;
 
-        if (finishedPercent < 100) {
+        // Keep leeching only while there is something left to fetch; once left hits
+        // zero a real client stops downloading and fires a single "completed".
+        if (finishedPercent < 100 && left > 0) {
           long downTarget = downloadKBps * 1024L;
           if (AppOptions.SwarmAware && seeders >= 0)
             downTarget = (long) (downTarget * SwarmModel.DownloadFactor(seeders));
           var add = AppOptions.RealisticSpeed ? downShaper.NextSecondBytes(downTarget) : downTarget;
           downloaded += add;
           left = Math.Max(0, left - add);
+          if (left == 0 && !completedSent) {
+            completedSent = true;
+            Log?.Invoke("download complete — announcing event=completed and switching to seeder.");
+            ThreadPool.QueueUserWorkItem(_ => { try { SendAnnounce("&event=completed"); } catch { } });
+          }
         }
       }
       catch (Exception ex) { Log?.Invoke("counter error: " + ex.Message); }
@@ -166,14 +195,26 @@ namespace Seedforger {
 
     private void ScheduleNextAnnounce() {
       if (!running) return;
-      var next = Stealth.JitterInterval(Math.Max(1, interval), rand);
+      // Never re-announce sooner than the tracker's own interval — and honour a
+      // "min interval" floor when it sends one — then only ever drift *later*.
+      var baseInterval = Math.Max(1, interval);
+      if (minInterval > 0) baseInterval = Math.Max(baseInterval, minInterval);
+      var next = Stealth.JitterInterval(baseInterval, rand);
       try { announceTimer?.Dispose(); } catch { }
       announceTimer = new Timer(_ => { SendAnnounce(""); ScheduleNextAnnounce(); }, null, next * 1000, Timeout.Infinite);
     }
 
     private void SendAnnounce(string ev) {
+      // Announce to every tracker the torrent lists (BEP-12). The first (primary)
+      // response drives the reported swarm counts and the announce interval; the
+      // rest are best-effort, so one dead tracker can't stall the others.
+      for (var i = 0; i < trackers.Count; i++)
+        AnnounceOne(trackers[i], ev, isPrimary: i == 0);
+    }
+
+    private void AnnounceOne(string tracker, string ev, bool isPrimary) {
       var p = new Announce.Params {
-        Tracker = torrent.Announce,
+        Tracker = tracker,
         QueryTemplate = client.Query,
         InfoHashHex = hashHex,
         PeerId = peerId,
@@ -197,9 +238,13 @@ namespace Seedforger {
       if (resp?.Dict == null) return;
       var r = Announce.FromDict(resp.Dict);
       if (!string.IsNullOrEmpty(r.Failure)) { Log?.Invoke("Tracker rejected the announce: " + r.Failure); return; }
+      // Only the primary tracker drives our reported state, so multiple trackers
+      // don't fight over the swarm figures we display and pace against.
+      if (!isPrimary) return;
       if (r.Seeders >= 0) seeders = r.Seeders;
       if (r.Leechers >= 0) leechers = r.Leechers;
       if (r.Interval > 0) interval = r.Interval;
+      if (r.MinInterval > 0) minInterval = r.MinInterval;
     }
 
     // A 20-byte wire peer_id: keep the client-identifying ASCII prefix (what a

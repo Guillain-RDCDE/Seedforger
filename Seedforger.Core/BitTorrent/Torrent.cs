@@ -86,6 +86,40 @@ namespace Seedforger.BitTorrent {
       set => Data.SetStringValue("announce", value);
     }
 
+    /// <summary>
+    /// Every distinct tracker URL this torrent lists: the primary <c>announce</c>
+    /// plus each URL in the BEP-12 <c>announce-list</c> tiers, de-duplicated and in
+    /// order (primary first). A real multi-tracker client announces to all of them;
+    /// so does <see cref="SeedEngine"/> when this returns more than one. Empty when
+    /// the torrent has no usable tracker.
+    /// </summary>
+    internal System.Collections.Generic.IReadOnlyList<string> AnnounceList {
+      get {
+        var list = new System.Collections.Generic.List<string>();
+        void Add(string u) {
+          u = (u ?? string.Empty).Trim();
+          if (u.Length == 0) return;
+          foreach (var e in list) if (string.Equals(e, u, StringComparison.OrdinalIgnoreCase)) return;
+          list.Add(u);
+        }
+
+        if (Data != null && Data.Contains("announce")) Add(BEncode.String(Data["announce"]));
+        try {
+          // Index manually: ValueList is a self-enumerator (foreach would trip its
+          // shared Position), so we never foreach it here.
+          if (Data != null && Data.Contains("announce-list") && Data["announce-list"] is ValueList tiers) {
+            for (var t = 0; t < tiers.Values.Count; t++) {
+              if (tiers.Values[t] is ValueList urls)
+                for (var u = 0; u < urls.Values.Count; u++)
+                  if (urls.Values[u] is ValueString vs) Add(vs.String);
+            }
+          }
+        }
+        catch { /* a malformed announce-list must never break announcing */ }
+        return list;
+      }
+    }
+
     internal string CreatedBy {
       get => BEncode.String(Data["created by"]);
 
