@@ -1,0 +1,15 @@
+# winget installer manifest — portable, no installer.
+# Update PackageVersion, InstallerUrl and InstallerSha256 from the GitHub Release's
+# SHA256SUMS.txt, then submit the three manifests to microsoft/winget-pkgs.
+PackageIdentifier: Guillain-RDCDE.Seedforger
+PackageVersion: 2.18.0
+InstallerType: portable
+Commands:
+  - Seedforger
+ReleaseDate: 2026-07-21
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v2.18.0/Seedforger-lite-win-x64.exe
+    InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
+ManifestType: installer
+ManifestVersion: 1.6.0

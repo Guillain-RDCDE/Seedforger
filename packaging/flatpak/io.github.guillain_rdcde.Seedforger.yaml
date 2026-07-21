@@ -1,0 +1,23 @@
+# Flatpak manifest skeleton for the cross-platform Avalonia GUI.
+# Ships the self-contained single-file GUI binary from the release. Update the
+# `url`/`sha256` for the linux-x64 GUI artifact when cutting a release, then build:
+#   flatpak-builder build-dir io.github.guillain_rdcde.Seedforger.yaml --install --user
+app-id: io.github.guillain_rdcde.Seedforger
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: seedforger-gui
+finish-args:
+  - --share=network
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+modules:
+  - name: seedforger
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 Seedforger-gui-linux-x64 /app/bin/seedforger-gui
+    sources:
+      - type: file
+        url: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v2.18.0/Seedforger-gui-linux-x64
+        sha256: '0000000000000000000000000000000000000000000000000000000000000000'

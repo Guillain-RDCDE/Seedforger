@@ -55,3 +55,42 @@ jobs:
           chmod +x publish/cli-linux/Seedforger.Cli
           ./publish/cli-linux/Seedforger.Cli --list-clients | head -5
           ./publish/cli-linux/Seedforger.Cli --help | head -3
+
+      # End-to-end against a real local tracker: a Python mock tracker replies with a
+      # bencoded swarm, the CLI dry-run must be accepted, and the daemon must serve a
+      # live dashboard whose JSON reflects the reported figures. Exercises the shipped
+      # binary, not just the library (the in-process wire tests run in the test step).
+      - name: E2E — CLI + daemon against a mock tracker
+        run: |
+          set -euo pipefail
+          BIN=./publish/cli-linux/Seedforger.Cli
+          python3 tools/mock_tracker.py make-torrent /tmp/sample.torrent http://127.0.0.1:8071/announce
+          python3 tools/mock_tracker.py serve --port 8071 --complete 9 --incomplete 6 --interval 5 &
+          TRACKER=$!
+          sleep 1
+
+          echo "== dry-run announce =="
+          "$BIN" --test-announce -t /tmp/sample.torrent --client qBittorrent | tee /tmp/dry.txt
+          grep -q "accepted as a seeder" /tmp/dry.txt
+          grep -q "seeders (complete):    9" /tmp/dry.txt
+
+          echo "== daemon + dashboard =="
+          "$BIN" -t /tmp/sample.torrent --daemon --web-port 8091 -u 200 --realistic off --duration 1 &
+          DAEMON=$!
+          sleep 4
+          curl -sf http://127.0.0.1:8091/api/status -o /tmp/status.json
+          cat /tmp/status.json; echo
+          python3 - <<'PY'
+          import json
+          d = json.load(open("/tmp/status.json"))
+          assert d["app"] == "Seedforger", d
+          assert d["totals"]["count"] == 1, d
+          t = d["torrents"][0]
+          assert t["seeders"] == 9 and t["leechers"] == 6, t
+          assert t["uploaded"] > 0, t
+          assert t["client"].startswith("qBittorrent"), t
+          print("dashboard JSON OK:", t["name"], t["uploaded"], "bytes,", t["seeders"], "seeders")
+          PY
+          curl -sf http://127.0.0.1:8091/ | grep -q "Seedforger"
+
+          kill $DAEMON $TRACKER 2>/dev/null || true

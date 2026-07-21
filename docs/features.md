@@ -22,6 +22,9 @@ For *why* these matter, read [How it actually works](how-it-works.md); for the p
 |---|---|
 | **Realistic announces** | `SpeedShaper` applies a ramp-up + mean-reverting random walk instead of flat noise, so reported speeds look human. |
 | **Interval jitter** | Announce timing drifts *later* (0–12%), never earlier than the tracker's `interval` — no metronome. |
+| **`min interval` floor** | Reads the tracker's `min interval` and never re-announces sooner than it — the exact rule real clients obey. |
+| **`completed` lifecycle** | A leecher that reaches `left=0` fires a single `event=completed` and switches to a seeder, then never repeats it — like a real client finishing a download. |
+| **Multi-tracker (BEP-12)** | Announces to every tracker the torrent lists (the `announce-list` tiers, de-duplicated); the primary drives the reported swarm. |
 | **Day/night rhythm + active hours** | A diurnal speed curve plus an optional active-hours window (handles the midnight wrap, e.g. `22–6`). |
 | **Believability warnings** | Logs a warning at START on physically implausible setups (absurd upstream, upload ≫ download). |
 | **Connectable seeder** | Answers inbound handshakes on your port with a full **bitfield then a choke** — a connectable, complete seeder that transfers nothing. |
@@ -57,6 +60,17 @@ For *why* these matter, read [How it actually works](how-it-works.md); for the p
 | **Human pacing** | **Staggered** starts (launching everything at once is a tell), upstream **budget split by real demand**, **pacing** so you don't finish suspiciously early, then **auto-stop** at the goal. |
 
 See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orchestrator) for the `campaign.json` format.
+
+## 🖥️ Headless daemon & web dashboard
+
+*Run it 24/7 on a seedbox or NAS.* See [Daemon & web dashboard](daemon.md).
+
+| | |
+|---|---|
+| **Daemon mode** | `--daemon` (or `--folder`) runs one torrent or a whole folder headless, holding the process until Ctrl+C, a duration, or the dashboard's Stop button. |
+| **Live web dashboard** | A single self-contained dark page (built-in `HttpListener`, no assets) shows total upload / ratio / active count and a per-torrent table (client, ratio, live seeders/leechers, interval, `real seed` badge), refreshing every 2 s. |
+| **JSON API** | `GET /api/status` returns the whole snapshot to script against; `POST /api/stop` halts everything. |
+| **Bind & port** | Localhost by default; `--web-bind 0.0.0.0 --web-port N` to reach it across the LAN (or over an SSH tunnel). |
 
 ## 🔌 Connectivity & inputs
 

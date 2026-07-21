@@ -1,0 +1,19 @@
+# Maintainer: Guillain-RDCDE
+# AUR package for the Seedforger headless CLI (self-contained, no .NET runtime dep).
+# Update pkgver and the sha256sums from the release's SHA256SUMS.txt.
+pkgname=seedforger-cli
+pkgver=2.18.0
+pkgrel=1
+pkgdesc="Report torrent stats to a tracker without transferring bytes (headless CLI)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/Guillain-RDCDE/Seedforger"
+license=('MIT')
+provides=('seedforger')
+source_x86_64=("seedforger-$pkgver-x86_64::https://github.com/Guillain-RDCDE/Seedforger/releases/download/v$pkgver/Seedforger-cli-linux-x64")
+source_aarch64=("seedforger-$pkgver-aarch64::https://github.com/Guillain-RDCDE/Seedforger/releases/download/v$pkgver/Seedforger-cli-linux-arm64")
+sha256sums_x86_64=('SKIP')
+sha256sums_aarch64=('SKIP')
+
+package() {
+  install -Dm755 "seedforger-$pkgver-$CARCH" "$pkgdir/usr/bin/seedforger"
+}

@@ -1,0 +1,23 @@
+PackageIdentifier: Guillain-RDCDE.Seedforger
+PackageVersion: 2.18.0
+PackageLocale: en-US
+Publisher: Guillain-RDCDE
+PublisherUrl: https://github.com/Guillain-RDCDE
+PackageName: Seedforger
+PackageUrl: https://github.com/Guillain-RDCDE/Seedforger
+License: MIT
+LicenseUrl: https://github.com/Guillain-RDCDE/Seedforger/blob/master/LICENSE
+ShortDescription: Report any upload/download stats to a BitTorrent tracker without transferring bytes.
+Description: |-
+  A modern .NET 8 revival of RatioMaster built around believability: client
+  impersonation, swarm-aware speeds, stealth timing, a real peer-wire engine,
+  goal-seeking campaigns, a headless daemon with a web dashboard, and a
+  cross-platform GUI/CLI. Educational / security-research tool.
+Tags:
+  - bittorrent
+  - torrent
+  - tracker
+  - ratio
+  - seedbox
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
