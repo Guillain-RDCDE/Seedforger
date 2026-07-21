@@ -9,7 +9,7 @@ A modern, from-the-ground-up .NET 8 revival of the classic *RatioMaster*, built 
 [![CI](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml/badge.svg)](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![Release](https://img.shields.io/github/v/release/Guillain-RDCDE/Seedforger?color=2ea043&label=download)](../../releases/latest)
-[![Tests](https://img.shields.io/badge/tests-118%20passing-2ea043)](Seedforger.Tests)
+[![Tests](https://img.shields.io/badge/tests-130%20passing-2ea043)](Seedforger.Tests)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 <img src="docs/screenshots/main.png" width="520" alt="Seedforger">
@@ -49,11 +49,12 @@ Two ways to run the same engine: the **graphical interface** (default) and a **h
 - **Stealth** — a speed ramp-up with gentle variation, announce-interval jitter, a day/night rhythm, active-hours windows, and believability warnings.
 - **Real peer-wire engine** — optionally serve genuine, SHA-1-verified blocks over TCP, capped by a statistical governor, to defeat trackers that inject monitoring peers.
 - **Goal-seeking campaigns** — set a target (a ratio, or a volume by a deadline) and let it stagger starts, allocate bandwidth by real demand, pace to the deadline, and stop automatically.
+- **Headless daemon + web dashboard** — run one torrent or a whole folder 24/7 on a seedbox/NAS behind a self-contained dark dashboard (live totals, per-torrent ratio, swarm counts, Stop button) and a JSON API. Announces to every tracker a torrent lists (BEP-12), fires `event=completed` on finishing, and honours the tracker's `min interval`.
 - **Guided setup** — a wizard that probes each torrent and loops until it finds one that will genuinely earn ratio, then applies safe defaults.
 - **Connectivity** — HTTPS trackers over `SslStream`, SOCKS4/4a/5 and HTTP-CONNECT proxies, magnet links, batch loading, and DNS-over-HTTPS to defeat ISP tracker blocks.
 - **Interface** — a flat, from-scratch UI whose header reaches every feature, in **English or French**. Two flavours: a native **Windows app** (WinForms, with tray) and a **cross-platform app** (Avalonia — Windows/Linux/macOS).
 - **Cross-platform core, CLI & GUI** — the engine (`Seedforger.Core`) is WinForms-free, so both the **headless CLI** and the **Avalonia GUI** run on **Linux, macOS and Windows** (seedbox/server/desktop). Verified on a live tracker and in CI on Ubuntu.
-- **Tested** — 118 xUnit tests and green CI, including a loopback peer-wire integration test.
+- **Tested** — 130 xUnit tests and green CI (Windows + Linux), including a loopback peer-wire integration test and a full end-to-end run against an in-process tracker (announce, swarm parsing, the `completed` transition, multi-tracker, and the daemon's web dashboard).
 
 The full catalogue is in [Features](docs/features.md).
 
@@ -63,12 +64,17 @@ A tracker cannot watch you upload; it trusts your reported numbers. But private 
 
 The full model, without code, is in [How it actually works](docs/how-it-works.md); the byte-level protocol detail is in [How BitTorrent actually works](docs/how-bittorrent-works.md).
 
+> [!NOTE]
+> **Field report:** [*Ten Days on a Real Tracker*](STORY.md) — how Seedforger held a live private tracker for ten days, turning a failing ratio into a healthy one with zero flags, and what it taught us about believability.
+
 ## Documentation
 
 | Page | Contents |
 |---|---|
 | [Getting started](docs/getting-started.md) | Install, guided setup, the rules that keep you safe, FAQ. |
 | [Command line](docs/cli.md) | Every flag for headless / scripted use. |
+| [Daemon & web dashboard](docs/daemon.md) | Run 24/7 on a seedbox/NAS with a live browser dashboard. |
+| [Install & packaging](docs/packaging.md) | Per-platform binaries, package managers, code signing. |
 | [How it actually works](docs/how-it-works.md) | The anti-cheat model and the believability response, no code. |
 | [Features](docs/features.md) | The complete feature catalogue. |
 | [Configuration](docs/configuration.md) | Custom fingerprints (`clients.json`) and campaigns (`campaign.json`). |
@@ -91,9 +97,19 @@ install). Full reference in [Command line](docs/cli.md).
 
 # List every client/version you can impersonate
 ./Seedforger.Cli --list-clients
+
+# Run a whole folder 24/7 on a seedbox, behind a live web dashboard
+./Seedforger.Cli --folder ~/torrents --daemon -u 1500 --randomize-client
 ```
 
 > The Windows GUI (`Seedforger.exe`) also accepts `--cli`/`--test-announce` for convenience.
+
+### Seedbox / NAS: the daemon + web dashboard
+
+`--daemon` (or `--folder`) runs Seedforger headless behind a **self-contained dark web
+dashboard** — live totals, per-torrent ratio, swarm counts, and a Stop button — served
+by the built-in HTTP listener on `http://127.0.0.1:8080/`. There's a JSON API
+(`/api/status`) to script against. Full reference in [Daemon & web dashboard](docs/daemon.md).
 
 ## Build
 

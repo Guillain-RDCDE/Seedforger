@@ -8,7 +8,7 @@
     <Nullable>disable</Nullable>
     <RootNamespace>Seedforger.Cli</RootNamespace>
     <AssemblyName>Seedforger.Cli</AssemblyName>
-    <Version>2.17.0</Version>
+    <Version>2.18.0</Version>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 

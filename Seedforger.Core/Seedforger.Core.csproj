@@ -8,7 +8,7 @@
     <Nullable>disable</Nullable>
     <RootNamespace>Seedforger</RootNamespace>
     <AssemblyName>Seedforger.Core</AssemblyName>
-    <Version>2.17.0</Version>
+    <Version>2.18.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
