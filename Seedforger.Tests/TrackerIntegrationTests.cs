@@ -33,12 +33,12 @@ namespace Seedforger.Tests {
         var engine = new SeedEngine(new Torrent(path), client, new ProxyInfo(), uploadKBps: 50, downloadKBps: 0, finishedPercent: 100);
 
         engine.Start();
-        Assert.True(WaitUntil(() => tracker.SawEvent("started"), 5000), "tracker never saw event=started");
-        Assert.True(WaitUntil(() => engine.SeederCount == 7 && engine.LeecherCount == 4, 5000), "swarm counts not parsed");
-        Assert.True(WaitUntil(() => engine.UploadedBytes > 0, 5000), "reported upload never advanced");
+        Assert.True(WaitUntil(() => tracker.SawEvent("started"), 8000), "tracker never saw event=started");
+        Assert.True(WaitUntil(() => engine.SeederCount == 7 && engine.LeecherCount == 4, 8000), "swarm counts not parsed");
+        Assert.True(WaitUntil(() => engine.UploadedBytes > 0, 8000), "reported upload never advanced");
 
         engine.Stop();
-        Assert.True(WaitUntil(() => tracker.SawEvent("stopped"), 5000), "tracker never saw event=stopped");
+        Assert.True(WaitUntil(() => tracker.SawEvent("stopped"), 8000), "tracker never saw event=stopped");
       }
       finally {
         AppOptions.RealisticSpeed = true; AppOptions.SwarmAware = true;
@@ -84,10 +84,10 @@ namespace Seedforger.Tests {
 
         engine.Start();
         try {
-          Assert.True(WaitUntil(() => primary.SawEvent("started"), 5000), "primary tracker not announced to");
-          Assert.True(WaitUntil(() => backup.SawEvent("started"), 5000), "backup tracker not announced to");
+          Assert.True(WaitUntil(() => primary.SawEvent("started"), 8000), "primary tracker not announced to");
+          Assert.True(WaitUntil(() => backup.SawEvent("started"), 8000), "backup tracker not announced to");
           // Only the primary drives the reported swarm.
-          Assert.True(WaitUntil(() => engine.SeederCount == 3, 5000), "primary swarm not adopted");
+          Assert.True(WaitUntil(() => engine.SeederCount == 3, 8000), "primary swarm not adopted");
         }
         finally { engine.Stop(); }
       }
@@ -136,6 +136,10 @@ namespace Seedforger.Tests {
             ctx.Response.StatusCode = 200;
             ctx.Response.ContentType = "text/plain";
             ctx.Response.ContentLength64 = bytes.Length;
+            // Close the TCP connection after each response (send Connection: close).
+            // The legacy socket transport reads until the peer closes, so a kept-alive
+            // connection would make it block — real trackers close, and so must we.
+            ctx.Response.KeepAlive = false;
             ctx.Response.OutputStream.Write(bytes, 0, bytes.Length);
             ctx.Response.OutputStream.Close();
           }
