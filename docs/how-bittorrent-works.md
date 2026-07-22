@@ -56,7 +56,7 @@ Rules that matter:
 - No floats, no negative-zero, no leading zeros (`i03e` is invalid).
 
 Seedforger ships a small bencode parser/encoder in
-[`Seedforger/BitTorrent/BEncode.cs`](../Seedforger/BitTorrent/BEncode.cs); it's
+[`Seedforger.Core/BitTorrent/BEncode.cs`](../Seedforger.Core/BitTorrent/BEncode.cs); it's
 what reads a `.torrent` and decodes tracker replies.
 
 ---
@@ -116,7 +116,7 @@ structure; hybrid torrents carry both a v1 and v2 infohash. Most of the ecosyste
 today is still v1/SHA-1.
 
 Seedforger computes the v1 infohash in
-[`Seedforger/BitTorrent/Torrent.cs`](../Seedforger/BitTorrent/Torrent.cs) (`InfoHash`),
+[`Seedforger.Core/BitTorrent/Torrent.cs`](../Seedforger.Core/BitTorrent/Torrent.cs) (`InfoHash`),
 and for magnet links takes the hash **directly** since there is no `info` dict to
 hash (see §10 and `Torrent.SetVirtual`).
 
@@ -149,7 +149,7 @@ The peer ID travels in **two places**: the tracker announce (`peer_id=`) and the
 peer wire **handshake**. Private trackers keep a **whitelist of allowed client
 prefixes** and reject or ban anything unknown or inconsistent — which is exactly
 why emulating a *current, real* client matters. Seedforger's client database
-([`DefaultClientProfiles.cs`](../Seedforger/DefaultClientProfiles.cs)) stores the
+([`DefaultClientProfiles.cs`](../Seedforger.Core/DefaultClientProfiles.cs)) stores the
 exact prefix + matching `User-Agent` for each client.
 
 ---
@@ -323,7 +323,7 @@ With only the infohash, a client joins the swarm (via trackers/DHT) and then
 (BEP 9), verifying it against the infohash it already knows. Because a magnet has
 no piece data and no size, a stats simulator must be told the size out-of-band —
 which is exactly what Seedforger's **Open magnet…** does (parse in
-[`Seedforger/Magnet.cs`](../Seedforger/Magnet.cs), then ask for the size).
+[`Seedforger.Core/Magnet.cs`](../Seedforger.Core/Magnet.cs), then ask for the size).
 
 ---
 
@@ -423,7 +423,7 @@ is upload to the **whole** swarm, which no single observer can measure. So:
 > refute it — and the peer count is bounded by the swarm's real leecher count.
 
 Seedforger implements this as an optional TCP **peer wire engine** (see
-[`Seedforger/Peer/`](../Seedforger/Peer/)):
+[`Seedforger.Core/Peer/`](../Seedforger.Core/Peer/)):
 
 - **Stage A — serve from a local file.** `FilePieceSource` reads blocks from the
   real downloaded file and **verifies each piece's SHA-1** before serving it, so a
