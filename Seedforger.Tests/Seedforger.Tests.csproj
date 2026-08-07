@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Seedforger.Core\Seedforger.Core.csproj" />
+    <ProjectReference Include="..\Seedforger.Integrity\Seedforger.Integrity.csproj" />
   </ItemGroup>
 
 </Project>

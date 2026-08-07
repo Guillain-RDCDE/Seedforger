@@ -38,14 +38,51 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Build core + CLI + Avalonia GUI
+      - name: Build core + CLI + Avalonia GUI + Integrity
         run: |
           dotnet build Seedforger.Core/Seedforger.Core.csproj -c Release
           dotnet build Seedforger.Cli/Seedforger.Cli.csproj -c Release
           dotnet build Seedforger.App/Seedforger.App.csproj -c Release
+          dotnet build Seedforger.Integrity/Seedforger.Integrity.csproj -c Release
+          dotnet build Seedforger.Integrity.Figures/Seedforger.Integrity.Figures.csproj -c Release
 
       - name: Test on Linux
         run: dotnet test Seedforger.Tests/Seedforger.Tests.csproj -c Release
+
+      # The science annex (docs/papers) quotes figures/metrics.json. Regenerate it from
+      # the model so a code change that would move the numbers can't ship with stale prose.
+      # We check the metrics land in the expected ranges rather than byte-diffing the SVGs,
+      # since transcendental functions can differ by an ULP across platforms; the xUnit
+      # suite already pins the science with tolerances.
+      - name: Regenerate + validate science-annex figures
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/figs && mkdir -p /tmp/figs
+          dotnet run --project Seedforger.Integrity.Figures/Seedforger.Integrity.Figures.csproj -c Release -- /tmp/figs
+          for f in fig1-invariants fig2-roc fig3-breakdown fig4-plateau fig5-boundary; do
+            test -s "/tmp/figs/$f.svg" || { echo "::error::missing figure $f.svg"; exit 1; }
+            python3 -c "import xml.dom.minidom,sys; xml.dom.minidom.parse('/tmp/figs/$f.svg')"
+          done
+          python3 - <<'PY'
+          import json
+          m = json.load(open("/tmp/figs/metrics.json"))
+          def chk(k, lo, hi):
+              v = m[k]
+              assert lo <= v <= hi, f"{k}={v} outside [{lo},{hi}]"
+              print(f"  {k} = {v}  ok")
+          chk("auc_careful", 0.98, 1.0)
+          chk("auc_naive", 0.98, 1.0)
+          chk("auc_established_c002", 0.95, 1.0)
+          chk("auc_fresh_c002", 0.6, 0.95)          # the characterised weak spot
+          chk("mass_alarm_healthy", 0.0, 0.02)
+          chk("mass_alarm_cheated", 0.05, 0.5)
+          chk("breakdown_mean_at_040", 3.0, 8.0)     # mean is dragged away
+          chk("breakdown_huber_at_040", 0.8, 1.8)    # Huber holds near 1.0
+          chk("game_credit_multiplier", 1.25, 1.25)  # 1/(1-0.2), exact
+          chk("game_free_ratio_at_zero_work", 0.0, 0.0)
+          assert m["auc_established_c002"] > m["auc_fresh_c002"], "coverage/freshness ordering broken"
+          print("science-annex metrics validated")
+          PY
 
       - name: Publish self-contained Linux CLI
         run: dotnet publish Seedforger.Cli/Seedforger.Cli.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o publish/cli-linux

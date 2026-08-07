@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 420" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="560" height="420" fill="#ffffff"/>
+<rect x="74" y="46" width="462" height="318" fill="none" stroke="#57606a" stroke-width="1"/>
+<line x1="74" y1="364" x2="536" y2="364" stroke="#d0d7de" stroke-width="1"/>
+<text x="66" y="368" fill="#57606a" font-size="12" text-anchor="end">0</text>
+<line x1="74" y1="318.571" x2="536" y2="318.571" stroke="#d0d7de" stroke-width="1"/>
+<text x="66" y="322.571" fill="#57606a" font-size="12" text-anchor="end">2</text>
+<line x1="74" y1="273.143" x2="536" y2="273.143" stroke="#d0d7de" stroke-width="1"/>
+<text x="66" y="277.143" fill="#57606a" font-size="12" text-anchor="end">4</text>
+<line x1="74" y1="227.714" x2="536" y2="227.714" stroke="#d0d7de" stroke-width="1"/>
+<text x="66" y="231.714" fill="#57606a" font-size="12" text-anchor="end">6</text>
+<line x1="74" y1="182.286" x2="536" y2="182.286" stroke="#d0d7de" stroke-width="1"/>
+<text x="66" y="186.286" fill="#57606a" font-size="12" text-anchor="end">8</text>
+<line x1="74" y1="136.857" x2="536" y2="136.857" stroke="#d0d7de" stroke-width="1"/>
+<text x="66" y="140.857" fill="#57606a" font-size="12" text-anchor="end">10</text>
+<line x1="74" y1="91.429" x2="536" y2="91.429" stroke="#d0d7de" stroke-width="1"/>
+<text x="66" y="95.429" fill="#57606a" font-size="12" text-anchor="end">12</text>
+<line x1="74" y1="46" x2="536" y2="46" stroke="#d0d7de" stroke-width="1"/>
+<text x="66" y="50" fill="#57606a" font-size="12" text-anchor="end">14</text>
+<line x1="74" y1="364" x2="74" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="74" y="383" fill="#57606a" font-size="12" text-anchor="middle">0</text>
+<line x1="166.4" y1="364" x2="166.4" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="166.4" y="383" fill="#57606a" font-size="12" text-anchor="middle">2</text>
+<line x1="258.8" y1="364" x2="258.8" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="258.8" y="383" fill="#57606a" font-size="12" text-anchor="middle">4</text>
+<line x1="351.2" y1="364" x2="351.2" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="351.2" y="383" fill="#57606a" font-size="12" text-anchor="middle">6</text>
+<line x1="443.6" y1="364" x2="443.6" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="443.6" y="383" fill="#57606a" font-size="12" text-anchor="middle">8</text>
+<line x1="536" y1="364" x2="536" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="536" y="383" fill="#57606a" font-size="12" text-anchor="middle">10</text>
+<text x="280" y="26" fill="#1f2328" font-size="17" text-anchor="middle" font-weight="600">No free ratio: credit is capped at a multiple of real work</text>
+<text x="305" y="408" fill="#57606a" font-size="13" text-anchor="middle">real upload actually served (work)</text>
+<text x="18" y="205" fill="#57606a" font-size="13" text-anchor="middle" transform="rotate(-90 18 205)">max credited upload that survives</text>
+<polyline points="74,364 536,136.857" fill="none" stroke="#d0d7de" stroke-width="1.6" stroke-dasharray="6 5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="74,364 97.1,349.804 120.2,335.607 143.3,321.411 166.4,307.214 189.5,293.018 212.6,278.821 235.7,264.625 258.8,250.429 281.9,236.232 305,222.036 328.1,207.839 351.2,193.643 374.3,179.446 397.4,165.25 420.5,151.054 443.6,136.857 466.7,122.661 489.8,108.464 512.9,94.268 536,80.071" fill="none" stroke="#2ea043" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="97.1" cy="349.804" r="4.2" fill="#d1242f"/>
+<circle cx="138.68" cy="324.25" r="4.2" fill="#d1242f"/>
+<circle cx="180.26" cy="298.696" r="4.2" fill="#d1242f"/>
+<circle cx="221.84" cy="273.143" r="4.2" fill="#d1242f"/>
+<circle cx="263.42" cy="247.589" r="4.2" fill="#d1242f"/>
+<circle cx="305" cy="222.036" r="4.2" fill="#d1242f"/>
+<circle cx="346.58" cy="196.482" r="4.2" fill="#d1242f"/>
+<circle cx="388.16" cy="170.929" r="4.2" fill="#d1242f"/>
+<circle cx="429.74" cy="145.375" r="4.2" fill="#d1242f"/>
+<circle cx="471.32" cy="119.821" r="4.2" fill="#d1242f"/>
+<circle cx="512.9" cy="94.268" r="4.2" fill="#d1242f"/>
+<rect x="86" y="53" width="13" height="13" rx="2" fill="#2ea043"/>
+<text x="105" y="64" fill="#1f2328" font-size="12.5" text-anchor="start">detection ceiling  x/(1-τ),  τ=0.2</text>
+<rect x="86" y="73" width="13" height="13" rx="2" fill="#d1242f"/>
+<text x="105" y="84" fill="#1f2328" font-size="12.5" text-anchor="start">blind client's best effort</text>
+<rect x="86" y="93" width="13" height="13" rx="2" fill="#57606a"/>
+<text x="105" y="104" fill="#1f2328" font-size="12.5" text-anchor="start">honest y = x</text>
+<text x="360.44" y="343.557" fill="#1f2328" font-size="12.5" text-anchor="start">0 work → 0 credit</text>
+</svg>

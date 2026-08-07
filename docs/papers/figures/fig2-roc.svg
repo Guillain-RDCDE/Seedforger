@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 460" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="460" height="460" fill="#ffffff"/>
+<rect x="62" y="46" width="378" height="358" fill="none" stroke="#57606a" stroke-width="1"/>
+<line x1="62" y1="404" x2="440" y2="404" stroke="#d0d7de" stroke-width="1"/>
+<text x="54" y="408" fill="#57606a" font-size="12" text-anchor="end">0</text>
+<line x1="62" y1="314.5" x2="440" y2="314.5" stroke="#d0d7de" stroke-width="1"/>
+<text x="54" y="318.5" fill="#57606a" font-size="12" text-anchor="end">0.25</text>
+<line x1="62" y1="225" x2="440" y2="225" stroke="#d0d7de" stroke-width="1"/>
+<text x="54" y="229" fill="#57606a" font-size="12" text-anchor="end">0.5</text>
+<line x1="62" y1="135.5" x2="440" y2="135.5" stroke="#d0d7de" stroke-width="1"/>
+<text x="54" y="139.5" fill="#57606a" font-size="12" text-anchor="end">0.75</text>
+<line x1="62" y1="46" x2="440" y2="46" stroke="#d0d7de" stroke-width="1"/>
+<text x="54" y="50" fill="#57606a" font-size="12" text-anchor="end">1</text>
+<line x1="62" y1="404" x2="62" y2="409" stroke="#57606a" stroke-width="1"/>
+<text x="62" y="423" fill="#57606a" font-size="12" text-anchor="middle">0</text>
+<line x1="156.5" y1="404" x2="156.5" y2="409" stroke="#57606a" stroke-width="1"/>
+<text x="156.5" y="423" fill="#57606a" font-size="12" text-anchor="middle">0.25</text>
+<line x1="251" y1="404" x2="251" y2="409" stroke="#57606a" stroke-width="1"/>
+<text x="251" y="423" fill="#57606a" font-size="12" text-anchor="middle">0.5</text>
+<line x1="345.5" y1="404" x2="345.5" y2="409" stroke="#57606a" stroke-width="1"/>
+<text x="345.5" y="423" fill="#57606a" font-size="12" text-anchor="middle">0.75</text>
+<line x1="440" y1="404" x2="440" y2="409" stroke="#57606a" stroke-width="1"/>
+<text x="440" y="423" fill="#57606a" font-size="12" text-anchor="middle">1</text>
+<text x="230" y="26" fill="#1f2328" font-size="17" text-anchor="middle" font-weight="600">Detector ROC</text>
+<text x="251" y="448" fill="#57606a" font-size="13" text-anchor="middle">false-positive rate</text>
+<text x="18" y="225" fill="#57606a" font-size="13" text-anchor="middle" transform="rotate(-90 18 225)">true-positive rate</text>
+<polyline points="62,404 440,46" fill="none" stroke="#d0d7de" stroke-width="1.5" stroke-dasharray="6 5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="62,404 62,404 62,392.067 62,380.133 62,368.2 62,356.267 62,344.333 62,332.4 62,320.467 62,308.533 62,296.6 62,284.667 62,272.733 62,260.8 62,248.867 62,236.933 62,225 62,213.067 62,201.133 62,189.2 62,177.267 62,165.333 62,153.4 62,141.467 62,129.533 62,117.6 62,105.667 62,93.733 62,81.8 62,69.867 62,57.933 62,46 64.224,46 66.447,46 68.671,46 70.894,46 73.118,46 75.341,46 77.565,46 79.788,46 82.012,46 84.235,46 86.459,46 88.682,46 90.906,46 93.129,46 95.353,46 97.576,46 99.8,46 102.024,46 104.247,46 106.471,46 108.694,46 110.918,46 113.141,46 115.365,46 117.588,46 119.812,46 122.035,46 124.259,46 126.482,46 128.706,46 130.929,46 133.153,46 135.376,46 137.6,46 139.824,46 142.047,46 144.271,46 146.494,46 148.718,46 150.941,46 153.165,46 155.388,46 157.612,46 159.835,46 162.059,46 164.282,46 166.506,46 168.729,46 170.953,46 173.176,46 175.4,46 177.624,46 179.847,46 182.071,46 184.294,46 186.518,46 188.741,46 190.965,46 193.188,46 195.412,46 197.635,46 199.859,46 202.082,46 204.306,46 206.529,46 208.753,46 210.976,46 213.2,46 215.424,46 217.647,46 219.871,46 222.094,46 224.318,46 226.541,46 228.765,46 230.988,46 233.212,46 235.435,46 237.659,46 239.882,46 242.106,46 244.329,46 246.553,46 248.776,46 251,46 253.224,46 440,46" fill="none" stroke="#2ea043" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="62,404 62,404 62,344.333 62,284.667 62,225 62,165.333 62,105.667 62,46 73.118,46 84.235,46 95.353,46 106.471,46 117.588,46 128.706,46 139.824,46 150.941,46 162.059,46 173.176,46 184.294,46 195.412,46 206.529,46 217.647,46 228.765,46 239.882,46 251,46 262.118,46 273.235,46 440,46" fill="none" stroke="#d1242f" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="74" y="53" width="13" height="13" rx="2" fill="#2ea043"/>
+<text x="93" y="64" fill="#1f2328" font-size="12.5" text-anchor="start">healthy deployment  (AUC 1.000)</text>
+<rect x="74" y="73" width="13" height="13" rx="2" fill="#d1242f"/>
+<text x="93" y="84" fill="#1f2328" font-size="12.5" text-anchor="start">thin coverage + tiny swarm  (AUC 1.000)</text>
+</svg>

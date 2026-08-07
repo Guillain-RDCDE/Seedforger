@@ -1,0 +1,18 @@
+{
+  "auc_careful": 1,
+  "auc_naive": 1,
+  "mass_alarm_healthy": 0.0013,
+  "mass_alarm_cheated": 0.1262,
+  "breakdown_honest_center": 1,
+  "breakdown_mean_at_040": 4.9969,
+  "breakdown_huber_at_040": 1.3802,
+  "breakdown_median_at_040": 1.1244,
+  "game_tau": 0.2,
+  "game_credit_multiplier": 1.25,
+  "game_free_ratio_at_zero_work": 0,
+  "auc_established_c015": 1,
+  "auc_established_c002": 0.9986,
+  "auc_fresh_c015": 0.9891,
+  "auc_fresh_c002": 0.824,
+  "auc_default": 1
+}

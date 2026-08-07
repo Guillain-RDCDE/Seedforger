@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 420" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="560" height="420" fill="#ffffff"/>
+<rect x="66" y="46" width="470" height="318" fill="none" stroke="#57606a" stroke-width="1"/>
+<line x1="66" y1="364" x2="536" y2="364" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="368" fill="#57606a" font-size="12" text-anchor="end">0.5</text>
+<line x1="66" y1="300.4" x2="536" y2="300.4" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="304.4" fill="#57606a" font-size="12" text-anchor="end">0.6</text>
+<line x1="66" y1="236.8" x2="536" y2="236.8" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="240.8" fill="#57606a" font-size="12" text-anchor="end">0.7</text>
+<line x1="66" y1="173.2" x2="536" y2="173.2" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="177.2" fill="#57606a" font-size="12" text-anchor="end">0.8</text>
+<line x1="66" y1="109.6" x2="536" y2="109.6" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="113.6" fill="#57606a" font-size="12" text-anchor="end">0.9</text>
+<line x1="66" y1="46" x2="536" y2="46" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="50" fill="#57606a" font-size="12" text-anchor="end">1</text>
+<line x1="66" y1="364" x2="66" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="66" y="383" fill="#57606a" font-size="12" text-anchor="middle">0</text>
+<line x1="183.5" y1="364" x2="183.5" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="183.5" y="383" fill="#57606a" font-size="12" text-anchor="middle">0.1</text>
+<line x1="301" y1="364" x2="301" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="301" y="383" fill="#57606a" font-size="12" text-anchor="middle">0.2</text>
+<line x1="418.5" y1="364" x2="418.5" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="418.5" y="383" fill="#57606a" font-size="12" text-anchor="middle">0.3</text>
+<line x1="536" y1="364" x2="536" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="536" y="383" fill="#57606a" font-size="12" text-anchor="middle">0.4</text>
+<text x="280" y="26" fill="#1f2328" font-size="17" text-anchor="middle" font-weight="600">Where the server design weakens (detection AUC)</text>
+<text x="301" y="408" fill="#57606a" font-size="13" text-anchor="middle">monitoring coverage  c</text>
+<text x="18" y="205" fill="#57606a" font-size="13" text-anchor="middle" transform="rotate(-90 18 205)">detection AUC</text>
+<polyline points="89.5,46.863 124.75,46.015 183.5,46 242.25,46 359.75,46 536,46" fill="none" stroke="#2ea043" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="89.5" cy="46.863" r="3.4" fill="#2ea043"/>
+<circle cx="124.75" cy="46.015" r="3.4" fill="#2ea043"/>
+<circle cx="183.5" cy="46" r="3.4" fill="#2ea043"/>
+<circle cx="242.25" cy="46" r="3.4" fill="#2ea043"/>
+<circle cx="359.75" cy="46" r="3.4" fill="#2ea043"/>
+<circle cx="536" cy="46" r="3.4" fill="#2ea043"/>
+<polyline points="89.5,157.931 124.75,92.189 183.5,60.456 242.25,52.939 359.75,47.94 536,46.279" fill="none" stroke="#d1242f" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="89.5" cy="157.931" r="3.4" fill="#d1242f"/>
+<circle cx="124.75" cy="92.189" r="3.4" fill="#d1242f"/>
+<circle cx="183.5" cy="60.456" r="3.4" fill="#d1242f"/>
+<circle cx="242.25" cy="52.939" r="3.4" fill="#d1242f"/>
+<circle cx="359.75" cy="47.94" r="3.4" fill="#d1242f"/>
+<circle cx="536" cy="46.279" r="3.4" fill="#d1242f"/>
+<rect x="78" y="53" width="13" height="13" rx="2" fill="#2ea043"/>
+<text x="97" y="64" fill="#1f2328" font-size="12.5" text-anchor="start">established torrent (30-min window)</text>
+<rect x="78" y="73" width="13" height="13" rx="2" fill="#d1242f"/>
+<text x="97" y="84" fill="#1f2328" font-size="12.5" text-anchor="start">fresh torrent (90-s window)</text>
+</svg>

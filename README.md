@@ -9,7 +9,7 @@ A modern, from-the-ground-up .NET 8 revival of the classic *RatioMaster*, built 
 [![CI](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml/badge.svg)](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![Release](https://img.shields.io/github/v/release/Guillain-RDCDE/Seedforger?color=2ea043&label=download)](../../releases/latest)
-[![Tests](https://img.shields.io/badge/tests-132%20passing-2ea043)](Seedforger.Tests)
+[![Tests](https://img.shields.io/badge/tests-172%20passing-2ea043)](Seedforger.Tests)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 <img src="docs/screenshots/main.png" width="520" alt="Seedforger">
@@ -64,6 +64,9 @@ A tracker cannot watch you upload; it trusts your reported numbers. But private 
 
 The full model, without code, is in [How it actually works](docs/how-it-works.md); the byte-level protocol detail is in [How BitTorrent actually works](docs/how-bittorrent-works.md).
 
+> [!IMPORTANT]
+> **Science annex — [*why perfecting the client is a losing game*](docs/papers/).** Two short, reproducible papers turn Seedforger's own project into an object of study: a tracker doesn't *trust* your number, it *reconciles* it, and a formal information-asymmetry result shows that even a perfect client is capped at a fixed multiple of **real work** — at zero work, zero credit. Backed by a runnable model ([`Seedforger.Integrity`](Seedforger.Integrity)) and guarded by the test suite, so the figures can't drift from the code.
+
 > [!NOTE]
 > **Field report:** [*Ten Days on a Real Tracker*](STORY.md) — how Seedforger held a live private tracker for ten days, turning a failing ratio into a healthy one with zero flags, and what it taught us about believability.
 
@@ -76,6 +79,7 @@ The full model, without code, is in [How it actually works](docs/how-it-works.md
 | [Daemon & web dashboard](docs/daemon.md) | Run 24/7 on a seedbox/NAS with a live browser dashboard. |
 | [Install & packaging](docs/packaging.md) | Per-platform binaries, package managers, code signing. |
 | [How it actually works](docs/how-it-works.md) | The anti-cheat model and the believability response, no code. |
+| [Science annex](docs/papers/) | Two reproducible papers: tracker-side reconciliation as anomaly detection, and why client-side optimisation is capped at real work. |
 | [Features](docs/features.md) | The complete feature catalogue. |
 | [Configuration](docs/configuration.md) | Custom fingerprints (`clients.json`) and campaigns (`campaign.json`). |
 | [Build from source](docs/build.md) | Build, publish, project layout, tests. |

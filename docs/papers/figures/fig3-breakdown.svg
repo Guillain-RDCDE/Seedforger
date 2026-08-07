@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 420" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="560" height="420" fill="#ffffff"/>
+<rect x="66" y="46" width="470" height="318" fill="none" stroke="#57606a" stroke-width="1"/>
+<line x1="66" y1="364" x2="536" y2="364" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="368" fill="#57606a" font-size="12" text-anchor="end">0</text>
+<line x1="66" y1="311" x2="536" y2="311" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="315" fill="#57606a" font-size="12" text-anchor="end">2</text>
+<line x1="66" y1="258" x2="536" y2="258" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="262" fill="#57606a" font-size="12" text-anchor="end">4</text>
+<line x1="66" y1="205" x2="536" y2="205" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="209" fill="#57606a" font-size="12" text-anchor="end">6</text>
+<line x1="66" y1="152" x2="536" y2="152" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="156" fill="#57606a" font-size="12" text-anchor="end">8</text>
+<line x1="66" y1="99" x2="536" y2="99" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="103" fill="#57606a" font-size="12" text-anchor="end">10</text>
+<line x1="66" y1="46" x2="536" y2="46" stroke="#d0d7de" stroke-width="1"/>
+<text x="58" y="50" fill="#57606a" font-size="12" text-anchor="end">12</text>
+<line x1="66" y1="364" x2="66" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="66" y="383" fill="#57606a" font-size="12" text-anchor="middle">0</text>
+<line x1="144.333" y1="364" x2="144.333" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="144.333" y="383" fill="#57606a" font-size="12" text-anchor="middle">0.1</text>
+<line x1="222.667" y1="364" x2="222.667" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="222.667" y="383" fill="#57606a" font-size="12" text-anchor="middle">0.2</text>
+<line x1="301" y1="364" x2="301" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="301" y="383" fill="#57606a" font-size="12" text-anchor="middle">0.3</text>
+<line x1="379.333" y1="364" x2="379.333" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="379.333" y="383" fill="#57606a" font-size="12" text-anchor="middle">0.4</text>
+<line x1="457.667" y1="364" x2="457.667" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="457.667" y="383" fill="#57606a" font-size="12" text-anchor="middle">0.5</text>
+<line x1="536" y1="364" x2="536" y2="369" stroke="#57606a" stroke-width="1"/>
+<text x="536" y="383" fill="#57606a" font-size="12" text-anchor="middle">0.6</text>
+<text x="280" y="26" fill="#1f2328" font-size="17" text-anchor="middle" font-weight="600">Breakdown: what a colluding minority moves</text>
+<text x="301" y="408" fill="#57606a" font-size="13" text-anchor="middle">fraction of swarm colluding</text>
+<text x="18" y="205" fill="#57606a" font-size="13" text-anchor="middle" transform="rotate(-90 18 205)">estimated 'normal' upload rate</text>
+<polyline points="66,337.5 536,337.5" fill="none" stroke="#d0d7de" stroke-width="1.2" stroke-dasharray="6 5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="66,337.505 105.167,324.194 144.333,310.977 183.5,297.816 222.667,284.554 261.833,271.291 301,258.012 340.167,244.825 379.333,231.581 418.5,218.35 457.667,205.101 496.833,191.781 536,178.453" fill="none" stroke="#d1242f" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="66,337.398 105.167,336.992 144.333,336.626 183.5,336.277 222.667,335.613 261.833,334.701 301,333.346 340.167,331.331 379.333,327.426 418.5,319.694 457.667,205.101 496.833,72.5 536,72.5" fill="none" stroke="#2ea043" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="66,337.363 105.167,337.017 144.333,336.671 183.5,336.527 222.667,336.074 261.833,335.567 301,335.145 340.167,334.703 379.333,334.204 418.5,332.492 457.667,200.406 496.833,72.5 536,72.5" fill="none" stroke="#0969da" stroke-width="2" stroke-dasharray="6 5" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="78" y="53" width="13" height="13" rx="2" fill="#d1242f"/>
+<text x="97" y="64" fill="#1f2328" font-size="12.5" text-anchor="start">arithmetic mean (breakdown 0)</text>
+<rect x="78" y="73" width="13" height="13" rx="2" fill="#2ea043"/>
+<text x="97" y="84" fill="#1f2328" font-size="12.5" text-anchor="start">Huber M-estimator (~0.5)</text>
+<rect x="78" y="93" width="13" height="13" rx="2" fill="#0969da"/>
+<text x="97" y="104" fill="#1f2328" font-size="12.5" text-anchor="start">median (~0.5)</text>
+</svg>

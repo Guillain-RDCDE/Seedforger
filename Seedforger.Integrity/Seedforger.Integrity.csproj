@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Seedforger.Integrity — the science annex made executable.
+
+    A self-contained, WinForms-free model of the *defender's* side of the game:
+    a swarm-in-a-jar simulator, the three integrity invariants a mature tracker
+    can reconcile, a robust anomaly estimator, and the client/server
+    information-asymmetry game whose negative result is the point of the papers
+    in docs/papers/. Pure and deterministic, so every number in the papers is
+    reproduced by the xUnit suite and the figure generator — it cannot silently
+    drift from the prose.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Seedforger.Integrity</RootNamespace>
+    <AssemblyName>Seedforger.Integrity</AssemblyName>
+    <Version>2.18.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Seedforger.Tests" />
+    <InternalsVisibleTo Include="Seedforger.Integrity.Figures" />
+  </ItemGroup>
+
+</Project>

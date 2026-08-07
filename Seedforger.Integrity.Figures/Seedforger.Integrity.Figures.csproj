@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Regenerates the figures and metrics.json under docs/papers/figures from the
+    Integrity model. Run in CI so the figures can never silently drift from the code
+    (see docs/papers for the exact command). Emits pure, dependency-free SVG: no
+    plotting library, no fonts to embed.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Seedforger.Integrity.Figures</RootNamespace>
+    <AssemblyName>Seedforger.Integrity.Figures</AssemblyName>
+    <Version>2.18.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Seedforger.Integrity\Seedforger.Integrity.csproj" />
+  </ItemGroup>
+
+</Project>
