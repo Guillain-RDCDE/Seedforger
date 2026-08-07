@@ -65,7 +65,7 @@ A tracker cannot watch you upload; it trusts your reported numbers. But private 
 The full model, without code, is in [How it actually works](docs/how-it-works.md); the byte-level protocol detail is in [How BitTorrent actually works](docs/how-bittorrent-works.md).
 
 > [!IMPORTANT]
-> **Science annex — [*why perfecting the client is a losing game*](docs/papers/).** Two short, reproducible papers turn Seedforger's own project into an object of study: a tracker doesn't *trust* your number, it *reconciles* it, and a formal information-asymmetry result shows that even a perfect client is capped at a fixed multiple of **real work** — at zero work, zero credit. Backed by a runnable model ([`Seedforger.Integrity`](Seedforger.Integrity)) and guarded by the test suite, so the figures can't drift from the code.
+> **Science annex — [*No Free Ratio*](https://guillain-rdcde.github.io/Seedforger/) ([the papers](docs/papers/)).** Two short, reproducible papers turn Seedforger's own project into an object of study: a tracker doesn't *trust* your number, it *reconciles* it, and a formal information-asymmetry result shows that even a perfect client is capped at a fixed multiple of **real work** — at zero work, zero credit. There's an illustrated [story page](https://guillain-rdcde.github.io/Seedforger/); it's all backed by a runnable model ([`Seedforger.Integrity`](Seedforger.Integrity)) and guarded by the test suite, so the figures can't drift from the code.
 
 > [!NOTE]
 > **Field report:** [*Ten Days on a Real Tracker*](STORY.md) — how Seedforger held a live private tracker for ten days, turning a failing ratio into a healthy one with zero flags, and what it taught us about believability.

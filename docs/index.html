@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>No Free Ratio — the science behind Seedforger</title>
+<meta name="description" content="We built the most careful ratio client we could — then proved, inside it, that even a perfect client optimises the wrong variable. A story in two papers.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232ea043'/%3E%3Cpath d='M16 25c-5-1-8-5-8-10 4 0 8 2 8 7 0-6 4-8 8-8 0 6-3 10-8 11z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#ffffff; --panel:#f6f8fa; --ink:#1f2328; --muted:#57606a; --border:#d0d7de;
+    --green:#1a7f37; --green-bright:#2ea043; --red:#cf222e; --amber:#9a6700; --blue:#0969da;
+    --shadow:0 1px 3px rgba(31,35,40,.08),0 8px 24px rgba(31,35,40,.06);
+    --maxw:760px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0d1117; --panel:#161b22; --ink:#e6edf3; --muted:#9198a1; --border:#30363d;
+      --green:#3fb950; --green-bright:#3fb950; --red:#f85149; --amber:#d29922; --blue:#58a6ff;
+      --shadow:0 1px 3px rgba(1,4,9,.5),0 8px 28px rgba(1,4,9,.5);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.66; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  a{color:var(--blue); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 22px}
+  .wide{max-width:1000px}
+
+  /* ---- hero ---- */
+  header.hero{
+    position:relative; text-align:center; padding:96px 22px 70px;
+    background:
+      radial-gradient(1200px 460px at 50% -8%, rgba(46,160,67,.16), transparent 60%),
+      linear-gradient(180deg, var(--panel), var(--bg));
+    border-bottom:1px solid var(--border); overflow:hidden;
+  }
+  .badge{
+    display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:600;
+    color:var(--green); background:color-mix(in srgb, var(--green) 12%, transparent);
+    border:1px solid color-mix(in srgb, var(--green) 34%, transparent);
+    padding:5px 13px; border-radius:999px; letter-spacing:.3px; margin-bottom:26px;
+  }
+  .hero h1{
+    font-size:clamp(38px,7vw,68px); line-height:1.02; margin:0 0 18px; letter-spacing:-.02em;
+    font-weight:800;
+  }
+  .hero h1 .accent{
+    background:linear-gradient(90deg,var(--green-bright),#57d071); -webkit-background-clip:text;
+    background-clip:text; color:transparent;
+  }
+  .hero p.lede{font-size:clamp(17px,2.4vw,21px); color:var(--muted); max-width:640px; margin:0 auto 30px}
+  .cta{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:15px;
+    padding:11px 20px; border-radius:10px; border:1px solid var(--border); background:var(--bg);
+    color:var(--ink); transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover{text-decoration:none; transform:translateY(-1px); box-shadow:var(--shadow)}
+  .btn.primary{background:var(--green-bright); border-color:var(--green-bright); color:#fff}
+
+  /* ---- stat row ---- */
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:44px auto 0; max-width:900px;
+  }
+  .stat{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px 14px; text-align:center}
+  .stat b{display:block; font-size:clamp(22px,3.4vw,30px); font-weight:800; color:var(--ink); line-height:1.1}
+  .stat span{font-size:12.5px; color:var(--muted)}
+  @media(max-width:620px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  /* ---- sections ---- */
+  section{padding:56px 0}
+  .kicker{font-size:13px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--green); margin:0 0 10px}
+  h2{font-size:clamp(26px,4vw,38px); line-height:1.12; margin:0 0 18px; letter-spacing:-.015em; font-weight:800}
+  h3{font-size:20px; margin:34px 0 8px; font-weight:700}
+  p{margin:0 0 18px; font-size:17px}
+  .prose p:first-of-type{font-size:18px}
+  em.strong{font-style:normal; font-weight:700; color:var(--ink)}
+  .muted{color:var(--muted)}
+
+  .pull{
+    margin:36px 0; padding:6px 0 6px 24px; border-left:4px solid var(--green-bright);
+    font-size:clamp(20px,3vw,26px); font-weight:700; line-height:1.28; letter-spacing:-.01em;
+  }
+
+  /* ---- figures ---- */
+  figure{margin:34px auto; max-width:1000px}
+  .fig-card{
+    background:#fff; border:1px solid var(--border); border-radius:14px; padding:18px;
+    box-shadow:var(--shadow);
+  }
+  .fig-card img{display:block; width:100%; height:auto}
+  figcaption{margin-top:12px; font-size:14px; color:var(--muted); text-align:center; padding:0 8px}
+  figcaption b{color:var(--ink)}
+
+  .divider{height:1px; background:var(--border); border:0; max-width:var(--maxw); margin:8px auto}
+
+  /* ---- the three cards ---- */
+  .three{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:26px 0 6px}
+  .three .c{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px}
+  .three .c .n{font-size:13px; font-weight:700; color:var(--muted)}
+  .three .c h4{margin:6px 0 6px; font-size:17px}
+  .three .c p{font-size:14.5px; margin:0; color:var(--muted)}
+  @media(max-width:720px){.three{grid-template-columns:1fr}}
+
+  /* ---- code ---- */
+  pre{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 18px;
+    overflow-x:auto; font-size:13.5px; line-height:1.6;
+    font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace; color:var(--ink);
+  }
+  pre .c{color:var(--muted)}
+  pre .g{color:var(--green)}
+
+  .note{
+    background:color-mix(in srgb, var(--green) 8%, transparent);
+    border:1px solid color-mix(in srgb, var(--green) 30%, transparent);
+    border-radius:12px; padding:18px 20px; margin:30px 0; font-size:15.5px;
+  }
+  .note b{color:var(--green)}
+
+  /* ---- footer ---- */
+  footer{border-top:1px solid var(--border); padding:52px 22px 70px; text-align:center; color:var(--muted); background:var(--panel)}
+  footer .links{display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin:14px 0 22px}
+  footer .fine{font-size:13px; max-width:620px; margin:0 auto}
+  .seedling{font-size:30px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="badge">● Seedforger · science annex</div>
+  <h1>No <span class="accent">free ratio</span>.</h1>
+  <p class="lede">We built the most careful ratio client we knew how to build — then proved, <em>inside its own repository</em>, that even a perfect client optimises the wrong variable. This is that story, in two short papers and five figures.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/Guillain-RDCDE/Seedforger/tree/master/docs/papers">Read the papers →</a>
+    <a class="btn" href="https://github.com/Guillain-RDCDE/Seedforger">View the code</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>≈1.00</b><span>detector AUC, healthy swarm</span></div>
+    <div class="stat"><b>1.25×</b><span>the most you can inflate real work</span></div>
+    <div class="stat"><b>0</b><span>credit for zero real upload</span></div>
+    <div class="stat"><b>172</b><span>tests guarding every number</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap prose">
+    <p class="kicker">How it started</p>
+    <h2>A simple question with an uncomfortable answer</h2>
+    <p>The question was blunt: <em class="strong">what actually protects a private tracker?</em> Not the folklore, not the fear of getting caught — the real machinery. It's a fair thing to want to know when you've spent a long time building a client that reports whatever upload figure you tell it to.</p>
+    <p>The honest answer turned out to be more interesting than a list of tricks. A mature tracker doesn't <em class="strong">trust</em> your number. It <em class="strong">reconciles</em> it — against physics, against the swarm's books, against what its own peers actually received. And once you write that reconciliation down as maths, something falls out that no amount of client polish can undo.</p>
+    <p>So instead of a cat-and-mouse manual, we did the opposite: we turned Seedforger's own project into an object of study, and shipped the proof that the client side is a game you can't win — right next to the client.</p>
+    <div class="pull">You can fake how fast you claim to be. You cannot fake that nobody received it.</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section>
+  <div class="wrap prose">
+    <p class="kicker">Act I · Paper 1</p>
+    <h2>Three ways a lie stops adding up</h2>
+    <p>Everything the tracker needs, it already has. Three checks do most of the work — and none of them requires trusting your number.</p>
+    <div class="three">
+      <div class="c"><div class="n">01 — Physics</div><h4>Plausibility</h4><p>You can't upload faster than your uplink. A claim that implies impossible speed refutes itself.</p></div>
+      <div class="c"><div class="n">02 — Books</div><h4>Mass balance</h4><p>Every byte someone downloaded, someone uploaded. Fabricated upload has no matching download — the swarm's books stop balancing.</p></div>
+      <div class="c"><div class="n">03 — Witnesses</div><h4>Corroboration</h4><p>Trackers run their own peers. Whatever you really upload, some of them receive. Claim a lot they saw none of, and the gap is the tell.</p></div>
+    </div>
+  </div>
+  <figure class="wide">
+    <div class="fig-card"><img src="papers/figures/fig1-invariants.svg" alt="The three invariants across a healthy swarm, naive cheaters and careful cheaters"></div>
+    <figcaption>In a healthy swarm all three residuals are flat. <b>Naive</b> cheaters trip everything, including physics. The interesting column is the last: <b>careful</b> cheaters beat the physics check completely — and it doesn't matter, because they can't put bytes in someone else's inbox.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="wrap prose">
+    <p class="kicker">Act II · the estimator</p>
+    <h2>It's not a threshold. It's an estimator.</h2>
+    <p>The naive build — "flag anyone above a cutoff" — dies on real, dirty data: NAT, buggy clients, asymmetric seedboxes. The right object is a <em class="strong">robust</em> estimate of what normal looks like, and its <em class="strong">breakdown point</em> — the fraction of colluding liars needed to corrupt it — is the number that matters.</p>
+  </div>
+  <figure>
+    <div class="fig-card"><img src="papers/figures/fig3-breakdown.svg" alt="Mean vs median vs Huber estimate as a colluding fraction grows"></div>
+    <figcaption>With 40% of the swarm colluding on a far-away value, the arithmetic <b>mean</b> is dragged from 1.0 to ~5.0, while the <b>Huber</b> M-estimator holds at ~1.38 and the median at ~1.12. Breakdown point 0 versus ~½.</figcaption>
+  </figure>
+  <div class="wrap prose">
+    <p>Score every peer against that robust baseline, sweep the threshold, and you get a ROC curve. In a healthy deployment the separation is essentially complete.</p>
+  </div>
+  <figure>
+    <div class="fig-card" style="max-width:520px;margin:0 auto"><img src="papers/figures/fig2-roc.svg" alt="ROC of the detector, healthy deployment vs thin-coverage tiny swarm"></div>
+    <figcaption><b>AUC ≈ 1.00</b> against <em>careful</em> cheaters who seed for real and inflate only modestly. A peer that declares several times what any monitor received has nowhere to hide.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="wrap prose">
+    <p class="kicker">Act III · the honest part</p>
+    <h2>Where it breaks — and we say so</h2>
+    <p>A detector paper that only reports its wins is marketing. The corroboration measurement is a <em>sample</em>, so its noise grows when there's little to sample. Two things make that bite: almost no monitoring peers, and a brand-new torrent with barely any volume yet.</p>
+  </div>
+  <figure>
+    <div class="fig-card"><img src="papers/figures/fig5-boundary.svg" alt="Detection AUC vs coverage, established vs fresh torrent"></div>
+    <figcaption>On an established torrent the detector shrugs off thin coverage (AUC ~0.99 even at 2%). On a <b>fresh</b> torrent with thin coverage it sags to <b>~0.82</b> — still well above a coin flip, but visibly degraded. That's a property of sampling, not a leak of anyone's secret rules.</figcaption>
+  </figure>
+</section>
+
+<hr class="divider">
+
+<section>
+  <div class="wrap prose">
+    <p class="kicker">Act IV · Paper 2 · the twist</p>
+    <h2>The number you're chasing is one you can't see</h2>
+    <p>Here's the uncomfortable structure of a well-run tracker: the score it credits you is computed partly from what its monitors <em class="strong">witnessed</em> — a signal you can neither read nor forge, because forging it would mean actually delivering the bytes. Which is just… seeding.</p>
+    <p>Do some genuine work <em>w</em>, then inflate. The tracker witnesses a fraction of your <em>real</em> work and flags you when the gap is too big. Work the arithmetic and a wall appears: the most you can declare without a flag is <em class="strong">w ⁄ (1 − τ)</em> — a fixed multiple of real work. Nothing on the client moves it.</p>
+    <div class="pull">Zero real upload earns zero credit that survives. Not “a little.” Zero.</div>
+  </div>
+  <figure>
+    <div class="fig-card"><img src="papers/figures/fig4-plateau.svg" alt="Max credited upload capped at a multiple of real work; a blind client lands exactly on the ceiling"></div>
+    <figcaption>At tolerance τ = 0.2 the cap is <b>1.25×</b> your real work. The red dots are a client searching as hard as it can, <em>blind</em> to the corroboration signal — every one lands exactly on the ceiling the tracker set. A better client doesn't beat it; it reproduces it.</figcaption>
+  </figure>
+  <div class="wrap prose">
+    <p>This is the shape of an <em class="strong">incentive-compatible mechanism</em>: telling the truth is optimal not by anyone's goodwill, but by the geometry of who can see what. The tracker didn't out-code the client. It arranged the information so the client is grading its own homework, blind.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap prose">
+    <p class="kicker">The coda</p>
+    <h2>So we optimised the right variable instead</h2>
+    <p>The engineering conclusion isn't despair — it's redirection. The only lever that moves the ceiling is <em>w</em>: real upload, actually served. Which is why Seedforger's most valuable component is the one that isn't about faking anything at all — the real, hash-verified peer-wire engine that genuinely seeds.</p>
+    <div class="note"><b>Reproduce every number.</b> The whole story is a runnable, deterministic model — no hand-waving. The figures on this page are regenerated from the code, and 172 tests pin the science with tolerances.
+      <pre><span class="c"># from the repository root</span>
+dotnet run --project <span class="g">Seedforger.Integrity.Figures</span> -c Release -- docs/papers/figures
+dotnet test  <span class="g">Seedforger.Tests</span></pre>
+    </div>
+    <p class="muted" style="font-size:15px">The two papers are defensive and theoretical. They describe how a tracker protects itself and prove a limit on the client side — nothing here is an evasion recipe. The point is exactly the opposite: the durable engineering lives on the honest-seeding side.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="seedling">🌱</div>
+  <div class="links">
+    <a href="https://github.com/Guillain-RDCDE/Seedforger/blob/master/docs/papers/01-swarm-integrity.md">Paper 1 — Reconciling the swarm</a>
+    <a href="https://github.com/Guillain-RDCDE/Seedforger/blob/master/docs/papers/02-client-asymmetry.md">Paper 2 — The client can't win</a>
+    <a href="https://github.com/Guillain-RDCDE/Seedforger">Repository</a>
+  </div>
+  <p class="fine">Seedforger is a modern .NET 8 revival of RatioMaster. This annex turns the project into an object of study: the most careful client of its kind, and the formal proof that even a perfect one optimises the wrong variable.</p>
+</footer>
+
+</body>
+</html>
