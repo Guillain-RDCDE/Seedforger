@@ -14,9 +14,9 @@ A modern, from-the-ground-up **.NET 8** revival of the classic *RatioMaster*, bu
 
 <br>
 
-[![Download](https://img.shields.io/badge/⬇_Download-2ea043?style=for-the-badge)](../../releases/latest) &nbsp;
-[![Read the science](https://img.shields.io/badge/📄_Read_the_science-No_Free_Ratio-1f6feb?style=for-the-badge)](https://guillain-rdcde.github.io/Seedforger/) &nbsp;
-[![Docs](https://img.shields.io/badge/📚_Docs-30363d?style=for-the-badge)](docs/getting-started.md)
+[![Download](https://img.shields.io/badge/Download-2ea043?style=for-the-badge)](../../releases/latest) &nbsp;
+[![Read the science](https://img.shields.io/badge/Read_the_science-No_Free_Ratio-1f6feb?style=for-the-badge)](https://guillain-rdcde.github.io/Seedforger/) &nbsp;
+[![Docs](https://img.shields.io/badge/Docs-30363d?style=for-the-badge)](docs/getting-started.md)
 
 <br>
 
@@ -39,17 +39,17 @@ Sending a fake number is trivial; making it **believable** is the point. Seedfor
 
 <div align="center">
 
-## 📄 &nbsp; The science — *No Free Ratio*
+## The science — *No Free Ratio*
 
 **We built the most careful ratio client we knew how to build — then proved, inside its own repository, that even a *perfect* client optimises the wrong variable.**
 
-[![Read the story](https://img.shields.io/badge/📖_Read_the_illustrated_story-No_Free_Ratio-2ea043?style=for-the-badge)](https://guillain-rdcde.github.io/Seedforger/)
+[![Read the story](https://img.shields.io/badge/Read_the_illustrated_story-No_Free_Ratio-2ea043?style=for-the-badge)](https://guillain-rdcde.github.io/Seedforger/)
 
 <br>
 
 <a href="https://guillain-rdcde.github.io/Seedforger/"><img src="docs/papers/figures/fig1-invariants.svg" width="620" alt="The three integrity invariants across a healthy swarm, naive cheaters and careful cheaters"></a>
 
-<sub>A tracker doesn't *trust* your number — it *reconciles* it. You can fake how fast you claim to be; you cannot fake that nobody received it.</sub>
+<sub>A tracker doesn't <em>trust</em> your number — it <em>reconciles</em> it. You can fake how fast you claim to be; you cannot fake that nobody received it.</sub>
 
 </div>
 
@@ -66,13 +66,13 @@ Two short, **reproducible** papers turn Seedforger into an object of study. They
 |:--:|:--:|:--:|:--:|
 | **≈ 1.00** | **≈ 0.82** | **1.25×** | **0** |
 
-**[📖 Illustrated story](https://guillain-rdcde.github.io/Seedforger/)** · **[📄 The papers](docs/papers/)** · **[🧪 The model](Seedforger.Integrity)**
+**[Illustrated story](https://guillain-rdcde.github.io/Seedforger/)** · **[The papers](docs/papers/)** · **[The model](Seedforger.Integrity)**
 
 </div>
 
 <br>
 
-## ⬇ Download
+## Download
 
 Grab a build from the [**latest release**](../../releases/latest) — a single file, no installer.
 
@@ -83,19 +83,19 @@ Grab a build from the [**latest release**](../../releases/latest) — a single f
 
 New users should start with the **Guided** button, which walks through setup and verifies each torrent against the tracker before starting. There are two ways to run the same engine: the **graphical interface** (default) and a **headless command line** for automation — see [Getting started](docs/getting-started.md) and [Command line](docs/cli.md).
 
-## ✨ Features
+## Features
 
 | | |
 |---|---|
-| 🎭 **Client impersonation** — 50 clients with accurate `peer_id` / `User-Agent` fingerprints, verified against libtorrent, with rotation and Transmission checksums. | 🌊 **Swarm-aware realism** — reported speeds scale with the tracker's live leecher/seeder counts; no demand means a trickle, not an implausible claim. |
-| 🥷 **Stealth** — speed ramp-up with variation, announce-interval jitter, a day/night rhythm, active-hours windows, and believability warnings. | 🔌 **Real peer-wire engine** — optionally serve genuine, SHA-1-verified blocks over TCP, capped by a statistical governor, to satisfy monitoring peers. |
-| 🎯 **Goal-seeking campaigns** — set a ratio or a volume-by-deadline; it staggers starts, allocates bandwidth by demand, paces, and stops itself. | 🖥️ **Daemon + web dashboard** — run a folder 24/7 on a seedbox/NAS behind a self-contained dark dashboard and JSON API (BEP-12, `completed`, `min interval`). |
-| 🧭 **Guided setup** — a wizard that probes each torrent and loops until it finds one that will genuinely earn ratio, then applies safe defaults. | 🌐 **Connectivity** — HTTPS trackers over `SslStream`, SOCKS4/4a/5 & HTTP-CONNECT proxies, magnet links, batch loading, and DNS-over-HTTPS. |
-| 💻 **Cross-platform** — the WinForms-free core drives a headless **CLI** and an **Avalonia GUI** on Windows, Linux & macOS. | ✅ **Tested** — **172 xUnit tests**, green CI on Windows + Linux, including a peer-wire integration test and an end-to-end CLI run against a live mock tracker. |
+| **Client impersonation** — 50 clients with accurate `peer_id` / `User-Agent` fingerprints, verified against libtorrent, with rotation and Transmission checksums. | **Swarm-aware realism** — reported speeds scale with the tracker's live leecher/seeder counts; no demand means a trickle, not an implausible claim. |
+| **Stealth** — speed ramp-up with variation, announce-interval jitter, a day/night rhythm, active-hours windows, and believability warnings. | **Real peer-wire engine** — optionally serve genuine, SHA-1-verified blocks over TCP, capped by a statistical governor, to satisfy monitoring peers. |
+| **Goal-seeking campaigns** — set a ratio or a volume-by-deadline; it staggers starts, allocates bandwidth by demand, paces, and stops itself. | **Daemon + web dashboard** — run a folder 24/7 on a seedbox/NAS behind a self-contained dark dashboard and JSON API (BEP-12, `completed`, `min interval`). |
+| **Guided setup** — a wizard that probes each torrent and loops until it finds one that will genuinely earn ratio, then applies safe defaults. | **Connectivity** — HTTPS trackers over `SslStream`, SOCKS4/4a/5 & HTTP-CONNECT proxies, magnet links, batch loading, and DNS-over-HTTPS. |
+| **Cross-platform** — the WinForms-free core drives a headless **CLI** and an **Avalonia GUI** on Windows, Linux & macOS. | **Tested** — **172 xUnit tests**, green CI on Windows + Linux, including a peer-wire integration test and an end-to-end CLI run against a live mock tracker. |
 
 The full catalogue is in [Features](docs/features.md).
 
-## ⚙️ How it works
+## How it works
 
 A tracker cannot watch you upload; it trusts your reported numbers. But private trackers run anti-cheat, so a single large number is easy to flag — the wrong fingerprint, an impossible speed, robotic timing, figures that don't reconcile with scrape data, or a port with no real peer behind it. Seedforger's job is to answer each of those checks so the tracker-visible story stays consistent and human-shaped. It does **not** make fakery undetectable — and [the science](docs/papers/) proves exactly why the client side is a capped game.
 
@@ -104,7 +104,7 @@ The full model, without code, is in [How it actually works](docs/how-it-works.md
 > [!NOTE]
 > **Field report:** [*Ten Days on a Real Tracker*](STORY.md) — how Seedforger held a live private tracker for ten days, turning a failing ratio into a healthy one with zero flags, and what it taught us about believability.
 
-## 📚 Documentation
+## Documentation
 
 | Page | Contents |
 |---|---|
@@ -119,7 +119,7 @@ The full model, without code, is in [How it actually works](docs/how-it-works.md
 | [Build from source](docs/build.md) | Build, publish, project layout, tests. |
 | [How BitTorrent actually works](docs/how-bittorrent-works.md) | A from-the-wire technical deep dive. |
 
-## ⌨️ Command line
+## Command line
 
 The WinForms-free core (`Seedforger.Core`) makes the headless CLI build and run on **Linux, macOS and Windows** — ideal for a seedbox, a server or CI. It ships as a self-contained single file. Full reference in [Command line](docs/cli.md).
 
@@ -136,7 +136,7 @@ The WinForms-free core (`Seedforger.Core`) makes the headless CLI build and run 
 
 `--daemon` (or `--folder`) serves a self-contained dark **web dashboard** — live totals, per-torrent ratio, swarm counts, a Stop button — plus a JSON API at `/api/status`. See [Daemon & web dashboard](docs/daemon.md).
 
-## 🔨 Build
+## Build
 
 Requires the .NET 8 SDK.
 
@@ -150,10 +150,10 @@ dotnet run   --project Seedforger.Integrity.Figures -c Release -- docs/papers/fi
 
 Full notes in [Build from source](docs/build.md).
 
-## 🧬 Lineage
+## Lineage
 
 **RatioMaster** → [NikolayIT/RatioMaster.NET](https://github.com/NikolayIT/RatioMaster.NET) (MIT) → [sergiye/RatioMaster](https://github.com/sergiye/RatioMaster) → **Seedforger**: a .NET 8 rewrite adding a modern client database, HTTPS, swarm-aware announces, a real peer-wire engine, a campaign orchestrator, a guided setup, i18n, themes, portable settings — and a formal science annex.
 
-## 📜 License
+## License
 
 [MIT](LICENSE). Provided as-is, without warranty.
