@@ -33,9 +33,17 @@ namespace Seedforger.UI {
     private readonly Label ratioValue = new Label();
     private readonly Label ratioCaption = new Label();
     private readonly Label upValue = new Label();
+    private readonly Label downValue = new Label();
+    private readonly Label speedValue = new Label();
     private readonly Label swarmValue = new Label();
+    private readonly Label elapsedValue = new Label();
     private readonly Label stateValue = new Label();
     private readonly RichTextBox log = new RichTextBox();
+
+    // Live up-speed (bytes/s) and elapsed are derived from the poll, not the engine.
+    private long prevUpBytes;
+    private DateTime prevTick = DateTime.UtcNow;
+    private DateTime? startedAt;
 
     private GraphForm graphForm;
 
@@ -55,9 +63,10 @@ namespace Seedforger.UI {
     internal NewMainForm() {
       Text = AppInfo.Title;
       BackColor = Modern.Bg;
-      Font = Modern.F(9.5f);
-      ClientSize = new Size(900, 640);
-      MinimumSize = new Size(820, 560);
+      Font = Modern.F(9f);
+      // Compact, RatioMaster-dense: everything on one screen, no wasted space.
+      ClientSize = new Size(716, 470);
+      MinimumSize = new Size(700, 470);
       StartPosition = FormStartPosition.CenterScreen;
       try { Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath); } catch { }
       Theme.EnableDarkAppMode();
@@ -223,14 +232,34 @@ namespace Seedforger.UI {
       var running = engine.IsRunning;
       startBtn.Enabled = !running;
       stopBtn.Enabled = running;
+
       var up = Math.Max(0, engine.UploadedBytes);
       var down = Math.Max(0, engine.DownloadedBytes);
       // A pure seeder downloads nothing, so the ratio is mathematically infinite —
       // showing "0.00" or "∞" both confuse. We show "—" and explain it in a tooltip.
       ratioValue.Text = down > 0 ? ((double) up / down).ToString("0.00") : "—";
       upValue.Text = RM.FormatFileSize((ulong) up);
+      downValue.Text = RM.FormatFileSize((ulong) down);
+
+      // Live up-speed from the byte delta between polls; elapsed from the first running tick.
+      var now = DateTime.UtcNow;
+      var dt = (now - prevTick).TotalSeconds;
+      if (running) {
+        if (startedAt == null) startedAt = now;
+        if (dt > 0 && up >= prevUpBytes) {
+          var bps = (up - prevUpBytes) / dt;
+          speedValue.Text = RM.FormatFileSize((ulong) Math.Max(0, bps)) + "/s";
+        }
+        elapsedValue.Text = (now - startedAt.Value).ToString(@"hh\:mm\:ss");
+      } else {
+        startedAt = null;
+        speedValue.Text = "–";
+        elapsedValue.Text = "–";
+      }
+      prevUpBytes = up; prevTick = now;
+
       var seed = engine.SeederCount; var leech = engine.LeecherCount;
-      swarmValue.Text = (seed < 0 ? "–" : seed.ToString()) + "  /  " + (leech < 0 ? "–" : leech.ToString());
+      swarmValue.Text = (seed < 0 ? "–" : seed.ToString()) + " / " + (leech < 0 ? "–" : leech.ToString());
       stateValue.Text = running ? T("seeding") : T("idle");
       stateValue.ForeColor = running ? Modern.Green : Modern.Muted;
     }
@@ -244,25 +273,24 @@ namespace Seedforger.UI {
     // ---- header + navigation ----
 
     private void BuildHeader() {
-      var header = new Panel { Dock = DockStyle.Top, Height = 64, BackColor = Modern.Bg };
+      var header = new Panel { Dock = DockStyle.Top, Height = 46, BackColor = Modern.Bg };
 
-      var title = new Label { Text = "Seedforger", Font = Modern.Semibold(15f), ForeColor = Modern.Text, AutoSize = true, Location = new Point(22, 12), BackColor = Modern.Bg };
-      var sub = Reg(new Label { Font = Modern.F(8.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(24, 36), BackColor = Modern.Bg }, "subtitle");
+      var title = new Label { Text = "Seedforger", Font = Modern.Semibold(13f), ForeColor = Modern.Text, AutoSize = true, Location = new Point(16, 12), BackColor = Modern.Bg };
 
       var nav = new FlowLayoutPanel {
         Dock = DockStyle.Right, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
         FlowDirection = FlowDirection.RightToLeft, WrapContents = false, BackColor = Modern.Bg,
-        Padding = new Padding(0, 17, 14, 0),
+        Padding = new Padding(0, 9, 12, 0),
       };
       // RightToLeft: first added sits rightmost, so add in reverse visual order.
-      nav.Controls.Add(MakeNav("?", 40, ShowHelpMenu, tipKey: "tip.help"));
-      nav.Controls.Add(MakeNav("⚙", 40, ShowSettingsMenu, tipKey: "tip.settings"));
-      nav.Controls.Add(MakeNav("Tools", 64, ShowToolsMenu, tipKey: "tip.tools", textKey: "nav.tools"));
-      nav.Controls.Add(MakeNav("Campaigns", 94, _ => OpenCampaigns(), tipKey: "tip.campaigns", textKey: "nav.campaigns"));
-      nav.Controls.Add(MakeNav("Guided", 74, _ => OpenGuided(), tipKey: "tip.guided", textKey: "nav.guided"));
+      nav.Controls.Add(MakeNav("?", 34, ShowHelpMenu, tipKey: "tip.help"));
+      nav.Controls.Add(MakeNav("⚙", 34, ShowSettingsMenu, tipKey: "tip.settings"));
+      nav.Controls.Add(MakeNav("Tools", 58, ShowToolsMenu, tipKey: "tip.tools", textKey: "nav.tools"));
+      nav.Controls.Add(MakeNav("Campaigns", 88, _ => OpenCampaigns(), tipKey: "tip.campaigns", textKey: "nav.campaigns"));
+      nav.Controls.Add(MakeNav("Guided", 66, _ => OpenGuided(), tipKey: "tip.guided", textKey: "nav.guided"));
 
+      header.Controls.Add(new Panel { Dock = DockStyle.Bottom, Height = 1, BackColor = Modern.Border });
       header.Controls.Add(nav);
-      header.Controls.Add(sub);
       header.Controls.Add(title);
       Controls.Add(header);
     }
@@ -475,92 +503,92 @@ namespace Seedforger.UI {
     // ---- content layout ----
 
     private void BuildLog() {
-      var wrap = new Panel { Dock = DockStyle.Bottom, Height = 168, BackColor = Modern.Bg, Padding = new Padding(20, 6, 20, 16) };
-      var lbl = Reg(new Label { Font = Modern.Semibold(8f), ForeColor = Modern.Muted, AutoSize = true, Dock = DockStyle.Top, BackColor = Modern.Bg }, "activity");
+      var wrap = new Panel { Dock = DockStyle.Bottom, Height = 132, BackColor = Modern.Bg, Padding = new Padding(14, 2, 14, 12) };
+      var lbl = Reg(new Label { Font = Modern.Semibold(7.5f), ForeColor = Modern.Muted, AutoSize = true, Dock = DockStyle.Top, BackColor = Modern.Bg }, "activity");
       log.BorderStyle = BorderStyle.None; log.BackColor = Modern.LogBg; log.ForeColor = Modern.LogText;
-      log.Font = new Font("Cascadia Mono", 8.5f, FontStyle.Regular, GraphicsUnit.Point);
+      log.Font = new Font("Cascadia Mono", 8f, FontStyle.Regular, GraphicsUnit.Point);
       log.ReadOnly = true; log.Dock = DockStyle.Fill; log.WordWrap = true; log.ScrollBars = RichTextBoxScrollBars.Vertical;
-      var host = new Panel { Dock = DockStyle.Fill, BackColor = Modern.LogBg, Padding = new Padding(12, 10, 8, 10) };
+      var host = new Panel { Dock = DockStyle.Fill, BackColor = Modern.LogBg, Padding = new Padding(10, 8, 6, 8) };
       host.Controls.Add(log);
       wrap.Controls.Add(host); wrap.Controls.Add(lbl);
       Controls.Add(wrap);
     }
 
     private void BuildContent() {
-      var content = new Panel { Dock = DockStyle.Fill, BackColor = Modern.Bg, Padding = new Padding(20, 4, 20, 4) };
+      var content = new Panel { Dock = DockStyle.Fill, BackColor = Modern.Bg, Padding = new Padding(0) };
       Controls.Add(content);
       content.BringToFront();
 
-      // ----- left config column -----
-      var left = new Panel { BackColor = Modern.Bg, Location = new Point(20, 6), Size = new Size(520, 380), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom };
-      content.Controls.Add(left);
+      // ----- left: one dense SETUP card -----
+      var setup = new Card { Location = new Point(14, 4), Size = new Size(384, 252), Anchor = AnchorStyles.Top | AnchorStyles.Left };
+      content.Controls.Add(setup);
+      setup.Controls.Add(Reg(new Label { Font = Modern.Semibold(8f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(14, 12), BackColor = Modern.Card }, "card.setup"));
 
-      var torrentCard = MakeCard(left, 0, "card.torrent", 92);
-      torrentField.SetBounds(16, 40, 360, 38); torrentField.Box.ReadOnly = true; torrentField.Box.Text = T("no_torrent");
-      var browse = Reg(new PillButton { Fill = Modern.Accent, Bounds = new Rectangle(388, 40, 108, 38), Font = Modern.F(9.5f) }, "browse");
+      // torrent
+      setup.Controls.Add(Reg(new Label { Font = Modern.F(7.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(14, 34), BackColor = Modern.Card }, "card.torrent"));
+      torrentField.SetBounds(14, 50, 250, 32); torrentField.Box.ReadOnly = true; torrentField.Box.Text = T("no_torrent");
+      var browse = Reg(new PillButton { Fill = Modern.Accent, Bounds = new Rectangle(270, 50, 100, 32), Font = Modern.F(9f) }, "browse");
       browse.Click += (s, e) => Browse();
-      torrentCard.Controls.Add(torrentField); torrentCard.Controls.Add(browse);
+      setup.Controls.Add(torrentField); setup.Controls.Add(browse);
 
-      var clientCard = MakeCard(left, 104, "card.client", 96);
-      var appLbl = Reg(new Label { Font = Modern.F(8.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(16, 36), BackColor = Modern.Card }, "client");
-      var verLbl = Reg(new Label { Font = Modern.F(8.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(258, 36), BackColor = Modern.Card }, "version");
-      StyleCombo(familyBox); familyBox.SetBounds(16, 54, 230, 30);
-      StyleCombo(versionBox); versionBox.SetBounds(258, 54, 120, 30);
+      // client
+      setup.Controls.Add(Reg(new Label { Font = Modern.F(7.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(14, 90), BackColor = Modern.Card }, "hdr.client"));
+      StyleCombo(familyBox); familyBox.SetBounds(14, 107, 180, 30);
+      StyleCombo(versionBox); versionBox.SetBounds(198, 107, 84, 30);
       Reg(advancedBtn, "advanced");
-      advancedBtn.SetBounds(392, 53, 104, 32); advancedBtn.Font = Modern.F(9f); advancedBtn.TextColor = Modern.Text;
+      advancedBtn.SetBounds(286, 107, 84, 30); advancedBtn.Font = Modern.F(8.5f); advancedBtn.TextColor = Modern.Text;
       advancedBtn.Click += (s, e) => engine.ShowAdvanced();
       RegTip(advancedBtn, "tip.advanced");
       RegTip(familyBox, "tip.client");
-      clientCard.Controls.Add(appLbl); clientCard.Controls.Add(verLbl);
-      clientCard.Controls.Add(familyBox); clientCard.Controls.Add(versionBox); clientCard.Controls.Add(advancedBtn);
+      setup.Controls.Add(familyBox); setup.Controls.Add(versionBox); setup.Controls.Add(advancedBtn);
 
-      var speedCard = MakeCard(left, 208, "card.speed", 96);
-      var upLbl = Reg(new Label { Font = Modern.F(8.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(16, 38), BackColor = Modern.Card }, "upload_kbs");
-      uploadField.SetBounds(16, 56, 150, 34);
-      var modeLbl = Reg(new Label { Font = Modern.F(8.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(186, 38), BackColor = Modern.Card }, "mode");
-      StyleCombo(modeBox); modeBox.SetBounds(186, 57, 310, 30);
-      speedCard.Controls.Add(upLbl); speedCard.Controls.Add(uploadField); speedCard.Controls.Add(modeLbl); speedCard.Controls.Add(modeBox);
+      // mode + upload
+      setup.Controls.Add(Reg(new Label { Font = Modern.F(7.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(14, 144), BackColor = Modern.Card }, "hdr.mode"));
+      StyleCombo(modeBox); modeBox.SetBounds(14, 161, 230, 30);
+      setup.Controls.Add(Reg(new Label { Font = Modern.F(7.5f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(250, 144), BackColor = Modern.Card }, "hdr.upload"));
+      uploadField.SetBounds(250, 160, 120, 32);
+      setup.Controls.Add(modeBox); setup.Controls.Add(uploadField);
 
+      // actions
       Reg(startBtn, "start_seeding"); Reg(stopBtn, "stop");
-      startBtn.SetBounds(0, 320, 250, 46); startBtn.Font = Modern.Semibold(11f);
-      stopBtn.SetBounds(262, 320, 150, 46); stopBtn.Font = Modern.Semibold(11f);
+      startBtn.SetBounds(14, 204, 230, 36); startBtn.Font = Modern.Semibold(10f);
+      stopBtn.SetBounds(250, 204, 120, 36); stopBtn.Font = Modern.Semibold(10f);
       startBtn.Click += (s, e) => Start();
       stopBtn.Click += (s, e) => engine.CampaignStop();
-      left.Controls.Add(startBtn); left.Controls.Add(stopBtn);
+      setup.Controls.Add(startBtn); setup.Controls.Add(stopBtn);
 
-      // ----- right stats column -----
-      var statsCard = new Card { Location = new Point(556, 6), Size = new Size(300, 366), Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom };
-      content.Controls.Add(statsCard);
-      statsCard.Controls.Add(Reg(new Label { Font = Modern.Semibold(8f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(18, 16), BackColor = Modern.Card }, "live"));
+      // ----- right: a compact LIVE readout with the ratio front and centre -----
+      var live = new Card { Location = new Point(412, 4), Size = new Size(290, 252), Anchor = AnchorStyles.Top | AnchorStyles.Right };
+      content.Controls.Add(live);
+      live.Controls.Add(Reg(new Label { Font = Modern.Semibold(8f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(14, 12), BackColor = Modern.Card }, "live"));
 
-      ratioValue.Font = new Font(Modern.Family, 40f, FontStyle.Bold, GraphicsUnit.Point);
-      ratioValue.ForeColor = Modern.Text; ratioValue.AutoSize = false; ratioValue.TextAlign = ContentAlignment.MiddleLeft;
-      ratioValue.SetBounds(16, 40, 270, 64); ratioValue.BackColor = Modern.Card; ratioValue.Text = "—";
-      statsCard.Controls.Add(ratioValue);
-      ratioCaption.Font = Modern.F(8f); ratioCaption.ForeColor = Modern.Muted;
-      ratioCaption.AutoSize = true; ratioCaption.Location = new Point(18, 106); ratioCaption.BackColor = Modern.Card;
+      ratioCaption.Font = Modern.F(7.5f); ratioCaption.ForeColor = Modern.Muted;
+      ratioCaption.AutoSize = true; ratioCaption.Location = new Point(16, 32); ratioCaption.BackColor = Modern.Card;
       Reg(ratioCaption, "ratio");
-      statsCard.Controls.Add(ratioCaption);
-      // The "—" is not obvious, so explain it right on the numbers.
+      live.Controls.Add(ratioCaption);
+      ratioValue.Font = new Font(Modern.Family, 26f, FontStyle.Bold, GraphicsUnit.Point);
+      ratioValue.ForeColor = Modern.Text; ratioValue.AutoSize = false; ratioValue.TextAlign = ContentAlignment.MiddleLeft;
+      ratioValue.SetBounds(14, 44, 262, 42); ratioValue.BackColor = Modern.Card; ratioValue.Text = "—";
+      live.Controls.Add(ratioValue);
       RegTip(ratioValue, "tip.ratio");
       RegTip(ratioCaption, "tip.ratio");
 
-      AddStat(statsCard, 150, "uploaded", upValue);
-      AddStat(statsCard, 210, "swarm", swarmValue);
-      AddStat(statsCard, 270, "status", stateValue);
+      var sep = new Panel { BackColor = Modern.Border, Bounds = new Rectangle(14, 94, 262, 1) };
+      live.Controls.Add(sep);
+
+      AddRow(live, 104, "uploaded", upValue);
+      AddRow(live, 128, "downloaded", downValue);
+      AddRow(live, 152, "up_speed", speedValue);
+      AddRow(live, 176, "swarm", swarmValue);
+      AddRow(live, 200, "elapsed", elapsedValue);
+      AddRow(live, 224, "status", stateValue);
     }
 
-    private Card MakeCard(Panel parent, int y, string titleKey, int height) {
-      var card = new Card { Location = new Point(0, y), Size = new Size(516, height), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
-      parent.Controls.Add(card);
-      card.Controls.Add(Reg(new Label { Font = Modern.Semibold(8f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(16, 14), BackColor = Modern.Card }, titleKey));
-      return card;
-    }
-
-    private void AddStat(Card parent, int y, string labelKey, Label value) {
-      parent.Controls.Add(Reg(new Label { Font = Modern.F(8f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(18, y), BackColor = Modern.Card }, labelKey));
-      value.Font = Modern.Semibold(13f); value.ForeColor = Modern.Text; value.AutoSize = false;
-      value.SetBounds(16, y + 16, 270, 26); value.BackColor = Modern.Card; value.TextAlign = ContentAlignment.MiddleLeft;
+    /// <summary>A tight label-left / value-right readout row (RatioMaster density).</summary>
+    private void AddRow(Card parent, int y, string labelKey, Label value) {
+      parent.Controls.Add(Reg(new Label { Font = Modern.F(8f), ForeColor = Modern.Muted, AutoSize = true, Location = new Point(16, y + 2), BackColor = Modern.Card }, labelKey));
+      value.Font = Modern.Semibold(10f); value.ForeColor = Modern.Text; value.AutoSize = false;
+      value.SetBounds(120, y, 156, 19); value.BackColor = Modern.Card; value.TextAlign = ContentAlignment.MiddleRight;
       value.Text = "–";
       parent.Controls.Add(value);
     }
