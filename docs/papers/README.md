@@ -36,7 +36,7 @@ boundary regimes Paper 1 measures (a fresh torrent, thin monitoring coverage).
 
 ```bash
 # from the repository root
-dotnet run --project Seedforger.Integrity.Figures -c Release -- docs/papers/figures
+dotnet run --project src/Seedforger.Integrity.Figures -c Release -- docs/papers/figures
 ```
 
 This rewrites the five SVGs and [`figures/metrics.json`](figures/metrics.json). CI runs

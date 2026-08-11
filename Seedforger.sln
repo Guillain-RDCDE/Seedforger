@@ -3,19 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger", "Seedforger\Seedforger.csproj", "{C732F44B-C910-4C9B-A97F-38DFFAB3C957}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger", "src\Seedforger\Seedforger.csproj", "{C732F44B-C910-4C9B-A97F-38DFFAB3C957}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.Tests", "Seedforger.Tests\Seedforger.Tests.csproj", "{655A0D0D-1564-4AEE-87BC-D25FD791C757}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.Tests", "tests\Seedforger.Tests\Seedforger.Tests.csproj", "{655A0D0D-1564-4AEE-87BC-D25FD791C757}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.Core", "Seedforger.Core\Seedforger.Core.csproj", "{81F474A9-3E3A-452E-BFB7-331D89B57A30}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.Core", "src\Seedforger.Core\Seedforger.Core.csproj", "{81F474A9-3E3A-452E-BFB7-331D89B57A30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.Cli", "Seedforger.Cli\Seedforger.Cli.csproj", "{F8EA7BDD-F57E-41B7-8B46-058C828CFBD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.Cli", "src\Seedforger.Cli\Seedforger.Cli.csproj", "{F8EA7BDD-F57E-41B7-8B46-058C828CFBD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.App", "Seedforger.App\Seedforger.App.csproj", "{143AD4CA-29DE-4BBD-9002-1BC78BD8D487}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.App", "src\Seedforger.App\Seedforger.App.csproj", "{143AD4CA-29DE-4BBD-9002-1BC78BD8D487}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.Integrity", "Seedforger.Integrity\Seedforger.Integrity.csproj", "{4F56B4A9-4C9E-483D-92F4-738D91827049}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.Integrity", "src\Seedforger.Integrity\Seedforger.Integrity.csproj", "{4F56B4A9-4C9E-483D-92F4-738D91827049}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.Integrity.Figures", "Seedforger.Integrity.Figures\Seedforger.Integrity.Figures.csproj", "{063B0A06-E7FA-4F9E-9DC1-8982F45EAA78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seedforger.Integrity.Figures", "src\Seedforger.Integrity.Figures\Seedforger.Integrity.Figures.csproj", "{063B0A06-E7FA-4F9E-9DC1-8982F45EAA78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

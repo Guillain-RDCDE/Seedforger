@@ -236,8 +236,8 @@
     <p>The engineering conclusion isn't despair — it's redirection. The only lever that moves the ceiling is <em>w</em>: real upload, actually served. Which is why Seedforger's most valuable component is the one that isn't about faking anything at all — the real, hash-verified peer-wire engine that genuinely seeds.</p>
     <div class="note"><b>Reproduce every number.</b> The whole story is a runnable, deterministic model — no hand-waving. The figures on this page are regenerated from the code, and 172 tests pin the science with tolerances.
       <pre><span class="c"># from the repository root</span>
-dotnet run --project <span class="g">Seedforger.Integrity.Figures</span> -c Release -- docs/papers/figures
-dotnet test  <span class="g">Seedforger.Tests</span></pre>
+dotnet run --project <span class="g">src/Seedforger.Integrity.Figures</span> -c Release -- docs/papers/figures
+dotnet test  <span class="g">tests/Seedforger.Tests</span></pre>
     </div>
     <p class="muted" style="font-size:15px">The two papers are defensive and theoretical. They describe how a tracker protects itself and prove a limit on the client side — nothing here is an evasion recipe. The point is exactly the opposite: the durable engineering lives on the honest-seeding side.</p>
   </div>

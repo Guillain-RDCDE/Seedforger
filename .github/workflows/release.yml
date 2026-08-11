@@ -25,13 +25,13 @@ jobs:
       - name: Publish Windows GUI (lite, framework-dependent) + fat + CLI
         shell: bash
         run: |
-          dotnet publish Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contained false \
+          dotnet publish src/Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contained false \
             -p:PublishSingleFile=true -o out/lite
-          dotnet publish Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contained true \
+          dotnet publish src/Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contained true \
             -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o out/fat
-          dotnet publish Seedforger.Cli/Seedforger.Cli.csproj -c Release -r win-x64 --self-contained true \
+          dotnet publish src/Seedforger.Cli/Seedforger.Cli.csproj -c Release -r win-x64 --self-contained true \
             -p:PublishSingleFile=true -o out/cli
-          dotnet publish Seedforger.App/Seedforger.App.csproj -c Release -r win-x64 --self-contained true \
+          dotnet publish src/Seedforger.App/Seedforger.App.csproj -c Release -r win-x64 --self-contained true \
             -p:PublishSingleFile=true -o out/gui-avalonia
 
       # Optional Authenticode signing — runs only if the cert secret is present, so
@@ -78,9 +78,9 @@ jobs:
 
       - name: Publish CLI + Avalonia GUI (${{ matrix.rid }})
         run: |
-          dotnet publish Seedforger.Cli/Seedforger.Cli.csproj -c Release -r ${{ matrix.rid }} \
+          dotnet publish src/Seedforger.Cli/Seedforger.Cli.csproj -c Release -r ${{ matrix.rid }} \
             --self-contained true -p:PublishSingleFile=true -o out/cli
-          dotnet publish Seedforger.App/Seedforger.App.csproj -c Release -r ${{ matrix.rid }} \
+          dotnet publish src/Seedforger.App/Seedforger.App.csproj -c Release -r ${{ matrix.rid }} \
             --self-contained true -p:PublishSingleFile=true -o out/gui
 
       - name: Stage named artifacts
