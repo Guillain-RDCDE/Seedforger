@@ -55,6 +55,7 @@ namespace Seedforger.UI {
     private readonly NotifyIcon tray = new NotifyIcon();
     private bool reallyExit;
     private bool trayHintShown;
+    private bool minimizingFromClose;
 
     private static string T(string key) => UiStrings.Get(key);
     private TC Reg<TC>(TC c, string key) where TC : Control { c.Text = UiStrings.Get(key); loc.Add((c, key)); return c; }
@@ -86,7 +87,7 @@ namespace Seedforger.UI {
       StartUpdateCheck();
     }
 
-    // ---- tray (minimize / close to the notification area) ----
+    // ---- window behaviour: tray on minimize, taskbar on close ----
 
     private void SetupTray() {
       tray.Icon = Icon ?? System.Drawing.SystemIcons.Application;
@@ -101,17 +102,21 @@ namespace Seedforger.UI {
       tray.DoubleClick += (s, e) => RestoreFromTray();
 
       Resize += (s, e) => {
-        if (WindowState == FormWindowState.Minimized && Settings.Current.MinimizeToTray) HideToTray();
+        if (WindowState == FormWindowState.Minimized && Settings.Current.MinimizeToTray && !minimizingFromClose)
+          HideToTray();
       };
       FormClosing += (s, e) => {
-        // Tuck into the tray for a user-initiated close (X button, Alt+F4) — but
-        // never fight a real OS shutdown, task-manager kill or explicit app exit.
+        // A user-initiated close (X button, Alt+F4) shouldn't kill a run in
+        // progress, so it minimizes to the taskbar instead — where the window
+        // stays plainly visible, unlike a tray icon Windows 11 hides in the
+        // overflow. Quit for real from the ⚙ menu or the tray icon. Never fight
+        // a real OS shutdown, task-manager kill or explicit app exit.
         var systemClose = e.CloseReason == CloseReason.WindowsShutDown
           || e.CloseReason == CloseReason.TaskManagerClosing
           || e.CloseReason == CloseReason.ApplicationExitCall;
         if (!reallyExit && !systemClose && Settings.Current.CloseToTray) {
           e.Cancel = true;
-          try { HideToTray(); } catch { }
+          try { MinimizeToTaskbar(); } catch { }
           return;
         }
         // Real exit: stop the main engine and any campaign engines cleanly.
@@ -119,6 +124,22 @@ namespace Seedforger.UI {
         try { campaignRunner?.Stop(); } catch { }
         tray.Visible = false;
       };
+    }
+
+    /// <summary>
+    /// Minimize to the taskbar rather than to the notification area: the button
+    /// stays where the user is looking. The flag keeps the Resize handler from
+    /// re-routing this into the tray when "minimize to tray" is on — that option
+    /// is about the minimize button, not about closing.
+    /// </summary>
+    private void MinimizeToTaskbar() {
+      minimizingFromClose = true;
+      try {
+        ShowInTaskbar = true;
+        if (!Visible) Show();
+        WindowState = FormWindowState.Minimized;
+      }
+      finally { minimizingFromClose = false; }
     }
 
     private void HideToTray() {
@@ -378,15 +399,21 @@ namespace Seedforger.UI {
       m.Items.Add(conn);
       m.Items.Add(DarkMenu.Item(T("menu.active_hours"), (s, e) => SetActiveHours()));
 
-      // Tray behaviour.
+      // Window behaviour: the minimize button can go to the notification area, the
+      // close button minimizes to the taskbar.
       m.Items.Add(new ToolStripSeparator());
       var minTray = DarkMenu.Item(T("menu.minimize_tray"), null, Settings.Current.MinimizeToTray);
       minTray.Click += (s, e) => { Settings.Current.MinimizeToTray = minTray.Checked; Settings.Current.Save(); };
-      var closeTray = DarkMenu.Item(T("menu.close_tray"), null, Settings.Current.CloseToTray);
-      closeTray.Click += (s, e) => { Settings.Current.CloseToTray = closeTray.Checked; Settings.Current.Save(); };
+      var closeMin = DarkMenu.Item(T("menu.close_minimizes"), null, Settings.Current.CloseToTray);
+      closeMin.Click += (s, e) => { Settings.Current.CloseToTray = closeMin.Checked; Settings.Current.Save(); };
       var balloon = DarkMenu.Item(T("menu.tray_balloon"), null, Settings.Current.BallonTip);
       balloon.Click += (s, e) => { Settings.Current.BallonTip = balloon.Checked; Settings.Current.Save(); };
-      m.Items.Add(minTray); m.Items.Add(closeTray); m.Items.Add(balloon);
+      m.Items.Add(minTray); m.Items.Add(closeMin); m.Items.Add(balloon);
+
+      // With the X button minimizing, quitting needs a home that isn't the tray
+      // icon (which Windows 11 likes to hide).
+      m.Items.Add(new ToolStripSeparator());
+      m.Items.Add(DarkMenu.Item(T("menu.quit"), (s, e) => { reallyExit = true; Close(); }));
 
       m.Items.Add(new ToolStripSeparator());
       var lang = DarkMenu.Item(T("menu.language"));

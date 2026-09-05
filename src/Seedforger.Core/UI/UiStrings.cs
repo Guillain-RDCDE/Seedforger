@@ -70,8 +70,10 @@ namespace Seedforger.UI {
       ["menu.connection"]   = ("Connection profile", "Profil de connexion"),
       ["menu.active_hours"] = ("Active hours…", "Heures actives…"),
       ["menu.minimize_tray"]= ("Minimize to tray", "Réduire dans la zone de notification"),
-      ["menu.close_tray"]   = ("Close to tray", "Fermer dans la zone de notification"),
+      ["menu.close_minimizes"] = ("Closing minimizes to the taskbar",
+                                  "La croix réduit dans la barre des tâches"),
       ["menu.tray_balloon"] = ("Show tray notification", "Afficher la bulle de notification"),
+      ["menu.quit"]         = ("Quit Seedforger", "Quitter Seedforger"),
       ["menu.language"]     = ("Language", "Langue"),
       // menus — help
       ["menu.about"]        = ("About Seedforger", "À propos de Seedforger"),

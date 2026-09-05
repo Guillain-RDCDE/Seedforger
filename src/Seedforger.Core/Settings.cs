@@ -41,7 +41,10 @@ namespace Seedforger {
     #region App-level options
 
     public bool BallonTip { get; set; } = false;
+    /// <summary>The minimize button hides the window into the notification area.</summary>
     public bool MinimizeToTray { get; set; } = true;
+    /// <summary>The close button minimizes to the taskbar instead of quitting.
+    /// (Kept under its original name so existing settings.json files still apply.)</summary>
     public bool CloseToTray { get; set; } = true;
     public bool RealisticSpeed { get; set; } = true;
     public bool DarkMode { get; set; } = false;
