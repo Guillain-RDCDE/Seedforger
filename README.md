@@ -43,7 +43,7 @@ No installer — a single file. Grab the build for your platform from the [**lat
 | Platform | Download | Requires |
 |---|---|---|
 | **Windows** (recommended) | `Seedforger-lite-win-x64.exe` &nbsp;·&nbsp; ~0.5 MB | the free [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0/runtime) |
-| **Windows** (portable) | `Seedforger-win-x64.exe` &nbsp;·&nbsp; ~68 MB | nothing — fully self-contained |
+| **Windows** (portable) | `Seedforger-win-x64.exe` &nbsp;·&nbsp; ~24 MB | nothing — fully self-contained |
 | **Linux / macOS** | `Seedforger-gui-*` (GUI) · `Seedforger-cli-*` (headless) | nothing — self-contained |
 
 The **graphical app** and a **headless command line** drive the same engine:

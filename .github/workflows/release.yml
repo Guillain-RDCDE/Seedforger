@@ -22,13 +22,15 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      # Trimming and single-file compression for the self-contained builds live in
+      # src/Publish.props, so every publish path gets them.
       - name: Publish Windows GUI (lite, framework-dependent) + fat + CLI
         shell: bash
         run: |
           dotnet publish src/Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contained false \
             -p:PublishSingleFile=true -o out/lite
           dotnet publish src/Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contained true \
-            -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o out/fat
+            -p:PublishSingleFile=true -o out/fat
           dotnet publish src/Seedforger.Cli/Seedforger.Cli.csproj -c Release -r win-x64 --self-contained true \
             -p:PublishSingleFile=true -o out/cli
           dotnet publish src/Seedforger.App/Seedforger.App.csproj -c Release -r win-x64 --self-contained true \

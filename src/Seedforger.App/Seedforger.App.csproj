@@ -15,6 +15,17 @@
     <!-- Avalonia's native libs (SkiaSharp/HarfBuzz) must self-extract from a
          single-file publish, otherwise the window can't render. -->
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+
+  </PropertyGroup>
+
+  <Import Project="..\Publish.props" />
+
+  <!-- After the import, so it can react to PublishTrimmed being set there.
+       Avalonia is trim-annotated and ships trimmer descriptors, but partial mode
+       is the conservative one: it drops the unused BCL without touching the
+       reflection Avalonia genuinely needs. -->
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <TrimMode>partial</TrimMode>
   </PropertyGroup>
 
   <ItemGroup>

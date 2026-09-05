@@ -1,0 +1,34 @@
+<!--
+  Shared publish settings for the three shipping executables (WinForms GUI,
+  Avalonia GUI, headless CLI).
+
+  A self-contained build carries an entire .NET runtime, which is why the
+  "portable" download used to be ~68 MB against RatioMaster's ~600 KB. Most of
+  that is dead weight: the SDK ships the runtime pack whole, so a WinForms app
+  drags all of WPF along with it. Trimming the self-contained builds cuts the
+  download by about two thirds.
+
+  Trimming flips two feature switches these apps rely on, so both are turned
+  back on: reflection-based System.Text.Json (settings, clients.json and
+  campaign files all round-trip by reflection) and built-in COM interop.
+-->
+<Project>
+
+  <PropertyGroup Condition="'$(SelfContained)' == 'true'">
+    <PublishTrimmed>true</PublishTrimmed>
+    <EnableCompressionInSingleFile Condition="'$(PublishSingleFile)' == 'true'">true</EnableCompressionInSingleFile>
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <!-- Reflection-driven JSON on our own model types: the roots below answer the
+         warnings, so don't spam the build log with them. -->
+    <NoWarn>$(NoWarn);IL2026;IL2104;IL2105</NoWarn>
+  </PropertyGroup>
+
+  <!-- Keep every type of ours: settings, clients and campaigns round-trip through
+       System.Text.Json by reflection, which the trimmer cannot see. -->
+  <ItemGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <TrimmerRootAssembly Include="Seedforger.Core" />
+    <TrimmerRootAssembly Include="$(AssemblyName)" />
+  </ItemGroup>
+
+</Project>

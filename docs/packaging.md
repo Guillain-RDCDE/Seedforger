@@ -12,7 +12,7 @@ You can always just download and run — no installer, no runtime (except the ti
 | File | Platform | What |
 |---|---|---|
 | `Seedforger-lite-win-x64.exe` | Windows | GUI, ~0.5 MB, needs the .NET 8 Desktop Runtime |
-| `Seedforger-win-x64.exe` | Windows | GUI, self-contained (~68 MB) |
+| `Seedforger-win-x64.exe` | Windows | GUI, self-contained (~24 MB) |
 | `Seedforger-gui-win-x64.exe` | Windows | Cross-platform Avalonia GUI |
 | `Seedforger-cli-win-x64.exe` | Windows | Headless CLI / daemon |
 | `Seedforger-cli-linux-x64`, `-linux-arm64` | Linux | Headless CLI / daemon |

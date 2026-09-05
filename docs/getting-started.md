@@ -13,11 +13,11 @@ Grab a build from the [latest release](../../../releases/latest) — pick the on
 | Download | Size | Starts up | Needs |
 |---|---|---|---|
 | ⭐ **`Seedforger-lite.exe`** *(recommended)* | ~0.5 MB | **fastest** | the free [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0/runtime) (one-time install) |
-| **`Seedforger.exe`** | ~68 MB | slower to launch | **nothing at all** — fully self-contained |
+| **`Seedforger.exe`** | ~24 MB | slower to launch | **nothing at all** — fully self-contained |
 
 Either way it's a **single file, no installer**, that you can drop anywhere (USB stick included). Double-click and go.
 
-> **Why two?** The self-contained build carries the whole .NET runtime inside it, so it's big and your antivirus rescans all 68 MB on every launch — that's what makes it feel slow. The lite build is a tiny 0.5 MB and starts roughly twice as fast; it just asks you to install the .NET runtime once. If you're not sure whether you have .NET, download lite first — Windows will tell you (and hand you the installer) if it's missing.
+> **Why two?** The self-contained build carries the whole .NET runtime inside it, so it's big and your antivirus rescans all of it on every launch — that's what makes it feel slow. (It is trimmed down from ~68 MB to ~24 MB, but that is still ~50× the lite build.) The lite build is a tiny 0.5 MB and starts roughly twice as fast; it just asks you to install the .NET runtime once. If you're not sure whether you have .NET, download lite first — Windows will tell you (and hand you the installer) if it's missing.
 
 <a id="guided-setup"></a>
 ## 2. Easiest start — guided setup 🧭

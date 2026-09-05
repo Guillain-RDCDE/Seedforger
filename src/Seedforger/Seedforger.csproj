@@ -21,10 +21,55 @@
     <!-- Single-file publish defaults: dotnet publish -c Release -r win-x64 -->
     <RuntimeIdentifier Condition="'$(PublishSingleFile)' == 'true'">win-x64</RuntimeIdentifier>
     <SelfContained Condition="'$(PublishSingleFile)' == 'true'">false</SelfContained>
+
+  </PropertyGroup>
+
+  <Import Project="..\Publish.props" />
+
+  <!-- After the import, so it can react to PublishTrimmed being set there.
+       Trimming the self-contained build takes the portable download from ~68 MB
+       to ~24 MB. WinForms is not officially trim-annotated, hence the suppression;
+       the roots below keep it whole anyway. -->
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <TrimMode>full</TrimMode>
+    <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Seedforger.Core\Seedforger.Core.csproj" />
   </ItemGroup>
+
+  <!-- WinForms is not trim-annotated: trimming it throws TypeLoadException inside
+       the modal message loop. Keep it whole and let the trimmer drop WPF and the
+       unused BCL instead — that is where the weight actually is. -->
+  <ItemGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <TrimmerRootAssembly Include="System.Windows.Forms" />
+    <TrimmerRootAssembly Include="System.Windows.Forms.Primitives" />
+    <TrimmerRootAssembly Include="System.Drawing.Common" />
+    <TrimmerRootAssembly Include="System.Drawing.Primitives" />
+  </ItemGroup>
+
+  <!-- WPF rides along with the WindowsDesktop runtime pack even though this is a
+       WinForms app: the pack is shipped whole and the trimmer keeps its assemblies
+       because nothing tells it they are dead. Nothing here ever loads them, so drop
+       them outright — another ~7 MB before compression. -->
+  <Target Name="DropWpfFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+        Condition="$([System.String]::Copy('%(Filename)').StartsWith('Presentation'))
+                or $([System.String]::Copy('%(Filename)').StartsWith('UIAutomation'))
+                or '%(Filename)' == 'WindowsBase'
+                or '%(Filename)' == 'System.Xaml'
+                or '%(Filename)' == 'ReachFramework'
+                or '%(Filename)' == 'System.Printing'
+                or '%(Filename)' == 'System.Windows.Controls.Ribbon'
+                or '%(Filename)' == 'System.Windows.Input.Manipulations'
+                or '%(Filename)' == 'System.Windows.Presentation'
+                or '%(Filename)' == 'WindowsFormsIntegration'
+                or '%(Filename)' == 'D3DCompiler_47_cor3'
+                or '%(Filename)' == 'wpfgfx_cor3'
+                or '%(Filename)' == 'PenImc_cor3'" />
+    </ItemGroup>
+  </Target>
 
 </Project>

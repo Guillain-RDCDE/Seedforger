@@ -10,6 +10,15 @@
     <AssemblyName>Seedforger.Cli</AssemblyName>
     <Version>2.19.0</Version>
     <InvariantGlobalization>true</InvariantGlobalization>
+
+  </PropertyGroup>
+
+  <Import Project="..\Publish.props" />
+
+  <!-- After the import, so it can react to PublishTrimmed being set there.
+       No UI here, so the trimmer can be aggressive. -->
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <TrimMode>full</TrimMode>
   </PropertyGroup>
 
   <ItemGroup>

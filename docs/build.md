@@ -16,8 +16,21 @@ dotnet publish src/Seedforger/Seedforger.csproj -c Release -r win-x64 --self-con
 
 # self-contained single-file exe — bundles the runtime, needs nothing installed
 dotnet publish src/Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contained true \
-  -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true
+  -p:PublishSingleFile=true
 ```
+
+> **Size:** any `--self-contained` publish is trimmed and compressed automatically
+> (see [`src/Publish.props`](../src/Publish.props)) — the Windows GUI comes out at
+> ~24 MB instead of ~68 MB, the CLI at ~12 MB instead of ~68 MB, the Avalonia GUI at
+> ~22 MB instead of ~93 MB. Most of what goes is **WPF**: the SDK ships the whole
+> WindowsDesktop runtime pack with a WinForms app even though nothing loads it.
+>
+> Trimming needs three guardrails, all set in `Publish.props`: WinForms itself is
+> kept whole (it isn't trim-annotated — trimming it throws `TypeLoadException` in
+> the modal message loop), `JsonSerializerIsReflectionEnabledByDefault` is turned
+> back on (settings/clients/campaigns round-trip by reflection), and
+> `BuiltInComInteropSupport` too (without it `RichTextBox` throws
+> `InvalidCastException` when its handle is created).
 
 Or build both Windows executables at once with **`scripts/build-release.cmd`** (Windows). It closes any running instance first — the self-contained single-file build fails (`MSB4018`) if the target `Seedforger.exe` is locked by a running process — and writes `publish\lite\Seedforger.exe` and `publish\fat\Seedforger.exe`.
 

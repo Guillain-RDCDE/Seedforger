@@ -12,9 +12,10 @@ dotnet publish src\Seedforger\Seedforger.csproj -c Release -r win-x64 --self-con
   -p:PublishSingleFile=true -o publish\lite || exit /b 1
 
 echo.
-echo Building fat (self-contained, ~68 MB, needs nothing)...
+echo Building fat (self-contained, ~24 MB, needs nothing)...
+REM Trimming and compression come from src\Publish.props, not from this script.
 dotnet publish src\Seedforger\Seedforger.csproj -c Release -r win-x64 --self-contained true ^
-  -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish\fat || exit /b 1
+  -p:PublishSingleFile=true -o publish\fat || exit /b 1
 
 echo.
 echo Done:
