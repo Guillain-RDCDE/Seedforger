@@ -8,7 +8,7 @@
 > exact conditions under which it holds.*
 
 All numbers below come from [`figures/metrics.json`](figures/metrics.json), regenerated
-from [`Seedforger.Integrity`](../../Seedforger.Integrity) and guarded by the xUnit suite.
+from [`Seedforger.Integrity`](../../src/Seedforger.Integrity) and guarded by the xUnit suite.
 
 ---
 
@@ -75,7 +75,7 @@ Solving `deficit(D) = τ`:
 ```
 
 So the largest declaration that survives detection is `D*(w) = w/(1−τ)`
-([`AsymmetryGame.MaxUndetectedDeclaredUp`](../../Seedforger.Integrity/AsymmetryGame.cs)),
+([`AsymmetryGame.MaxUndetectedDeclaredUp`](../../src/Seedforger.Integrity/AsymmetryGame.cs)),
 and the **credit multiplier over real work** is
 
 ```
@@ -90,7 +90,7 @@ independent of `w` and of everything the client controls. At `τ = 0.2`, `M = 1.
 
 The client cannot observe `c` (it does not know which peers are monitors, nor what they
 received). Its only oracle is binary: *did declaring `D` get me flagged?* The best it can
-do is probe — push `D` up, back off when flagged. [`BlindClientBestDeclared`](../../Seedforger.Integrity/AsymmetryGame.cs)
+do is probe — push `D` up, back off when flagged. [`BlindClientBestDeclared`](../../src/Seedforger.Integrity/AsymmetryGame.cs)
 implements exactly this binary search, and it converges to `w/(1−τ)` to within `10⁻³` for
 every level of real work tested (the theory in `AsymmetryGameTests`). A blind optimiser
 against a graded-but-hidden variable does not do *better* than the closed form — it

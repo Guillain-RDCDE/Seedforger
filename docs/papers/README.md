@@ -5,9 +5,9 @@ short papers are the honest counterweight: a **formal account of why even a perf
 client optimises the wrong variable**, and where — precisely — that argument runs out.
 
 They are not hand-waving. Every claim is backed by a small, deterministic model that
-lives in [`Seedforger.Integrity`](../../Seedforger.Integrity) and is guarded by the
+lives in [`Seedforger.Integrity`](../../src/Seedforger.Integrity) and is guarded by the
 project's xUnit suite. Every figure and every number quoted below is regenerated from
-that model by [`Seedforger.Integrity.Figures`](../../Seedforger.Integrity.Figures), so
+that model by [`Seedforger.Integrity.Figures`](../../src/Seedforger.Integrity.Figures), so
 the prose cannot drift from the code.
 
 Each paper is written twice over: a **plain-language** part you can read cold, and a
@@ -26,11 +26,11 @@ boundary regimes Paper 1 measures (a fresh torrent, thin monitoring coverage).
 
 | File | What it is |
 |---|---|
-| [`Swarm.cs`](../../Seedforger.Integrity/Swarm.cs) | One announce window: what each peer *did* vs what it *declared*, plus the sliver a monitor witnessed. |
-| [`Invariants.cs`](../../Seedforger.Integrity/Invariants.cs) | The three reconciliation checks — physical plausibility, swarm mass balance, corroboration deficit. |
-| [`RobustEstimator.cs`](../../Seedforger.Integrity/RobustEstimator.cs) | Mean vs median vs Huber M-estimator, and the breakdown point that separates them. |
-| [`AnomalyDetector.cs`](../../Seedforger.Integrity/AnomalyDetector.cs) | Turns invariants into a per-peer score; ROC / AUC evaluation. |
-| [`AsymmetryGame.cs`](../../Seedforger.Integrity/AsymmetryGame.cs) | The client/server information game and its closed-form ceiling. |
+| [`Swarm.cs`](../../src/Seedforger.Integrity/Swarm.cs) | One announce window: what each peer *did* vs what it *declared*, plus the sliver a monitor witnessed. |
+| [`Invariants.cs`](../../src/Seedforger.Integrity/Invariants.cs) | The three reconciliation checks — physical plausibility, swarm mass balance, corroboration deficit. |
+| [`RobustEstimator.cs`](../../src/Seedforger.Integrity/RobustEstimator.cs) | Mean vs median vs Huber M-estimator, and the breakdown point that separates them. |
+| [`AnomalyDetector.cs`](../../src/Seedforger.Integrity/AnomalyDetector.cs) | Turns invariants into a per-peer score; ROC / AUC evaluation. |
+| [`AsymmetryGame.cs`](../../src/Seedforger.Integrity/AsymmetryGame.cs) | The client/server information game and its closed-form ceiling. |
 
 ## Reproducing the figures
 

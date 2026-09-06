@@ -9,7 +9,7 @@
 > stops working.*
 
 All numbers below come from [`figures/metrics.json`](figures/metrics.json), regenerated
-from [`Seedforger.Integrity`](../../Seedforger.Integrity) and guarded by the xUnit suite.
+from [`Seedforger.Integrity`](../../src/Seedforger.Integrity) and guarded by the xUnit suite.
 
 ---
 
@@ -69,7 +69,7 @@ granularity. It never observes `(u_i, d_i)` — that is the whole difficulty.
 
 ### B.2 The three residuals
 
-Each is a pure function of observables (see [`Invariants.cs`](../../Seedforger.Integrity/Invariants.cs)):
+Each is a pure function of observables (see [`Invariants.cs`](../../src/Seedforger.Integrity/Invariants.cs)):
 
 - **Physical.** `r^phys_i = max(0, û_i /(W·L_i) − 1)` — fractional overshoot of the link ceiling over a window of length `W`.
 - **Mass balance (swarm scalar).** `R^mass = (Σ û_i − Σ d̂_i)/(Σ û_i + Σ d̂_i) ∈ [−1,1]`. Because genuine transfers conserve bytes, `Σ u_i = Σ d_i`, so an honest swarm has `R^mass ≈ 0`; net-fabricated upload drives it positive.
@@ -94,7 +94,7 @@ coordinated liars needed to corrupt it — is the number that matters.
 The arithmetic mean has breakdown point 0: a single unbounded liar drags it anywhere.
 With 40 % of the swarm colluding on a far-away value, the mean of a distribution centred
 at `1.0` is dragged to ~`5.0`, while the Huber M-estimator holds at ~`1.38` and the median
-at ~`1.12`. The [Huber estimator](../../Seedforger.Integrity/RobustEstimator.cs) (iteratively
+at ~`1.12`. The [Huber estimator](../../src/Seedforger.Integrity/RobustEstimator.cs) (iteratively
 reweighted, points beyond `k` robust-σ down-weighted ∝ `1/|r|`) keeps a ~0.5 breakdown
 point *and* stays efficient on clean data — which is why a mature tracker reconciles with
 a robust statistic, not an average.
