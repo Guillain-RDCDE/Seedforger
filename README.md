@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src=".github/social-preview.png" width="100%" alt="Seedforger — fake your BitTorrent ratio on any tracker, shipped with the proof it can't win">
+
 # Seedforger
 
 ### Fake your BitTorrent upload/download stats on any tracker — the most complete ratio spoofer we could build, shipped with the proof it can't actually win.
