@@ -4,7 +4,7 @@
 
 [← back to the README](README.md)
 
-> This is a first-person account of running Seedforger against a **private tracker we were a member of, on our own account**. It is not a how-to for cheating a community you belong to — the warnings in the [README](README.md#overview) still stand, and none of what follows makes fake stats *undetectable*. It's a story about the gap between *sending a number* and *telling a story a tracker believes*.
+> This is a first-person account of running Seedforger against a **private tracker we were a member of, on our own account**. It is not a how-to for cheating a community you belong to — the warnings in the [README](README.md#what-it-is) still stand, and none of what follows makes fake stats *undetectable*. It's a story about the gap between *sending a number* and *telling a story a tracker believes*.
 
 ---
 
