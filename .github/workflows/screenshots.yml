@@ -37,7 +37,7 @@ jobs:
         run: |
           python tools/mock_tracker.py make-torrent sample.torrent http://127.0.0.1:8071/announce
           # keep the tracker alive for the rest of the job
-          nohup python tools/mock_tracker.py serve --port 8071 --complete 9 --incomplete 6 --interval 30 > tracker.log 2>&1 &
+          nohup python tools/mock_tracker.py serve --bind 0.0.0.0 --port 8071 --complete 9 --incomplete 6 --interval 30 > tracker.log 2>&1 &
           sleep 1
 
       - name: Open the WinForms window, load the torrent, start seeding, capture

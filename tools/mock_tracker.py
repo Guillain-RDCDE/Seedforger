@@ -7,7 +7,7 @@ handy for local end-to-end runs of Seedforger against something that actually
 replies. Standard library only.
 
 Usage:
-  python3 mock_tracker.py serve --port 8000 [--complete 7 --incomplete 4 --interval 5]
+  python3 mock_tracker.py serve --port 8000 [--complete 7 --incomplete 4 --interval 5] [--bind 0.0.0.0]
   python3 mock_tracker.py make-torrent out.torrent http://127.0.0.1:8000/announce
 """
 import sys
@@ -47,7 +47,7 @@ def make_torrent(path, announce):
     print(f"wrote {path} -> {announce}")
 
 
-def serve(port, complete, incomplete, interval):
+def serve(port, complete, incomplete, interval, bind="127.0.0.1"):
     body = bencode({
         "complete": complete,
         "incomplete": incomplete,
@@ -71,7 +71,7 @@ def serve(port, complete, incomplete, interval):
         def log_message(self, *a):
             pass
 
-    srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    srv = ThreadingHTTPServer((bind, port), Handler)
     print(f"mock tracker on http://127.0.0.1:{port}/announce", flush=True)
     srv.serve_forever()
 
@@ -89,7 +89,8 @@ def main():
         def opt(name, default):
             return args[args.index(name) + 1] if name in args else default
         serve(int(opt("--port", "8000")), int(opt("--complete", "7")),
-              int(opt("--incomplete", "4")), int(opt("--interval", "5")))
+              int(opt("--incomplete", "4")), int(opt("--interval", "5")),
+              opt("--bind", "127.0.0.1"))
         return 0
     print(__doc__)
     return 2

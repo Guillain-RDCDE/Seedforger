@@ -97,15 +97,18 @@
               <Button Grid.Column="3" MinWidth="100" Content="{Binding L[browse]}" Click="OnBrowse" />
             </Grid>
 
-            <Grid ColumnDefinitions="130,3*,8,Auto,8,2*,8,Auto">
+            <Grid ColumnDefinitions="130,*,8,Auto">
               <TextBlock Grid.Column="0" Classes="label" Text="{Binding L[lbl.client]}" />
               <ComboBox Grid.Column="1" HorizontalAlignment="Stretch" ToolTip.Tip="{Binding L[tip.client]}"
                         ItemsSource="{Binding Families}" SelectedItem="{Binding SelectedFamily}" />
-              <TextBlock Grid.Column="3" Classes="label" Text="{Binding L[lbl.version]}" />
-              <ComboBox Grid.Column="5" HorizontalAlignment="Stretch"
-                        ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}" />
-              <Button Grid.Column="7" MinWidth="100" Content="{Binding L[advanced]}" Click="OnAdvanced"
+              <Button Grid.Column="3" MinWidth="100" Content="{Binding L[advanced]}" Click="OnAdvanced"
                       ToolTip.Tip="{Binding L[tip.advanced]}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="130,200,*">
+              <TextBlock Grid.Column="0" Classes="label" Text="{Binding L[lbl.version]}" />
+              <ComboBox Grid.Column="1" HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}" />
             </Grid>
 
             <Grid ColumnDefinitions="130,*">

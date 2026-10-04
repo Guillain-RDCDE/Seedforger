@@ -88,8 +88,8 @@ namespace Seedforger.UI {
       AutoScaleMode = AutoScaleMode.Font;
       AutoScaleDimensions = new SizeF(7F, 15F);
       Font = new Font("Segoe UI", 9f, FontStyle.Regular, GraphicsUnit.Point);
-      ClientSize = new Size(800, 600);
-      MinimumSize = new Size(740, 560);
+      ClientSize = new Size(860, 620);
+      MinimumSize = new Size(800, 580);
       StartPosition = FormStartPosition.CenterScreen;
       try { Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath); } catch { }
 
@@ -628,8 +628,8 @@ namespace Seedforger.UI {
         Dock = DockStyle.Top, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
         ColumnCount = 2, RowCount = 2, Padding = new Padding(10, 8, 10, 0),
       };
-      top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58f));
-      top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42f));
+      top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62f));
+      top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38f));
       top.RowStyles.Add(new RowStyle(SizeType.AutoSize));
       top.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
@@ -664,12 +664,12 @@ namespace Seedforger.UI {
 
       var grid = new TableLayoutPanel {
         Dock = DockStyle.Top, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
-        ColumnCount = 3, RowCount = 4,
+        ColumnCount = 3, RowCount = 5,
       };
       grid.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
       grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
       grid.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-      for (var i = 0; i < 4; i++) grid.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+      for (var i = 0; i < 5; i++) grid.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
       // File
       grid.Controls.Add(Reg(FieldLabel(""), "lbl.file"), 0, 0);
@@ -681,38 +681,30 @@ namespace Seedforger.UI {
       browseBtn.Click += (s, e) => Browse();
       grid.Controls.Add(browseBtn, 2, 0);
 
-      // Client + version
+      // Client on one row, version on the next: each field gets the width it needs.
       grid.Controls.Add(Reg(FieldLabel(""), "lbl.client"), 0, 1);
-      var clientRow = new TableLayoutPanel {
-        AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Anchor = AnchorStyles.Left | AnchorStyles.Right,
-        ColumnCount = 3, RowCount = 1, Margin = new Padding(0),
-      };
-      clientRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
-      clientRow.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-      clientRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120f));
-      clientRow.RowStyles.Add(new RowStyle(SizeType.AutoSize));
       familyBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-      versionBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
       RegTip(familyBox, "tip.client");
-      clientRow.Controls.Add(familyBox, 0, 0);
-      clientRow.Controls.Add(Reg(FieldLabel(""), "lbl.version"), 1, 0);
-      clientRow.Controls.Add(versionBox, 2, 0);
-      grid.Controls.Add(clientRow, 1, 1);
+      grid.Controls.Add(familyBox, 1, 1);
       Reg(advancedBtn, "advanced"); advancedBtn.Size = new Size(100, 26); advancedBtn.Anchor = AnchorStyles.Left;
       advancedBtn.Click += (s, e) => engine.ShowAdvanced();
       RegTip(advancedBtn, "tip.advanced");
       grid.Controls.Add(advancedBtn, 2, 1);
 
+      grid.Controls.Add(Reg(FieldLabel(""), "lbl.version"), 0, 2);
+      versionBox.Width = 180; versionBox.Anchor = AnchorStyles.Left;
+      grid.Controls.Add(versionBox, 1, 2);
+
       // Mode
-      grid.Controls.Add(Reg(FieldLabel(""), "lbl.mode"), 0, 2);
+      grid.Controls.Add(Reg(FieldLabel(""), "lbl.mode"), 0, 3);
       modeBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-      grid.Controls.Add(modeBox, 1, 2);
+      grid.Controls.Add(modeBox, 1, 3);
 
       // Upload speed
-      grid.Controls.Add(Reg(FieldLabel(""), "lbl.upload"), 0, 3);
+      grid.Controls.Add(Reg(FieldLabel(""), "lbl.upload"), 0, 4);
       uploadBox.Width = 110; uploadBox.Anchor = AnchorStyles.Left;
       RegTip(uploadBox, "tip.upload");
-      grid.Controls.Add(uploadBox, 1, 3);
+      grid.Controls.Add(uploadBox, 1, 4);
 
       torrentGroup.Controls.Add(grid);
       return torrentGroup;
