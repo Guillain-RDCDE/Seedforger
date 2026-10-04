@@ -12,11 +12,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
 
-  <!-- Superseded by TrackerTransportTests (in-process fakes, no network). -->
-  <ItemGroup>
-    <Compile Remove="HttpsTransportTests.cs" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\Seedforger.Core\Seedforger.Core.csproj" />
     <ProjectReference Include="..\..\src\Seedforger.Integrity\Seedforger.Integrity.csproj" />

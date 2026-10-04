@@ -13,14 +13,6 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
   </ItemGroup>
 
-  <!-- Replaced by Net/ProxyConnector + TrackerTransport (sockets), SeedOptions /
-       StealthOptions / UpstreamBudget (options), and nothing (process-memory
-       scanning). Kept out of the build; delete the files from the tree. -->
-  <ItemGroup>
-    <Compile Remove="BytesRoads\**" />
-    <Compile Remove="AppOptions.cs;Bandwidth.cs;HttpsTransport.cs;ProxyInfo.cs;ProcessMemoryReader.cs;TorrentInfo.cs;StringExtensions.cs;Peer.cs;PeerList.cs;PeerWire.cs" />
-  </ItemGroup>
-
   <ItemGroup>
     <InternalsVisibleTo Include="Seedforger" />
     <InternalsVisibleTo Include="Seedforger.Tests" />
