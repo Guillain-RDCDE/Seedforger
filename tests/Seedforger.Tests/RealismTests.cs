@@ -75,7 +75,7 @@ namespace Seedforger.Tests {
       try {
         var t = new Torrent(path);
         var client = TorrentClientFactory.GetClient("qBittorrent 5.2.3");
-        var engine = new SeedEngine(t, client, new ProxyInfo(), 100, 0, 100);
+        var engine = new SeedEngine(new SeedOptions { Torrent = t, Client = client, UploadKBps = 100 });
         Assert.Equal(2, engine.TrackerCount);
       }
       finally { File.Delete(path); }
@@ -108,7 +108,7 @@ namespace Seedforger.Tests {
       try {
         var t = new Torrent(path);
         var client = TorrentClientFactory.GetClient("qBittorrent 5.2.3");
-        var engine = new SeedEngine(t, client, new ProxyInfo(), 100, 0, 100);
+        var engine = new SeedEngine(new SeedOptions { Torrent = t, Client = client, UploadKBps = 100 });
         Assert.Equal(1, engine.TrackerCount);
       }
       finally { File.Delete(path); }

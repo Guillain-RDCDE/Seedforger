@@ -6,11 +6,10 @@ using Seedforger.BitTorrent;
 namespace Seedforger {
 
   /// <summary>
-  /// The tracker-announce core, with **no WinForms dependency** — the part that
-  /// actually matters (building the exact announce URL, percent-encoding the
-  /// info_hash/peer_id, and reading the tracker's bencoded answer). Extracted from
-  /// the RM UserControl so it can be unit-tested on its own. The wire behaviour is
-  /// byte-for-byte identical to the legacy code it replaces.
+  /// The tracker-announce core, with no UI dependency: building the exact announce
+  /// URL, percent-encoding the info_hash/peer_id, and reading the tracker's
+  /// bencoded answer. Pure data in, a URL out, so it is unit-tested on its own;
+  /// the wire format is byte-for-byte what the emulated clients send.
   /// </summary>
   internal static class Announce {
 
@@ -34,7 +33,28 @@ namespace Seedforger {
 
     private static long RoundByDenominator(long value, long denominator) => denominator * (value / denominator);
 
-    /// <summary>Builds the announce URL exactly as the legacy RM path did.</summary>
+    /// <summary>The parameter set for one announce of <paramref name="client"/> —
+    /// shared by the engine and the dry-run probe so both build identical URLs.</summary>
+    internal static Params ParamsFor(string tracker, TorrentClient client, string infoHashHex, string peerId, string key,
+                                     string port, string numWant, long uploaded, long downloaded, long left, long totalSize,
+                                     string ev) => new Params {
+      Tracker = tracker,
+      QueryTemplate = client.Query,
+      InfoHashHex = infoHashHex,
+      PeerId = peerId,
+      Port = port,
+      Uploaded = uploaded,
+      Downloaded = downloaded,
+      Left = left,
+      TotalSize = totalSize,
+      Key = key,
+      NumWant = numWant,
+      Event = ev ?? "",
+      LocalIp = LocalAddress.Ipv4(),
+      HashUpperCase = client.HashUpperCase,
+    };
+
+    /// <summary>Builds the announce URL from the client's query template.</summary>
     internal static string BuildUrl(Params p) {
       var uploaded = "0";
       var up = p.Uploaded;
@@ -112,13 +132,16 @@ namespace Seedforger {
       var r = new Result();
       if (d == null) return r;
       if (d.Contains("failure reason")) r.Failure = BEncode.String(d["failure reason"]);
-      if (d.Contains("complete")) r.Seeders = BEncode.String(d["complete"]).ParseValidInt(-1);
-      if (d.Contains("incomplete")) r.Leechers = BEncode.String(d["incomplete"]).ParseValidInt(-1);
-      if (d.Contains("interval")) r.Interval = BEncode.String(d["interval"]).ParseValidInt(-1);
-      if (d.Contains("min interval")) r.MinInterval = BEncode.String(d["min interval"]).ParseValidInt(-1);
-      if (d.Contains("downloaded")) r.Downloaded = BEncode.String(d["downloaded"]).ParseValidInt(-1);
+      if (d.Contains("complete")) r.Seeders = IntOr(d["complete"], -1);
+      if (d.Contains("incomplete")) r.Leechers = IntOr(d["incomplete"], -1);
+      if (d.Contains("interval")) r.Interval = IntOr(d["interval"], -1);
+      if (d.Contains("min interval")) r.MinInterval = IntOr(d["min interval"], -1);
+      if (d.Contains("downloaded")) r.Downloaded = IntOr(d["downloaded"], -1);
       return r;
     }
+
+    private static int IntOr(IBEncodeValue v, int fallback) =>
+      int.TryParse(BEncode.String(v), out var n) ? n : fallback;
 
     /// <summary>Parses a raw bencoded announce body (no HTTP framing).</summary>
     internal static Result ParseBody(byte[] bencoded) {

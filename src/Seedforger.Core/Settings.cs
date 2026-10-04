@@ -1,136 +1,144 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Seedforger {
 
   /// <summary>
-  /// Portable, JSON-backed settings store. Replaces the former
-  /// <c>HKCU\Software\Seedforger</c> registry storage with a
-  /// <c>settings.json</c> file sitting next to the executable, so the app is
-  /// fully portable and leaves no trace in the registry.
+  /// Portable, JSON-backed settings: a <c>settings.json</c> next to the executable,
+  /// no registry. Two groups: what the interface remembers about itself (window
+  /// behaviour, language, believability toggles) and the last-used run values
+  /// (client, speeds, proxy, stop rule) so the next launch starts where you left off.
   ///
-  /// Every persisted value keeps the exact same default it had in the legacy
-  /// registry code so functional behaviour is unchanged. Booleans that were
-  /// stored as DWord (via <c>BtoI</c>/<c>ItoB</c>) are plain <see cref="bool"/>
-  /// here; everything else stays <see cref="string"/>.
+  /// JSON property names are kept as they always were (misspellings included),
+  /// so files written by earlier versions still load; numbers that used to be
+  /// stored as strings are read leniently.
   /// </summary>
   internal sealed class Settings {
 
     private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions {
       WriteIndented = true,
       PropertyNameCaseInsensitive = true,
+      NumberHandling = JsonNumberHandling.AllowReadingFromString,
     };
 
-    private static readonly string FilePath =
-      Path.Combine(AppContext.BaseDirectory, "settings.json");
+    internal static readonly string FilePath = Path.Combine(AppContext.BaseDirectory, "settings.json");
 
+    private static readonly object gate = new object();
     private static Settings current;
 
-    /// <summary>
-    /// True when no settings file existed at first <see cref="Load"/>. Mirrors
-    /// the legacy "Version" == "none" marker that triggered a reset to default
-    /// values on first launch.
-    /// </summary>
-    internal static bool IsFirstRun { get; private set; }
+    /// <summary>The one shared instance every window and command reads and writes.</summary>
+    internal static Settings Current {
+      get { lock (gate) return current ??= Load(); }
+    }
 
-    /// <summary>Shared instance so the app-level UI and every RM engine
-    /// read/write the same file/object.</summary>
-    internal static Settings Current => current ??= Load();
+    // ---- interface ----
 
-    #region App-level options
-
-    public bool BallonTip { get; set; } = false;
+    [JsonPropertyName("BallonTip")]
+    public bool BalloonTip { get; set; }
     /// <summary>The minimize button hides the window into the notification area.</summary>
     public bool MinimizeToTray { get; set; } = true;
-    /// <summary>The close button minimizes to the taskbar instead of quitting.
-    /// (Kept under its original name so existing settings.json files still apply.)</summary>
+    /// <summary>The close button minimizes instead of quitting (kept under its
+    /// original name so existing files still apply).</summary>
     public bool CloseToTray { get; set; } = true;
+    public string Language { get; set; } = "en";
+
+    // ---- believability (mirrored into StealthOptions.Shared at launch) ----
+
     public bool RealisticSpeed { get; set; } = true;
-    public bool DarkMode { get; set; } = false;
-    public bool RandomizeClientOnStart { get; set; } = false;
-    public bool ActiveHoursEnabled { get; set; } = false;
+    public bool SwarmAware { get; set; } = true;
+    public bool RandomizeClientOnStart { get; set; }
+    public bool ActiveHoursEnabled { get; set; }
     public int ActiveHoursStart { get; set; } = 8;
     public int ActiveHoursEnd { get; set; } = 24;
-    public string Language { get; set; } = "en";
-    public bool SwarmAware { get; set; } = true;
-    public int GlobalUpstreamKBps { get; set; } = 0;
+    /// <summary>Total upstream budget shared by every run, kB/s (0 = off).</summary>
+    public int GlobalUpstreamKBps { get; set; }
 
-    #endregion
+    // ---- last-used run values ----
 
-    #region Per-tab "last used" values
-
-    public bool NewValues { get; set; } = true;
-    public string Client { get; set; } = "qBittorrent";
+    public string Client { get; set; } = TorrentClientFactory.DefaultFamily;
     public string ClientVersion { get; set; } = "5.2.4";
-    public string UploadRate { get; set; } = "10240";
-    public string DownloadRate { get; set; } = "30";
-    public string Interval { get; set; } = "300";
-    public string FileSize { get; set; } = "0";
-    public string Directory { get; set; } = "";
-    public bool TCPlistener { get; set; } = true;
-    public bool ScrapeInfo { get; set; } = true;
-
-    public bool GetRandUp { get; set; } = true;
-    public bool GetRandDown { get; set; } = true;
-    public string MinRandUp { get; set; } = "1";
-    public string MaxRandUp { get; set; } = "10";
-    public string MinRandDown { get; set; } = "1";
-    public string MaxRandDown { get; set; } = "10";
-
-    public string CustomKey { get; set; } = "";
-    public string CustomPeerID { get; set; } = "";
-    public string CustomPeers { get; set; } = "";
-    public string CustomPort { get; set; } = "";
-
+    [JsonConverter(typeof(LenientIntConverter))]
+    public int UploadRate { get; set; } = 1024;
+    [JsonConverter(typeof(LenientIntConverter))]
+    public int DownloadRate { get; set; } = 30;
+    /// <summary>Base announce interval in seconds (0 = the tracker's).</summary>
+    [JsonConverter(typeof(LenientIntConverter))]
+    public int Interval { get; set; }
     public string StopWhen { get; set; } = "Never";
-    public string StopAfter { get; set; } = "0";
+    [JsonConverter(typeof(LenientDoubleConverter))]
+    public double StopAfter { get; set; }
 
     public string ProxyType { get; set; } = "None";
-    public string ProxyAdress { get; set; } = "";
+    [JsonPropertyName("ProxyAdress")]
+    public string ProxyAddress { get; set; } = "";
     public string ProxyUser { get; set; } = "";
     public string ProxyPass { get; set; } = "";
-    public string ProxyPort { get; set; } = "";
+    [JsonConverter(typeof(LenientIntConverter))]
+    public int ProxyPort { get; set; }
 
-    public bool GetRandUpNext { get; set; } = false;
-    public bool GetRandDownNext { get; set; } = false;
-    public string MinRandUpNext { get; set; } = "50";
-    public string MaxRandUpNext { get; set; } = "100";
-    public string MinRandDownNext { get; set; } = "10";
-    public string MaxRandDownNext { get; set; } = "50";
+    /// <summary>Fingerprint overrides from the Advanced dialog; empty/0 = the client's own.</summary>
+    public string CustomKey { get; set; } = "";
+    public string CustomPeerID { get; set; } = "";
+    [JsonConverter(typeof(LenientIntConverter))]
+    public int CustomPeers { get; set; }
+    [JsonConverter(typeof(LenientIntConverter))]
+    public int CustomPort { get; set; }
 
-    public bool IgnoreFailureReason { get; set; } = false;
+    // ---- persistence ----
 
-    #endregion
-
-    /// <summary>Loads the settings from disk, falling back to defaults when the
-    /// file is missing or corrupt. Never throws.</summary>
+    /// <summary>Loads the settings from disk; defaults when the file is missing. A
+    /// corrupt file is set aside as settings.json.bad instead of being overwritten.</summary>
     internal static Settings Load() {
       try {
-        if (!File.Exists(FilePath)) {
-          IsFirstRun = true;
-          return new Settings();
-        }
-
-        var json = File.ReadAllText(FilePath);
-        var loaded = JsonSerializer.Deserialize<Settings>(json, JsonOptions);
+        if (!File.Exists(FilePath)) return new Settings();
+        var loaded = JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath), JsonOptions);
         return loaded ?? new Settings();
       }
-      catch {
-        // Corrupt or unreadable file: fall back to defaults, never crash.
+      catch (Exception) {
+        try { File.Copy(FilePath, FilePath + ".bad", overwrite: true); } catch (Exception) { /* best effort */ }
         return new Settings();
       }
     }
 
-    /// <summary>Serialises the current values (indented) to disk. Never throws.</summary>
-    internal void Save() {
+    /// <summary>Writes the current values (indented). Returns false if the write failed.</summary>
+    internal bool Save() {
       try {
-        var json = JsonSerializer.Serialize(this, JsonOptions);
-        File.WriteAllText(FilePath, json);
+        File.WriteAllText(FilePath, JsonSerializer.Serialize(this, JsonOptions));
+        return true;
       }
-      catch {
-        // Best effort: never let a settings write take down the app.
+      catch (Exception) {
+        return false; // a settings write must never take the app down
       }
+    }
+
+    /// <summary>Change-and-save in one call: <c>Settings.Current.Update(s => s.Language = "fr")</c>.</summary>
+    internal bool Update(Action<Settings> change) {
+      change?.Invoke(this);
+      return Save();
+    }
+
+    /// <summary>Reads an int that older files stored as a string ("10240", "").</summary>
+    internal sealed class LenientIntConverter : JsonConverter<int> {
+      public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+        if (reader.TokenType == JsonTokenType.Number) return reader.TryGetInt32(out var n) ? n : (int) reader.GetDouble();
+        if (reader.TokenType == JsonTokenType.String)
+          return int.TryParse(reader.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var s) ? s : 0;
+        return 0;
+      }
+      public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options) => writer.WriteNumberValue(value);
+    }
+
+    internal sealed class LenientDoubleConverter : JsonConverter<double> {
+      public override double Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+        if (reader.TokenType == JsonTokenType.Number) return reader.GetDouble();
+        if (reader.TokenType == JsonTokenType.String)
+          return double.TryParse((reader.GetString() ?? "").Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out var d) ? d : 0;
+        return 0;
+      }
+      public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options) => writer.WriteNumberValue(value);
     }
   }
 }

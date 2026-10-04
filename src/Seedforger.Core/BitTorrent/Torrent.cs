@@ -27,7 +27,25 @@ namespace Seedforger.BitTorrent {
 
     internal Torrent(string localFilename) {
       PhysicalFiles = new Collection<TorrentFile>();
-      OpenTorrent(localFilename);
+      if (!OpenTorrent(localFilename))
+        throw new IOException("Could not read the torrent file: " + localFilename);
+    }
+
+    /// <summary>A "virtual" torrent from a magnet link: the hash and name come from
+    /// the link, the size from the user (magnets carry neither size nor pieces).
+    /// Enough to announce; not enough to serve real pieces.</summary>
+    internal static Torrent FromMagnet(MagnetInfo magnet, ulong sizeBytes) {
+      if (magnet == null) throw new ArgumentNullException(nameof(magnet));
+      var t = new Torrent();
+      var info = new ValueDictionary();
+      info.Add("name", new ValueString(string.IsNullOrEmpty(magnet.Name) ? magnet.HashHex : magnet.Name));
+      info.Add("length", new ValueNumber((long) sizeBytes));
+      t.Data.Add("info", info);
+      string announce = null;
+      foreach (var tr in magnet.Trackers)
+        if (tr.StartsWith("http", StringComparison.OrdinalIgnoreCase)) { announce = tr; break; }
+      t.SetVirtual(magnet.InfoHash, sizeBytes, announce, magnet.Name);
+      return t;
     }
 
     internal ulong totalLength { get; private set; }

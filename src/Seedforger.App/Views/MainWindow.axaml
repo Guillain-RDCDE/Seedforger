@@ -44,6 +44,7 @@
       <MenuItem Header="{Binding L[menu.run]}">
         <MenuItem Header="{Binding L[start_seeding]}" Command="{Binding StartCommand}" />
         <MenuItem Header="{Binding L[stop]}" Command="{Binding StopCommand}" />
+        <MenuItem Header="{Binding L[menu.announce_now]}" Click="OnAnnounceNow" IsEnabled="{Binding IsRunning}" />
         <Separator />
         <MenuItem Header="{Binding L[menu.test_announce]}" Click="OnTestAnnounce" />
         <MenuItem Header="{Binding L[menu.serve_real]}" Click="OnServeReal" />
@@ -51,6 +52,7 @@
       <MenuItem Header="{Binding L[menu.tools]}">
         <MenuItem Header="{Binding L[menu.guided]}" Click="OnGuided" />
         <MenuItem Header="{Binding L[menu.campaigns]}" Click="OnCampaigns" />
+        <MenuItem Header="{Binding L[menu.stop_campaign]}" Click="OnStopCampaign" />
         <Separator />
         <MenuItem Header="{Binding L[menu.advanced_settings]}" Click="OnAdvanced" />
       </MenuItem>
@@ -58,6 +60,8 @@
         <MenuItem Header="{Binding L[menu.realistic]}" ToggleType="CheckBox" IsChecked="{Binding Realistic, Mode=TwoWay}" />
         <MenuItem Header="{Binding L[menu.swarm]}" ToggleType="CheckBox" IsChecked="{Binding SwarmAware, Mode=TwoWay}" />
         <MenuItem Header="{Binding L[menu.randomize]}" ToggleType="CheckBox" IsChecked="{Binding RandomizeClient, Mode=TwoWay}" />
+        <Separator />
+        <MenuItem Name="ConnectionMenu" Header="{Binding L[menu.connection]}" />
         <Separator />
         <MenuItem Header="{Binding L[menu.language]}">
           <MenuItem Header="English" ToggleType="CheckBox" IsChecked="{Binding IsEnglish, Mode=TwoWay}" />
@@ -73,10 +77,11 @@
     <!-- ===== status bar ===== -->
     <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0" Padding="12,5"
             BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}">
-      <Grid ColumnDefinitions="Auto,24,*,Auto">
+      <Grid ColumnDefinitions="Auto,24,*,Auto,24,Auto">
         <TextBlock Grid.Column="0" Text="{Binding StatusText}" Foreground="{Binding StatusColor}" FontWeight="SemiBold" />
         <TextBlock Grid.Column="2" Text="{Binding ClientSummary}" />
-        <TextBlock Grid.Column="3" Text="{Binding VersionText}" />
+        <TextBlock Grid.Column="3" Text="{Binding NextAnnounceText}" />
+        <TextBlock Grid.Column="5" Text="{Binding VersionText}" />
       </Grid>
     </Border>
 

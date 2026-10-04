@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -8,14 +7,15 @@ using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Seedforger;
+using Seedforger.UI;
 using Seedforger.App.ViewModels;
 
 namespace Seedforger.App.Views {
 
   /// <summary>
   /// A condensed guided setup: the safety rule, pick a torrent, ask the tracker
-  /// (dry-run), then start. Drives the same MainViewModel / SeedEngine. Plain
-  /// themed controls — no custom palette.
+  /// (a real dry-run probe), then start as a complete seeder with the believable
+  /// defaults on. Plain themed controls.
   /// </summary>
   public sealed class GuideWindow : Window {
 
@@ -24,7 +24,7 @@ namespace Seedforger.App.Views {
     private readonly Button analyze;
     private readonly Button start;
 
-    private static string P(string en, string fr) => AppOptions.Language == Language.French ? fr : en;
+    private static string P(string en, string fr) => UiStrings.Pick(en, fr);
 
     public GuideWindow(MainViewModel vm) {
       this.vm = vm;
@@ -45,7 +45,7 @@ namespace Seedforger.App.Views {
 
       browse.Click += async (s, e) => await Browse();
       analyze.Click += (s, e) => Analyze();
-      start.Click += (s, e) => { vm.StartSeeding(); Close(); };
+      start.Click += (s, e) => { vm.StartSeedingSafely(); Close(); };
 
       status.Text = vm.HasTorrent
         ? P("Loaded: ", "Chargé : ") + vm.TorrentDisplay
@@ -55,11 +55,7 @@ namespace Seedforger.App.Views {
         Margin = new Thickness(22), Spacing = 14,
         Children = {
           new TextBlock { Text = P("Build ratio, believably", "Gagner du ratio, de façon crédible"), FontSize = 17, FontWeight = FontWeight.Bold },
-          rule,
-          browse,
-          status,
-          analyze,
-          start,
+          rule, browse, status, analyze, start,
         },
       };
     }
@@ -71,50 +67,26 @@ namespace Seedforger.App.Views {
           AllowMultiple = false,
           FileTypeFilter = new[] { new FilePickerFileType("Torrent") { Patterns = new[] { "*.torrent" } } },
         });
-        if (files != null)
-          foreach (var f in files) {
-            var path = f.TryGetLocalPath();
-            if (!string.IsNullOrEmpty(path)) {
-              vm.LoadTorrent(path);
-              status.Text = P("Loaded: ", "Chargé : ") + vm.TorrentDisplay;
-              start.IsEnabled = false;
-              break;
-            }
-          }
+        var path = MainWindow.FirstLocalPath(files);
+        if (path == null) return;
+        vm.LoadTorrent(path);
+        status.Text = P("Loaded: ", "Chargé : ") + vm.TorrentDisplay;
+        start.IsEnabled = false;
       }
-      catch { }
+      catch (Exception ex) { status.Text = "Error: " + ex.Message; }
     }
 
     private void Analyze() {
-      var engine = vm.CreateEngine();
-      if (engine == null) { status.Text = P("Load a .torrent first.", "Chargez d'abord un .torrent."); return; }
+      if (!vm.HasTorrent) { status.Text = P("Load a .torrent first.", "Chargez d'abord un .torrent."); return; }
       analyze.IsEnabled = false;
       status.Text = P("Talking to the tracker…", "Communication avec le tracker…");
-      Task.Run(() => {
-        try {
-          engine.Start();
-          Thread.Sleep(150);
-          engine.Stop();
-          Dispatcher.UIThread.Post(() => {
-            analyze.IsEnabled = true;
-            if (engine.SeederCount >= 0 && engine.LeecherCount > 0) {
-              status.Text = string.Format(P("Accepted — {0} leechers to feed, {1} seeders. Good to go.",
-                                             "Accepté — {0} leechers à nourrir, {1} seeders. C'est bon."),
-                                          engine.LeecherCount, engine.SeederCount);
-              start.IsEnabled = true;
-            }
-            else if (engine.SeederCount >= 0) {
-              status.Text = P("Accepted, but nobody is downloading it — you'd gain nothing. Pick a busier torrent.",
-                              "Accepté, mais personne ne le télécharge — vous ne gagneriez rien. Choisissez un torrent plus actif.");
-            }
-            else {
-              status.Text = P("The tracker didn't accept the announce (see the main log).",
-                              "Le tracker n'a pas accepté l'annonce (voir le journal principal).");
-            }
-          });
-        }
-        catch (Exception ex) { Dispatcher.UIThread.Post(() => { analyze.IsEnabled = true; status.Text = "Error: " + ex.Message; }); }
-      });
+      Task.Run(() => vm.Probe()).ContinueWith(t => Dispatcher.UIThread.Post(() => {
+        analyze.IsEnabled = true;
+        var p = t.IsFaulted ? null : t.Result;
+        if (p == null) { status.Text = "Error: " + (t.Exception?.GetBaseException().Message ?? "unknown"); return; }
+        status.Text = MainViewModel.DescribeProbe(p);
+        start.IsEnabled = p.Worthwhile;
+      }));
     }
 
     private static Button Wide(string text, bool accent = false) {

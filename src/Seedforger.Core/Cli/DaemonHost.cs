@@ -11,7 +11,7 @@ namespace Seedforger.Cli {
   /// Ideal on a seedbox or NAS — start it and watch/stop it from a browser. It holds
   /// the process open until Ctrl+C, a duration elapses, or the page hits /api/stop.
   /// </summary>
-  internal sealed class DaemonHost {
+  internal sealed class DaemonHost : IDisposable {
 
     private readonly List<SeedEngine> engines = new List<SeedEngine>();
     private readonly Action<string> log;
@@ -22,6 +22,9 @@ namespace Seedforger.Cli {
     public DaemonHost(Action<string> log) { this.log = log; }
 
     public int Count => engines.Count;
+    public IReadOnlyList<SeedEngine> Engines => engines;
+    public string DashboardUrl => web?.Url;
+
     public void Add(SeedEngine engine) { if (engine != null) engines.Add(engine); }
 
     public void Start(string bind, int port) {
@@ -42,33 +45,22 @@ namespace Seedforger.Cli {
     public void SignalStop() => stopSignal.Set();
 
     public void Stop() {
-      try { web?.Stop(); } catch { }
-      foreach (var e in engines) { try { e.Stop(); } catch { } }
+      try { web?.Stop(); } catch (Exception ex) { log?.Invoke("dashboard stop: " + ex.Message); }
+      foreach (var e in engines) {
+        try { e.Stop(); } catch (Exception ex) { log?.Invoke("engine stop: " + ex.Message); }
+      }
     }
+
+    public void Dispose() { Stop(); stopSignal.Dispose(); }
 
     private string BuildStatusJson() {
       var rows = new List<StatusSnapshot>(engines.Count);
-      foreach (var e in engines)
-        rows.Add(new StatusSnapshot {
-          Name = e.TorrentName,
-          Client = e.ClientName,
-          Uploaded = Math.Max(0, e.UploadedBytes),
-          Downloaded = Math.Max(0, e.DownloadedBytes),
-          Ratio = e.Ratio,
-          Seeders = e.SeederCount,
-          Leechers = e.LeecherCount,
-          Interval = e.IntervalSeconds,
-          Running = e.IsRunning,
-          Trackers = e.TrackerCount,
-          RealSeed = e.RealSeedEnabled,
-        });
-
-      var report = new StatusReport {
+      foreach (var e in engines) rows.Add(StatusSnapshot.From(e));
+      return StatusJson.Serialize(new StatusReport {
         Version = AppInfo.Version,
         UptimeSeconds = (long) (DateTime.UtcNow - startedUtc).TotalSeconds,
         Torrents = rows,
-      };
-      return StatusJson.Serialize(report);
+      });
     }
   }
 }

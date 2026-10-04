@@ -4,16 +4,21 @@
     <!-- Cross-platform engine: no WinForms, so it builds & runs on Windows,
          Linux and macOS. The GUI and the headless CLI both sit on top of this. -->
     <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
     <RootNamespace>Seedforger</RootNamespace>
     <AssemblyName>Seedforger.Core</AssemblyName>
-    <Version>2.20.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- BEncode/tracker parsing relies on legacy code pages (Windows-1252), no longer built-in on .NET Core/8. -->
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- Replaced by Net/ProxyConnector + TrackerTransport (sockets), SeedOptions /
+       StealthOptions / UpstreamBudget (options), and nothing (process-memory
+       scanning). Kept out of the build; delete the files from the tree. -->
+  <ItemGroup>
+    <Compile Remove="BytesRoads\**" />
+    <Compile Remove="AppOptions.cs;Bandwidth.cs;HttpsTransport.cs;ProxyInfo.cs;ProcessMemoryReader.cs;TorrentInfo.cs;StringExtensions.cs;Peer.cs;PeerList.cs;PeerWire.cs" />
   </ItemGroup>
 
   <ItemGroup>

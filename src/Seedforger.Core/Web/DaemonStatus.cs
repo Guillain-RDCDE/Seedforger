@@ -18,6 +18,21 @@ namespace Seedforger.Web {
     public bool Running { get; set; }
     public int Trackers { get; set; } = 1;
     public bool RealSeed { get; set; }
+
+    /// <summary>A snapshot of one engine's live figures.</summary>
+    public static StatusSnapshot From(SeedEngine e) => new StatusSnapshot {
+      Name = e.TorrentName,
+      Client = e.ClientName,
+      Uploaded = Math.Max(0, e.UploadedBytes),
+      Downloaded = Math.Max(0, e.DownloadedBytes),
+      Ratio = e.Ratio,
+      Seeders = e.SeederCount,
+      Leechers = e.LeecherCount,
+      Interval = e.IntervalSeconds,
+      Running = e.IsRunning,
+      Trackers = e.TrackerCount,
+      RealSeed = e.RealSeedEnabled,
+    };
   }
 
   /// <summary>The whole daemon snapshot: app identity, uptime, per-torrent rows and

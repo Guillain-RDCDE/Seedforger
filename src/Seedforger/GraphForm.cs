@@ -12,7 +12,7 @@ namespace Seedforger {
   /// </summary>
   internal sealed class GraphForm : Form {
 
-    private readonly Func<RM> provider;
+    private readonly Func<SeedEngine> provider;
     private readonly Timer timer;
 
     private static readonly Color Bg = SystemColors.Window;
@@ -21,7 +21,7 @@ namespace Seedforger {
     private static readonly Color TextCol = SystemColors.WindowText;
     private static readonly Color Muted = SystemColors.GrayText;
 
-    internal GraphForm(Func<RM> provider) {
+    internal GraphForm(Func<SeedEngine> provider) {
       this.provider = provider;
       Text = "Seedforger — live graph";
       ClientSize = new Size(580, 320);
@@ -59,8 +59,8 @@ namespace Seedforger {
       var plot = Rectangle.FromLTRB(padL, padT, w - padR, h - padB);
       if (plot.Width < 20 || plot.Height < 20) return;
 
-      var rm = provider?.Invoke();
-      var hist = rm != null ? rm.UploadHistory.ToArray() : Array.Empty<long>();
+      var engine = provider?.Invoke();
+      var hist = engine != null ? engine.UploadHistory : Array.Empty<long>();
 
       using (var gp = new Pen(Grid, 1))
         for (var i = 0; i <= 4; i++) {
@@ -72,7 +72,7 @@ namespace Seedforger {
       using (var infoFont = new Font("Segoe UI", 9f))
       using (var tb = new SolidBrush(TextCol)) {
         g.DrawString("Uploaded over time", titleFont, tb, padL, 10);
-        var ratio = rm?.RatioText ?? "-";
+        var ratio = engine != null ? Format.Ratio(engine.UploadedBytes, engine.DownloadedBytes) : "–";
         var upMb = hist.Length > 0 ? hist[hist.Length - 1] / 1048576.0 : 0.0;
         var info = $"Ratio: {ratio}    Uploaded: {upMb:0.0} MB";
         var sz = g.MeasureString(info, infoFont);

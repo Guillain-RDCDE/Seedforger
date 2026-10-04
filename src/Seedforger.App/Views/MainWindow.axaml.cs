@@ -28,6 +28,7 @@ namespace Seedforger.App.Views {
         e.DragEffects = e.Data.Contains(DataFormats.Files) ? DragDropEffects.Copy : DragDropEffects.None;
       });
       DragDrop.SetAllowDrop(this, true);
+      FillConnectionProfiles();
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
@@ -46,7 +47,17 @@ namespace Seedforger.App.Views {
           }
         }
       }
-      catch { }
+      catch (Exception) { /* nothing usable was dropped */ }
+    }
+
+    /// <summary>The first picker result that is a real local path, or null.</summary>
+    internal static string FirstLocalPath(System.Collections.Generic.IEnumerable<IStorageItem> items) {
+      if (items == null) return null;
+      foreach (var f in items) {
+        var path = f.TryGetLocalPath();
+        if (!string.IsNullOrEmpty(path)) return path;
+      }
+      return null;
     }
 
     // ---- File ----
@@ -62,31 +73,28 @@ namespace Seedforger.App.Views {
           AllowMultiple = false,
           FileTypeFilter = new[] { new FilePickerFileType("Torrent") { Patterns = new[] { "*.torrent" } } },
         });
-        if (files != null)
-          foreach (var f in files) {
-            var path = f.TryGetLocalPath();
-            if (!string.IsNullOrEmpty(path)) { vm.LoadTorrent(path); break; }
-          }
+        var path = FirstLocalPath(files);
+        if (path != null) vm.LoadTorrent(path);
       }
-      catch { /* cancelled */ }
+      catch (Exception) { /* cancelled */ }
     }
 
     // ---- Run ----
 
     private void OnTestAnnounce(object sender, RoutedEventArgs e) => vm.RunTestAnnounce();
 
+    private void OnEnglish(object sender, RoutedEventArgs e) => vm.SetLanguage(false);
+    private void OnFrench(object sender, RoutedEventArgs e) => vm.SetLanguage(true);
+
     private async void OnServeReal(object sender, RoutedEventArgs e) {
       try {
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions {
           Title = T("dlg.serve_title"), AllowMultiple = false,
         });
-        if (files != null)
-          foreach (var f in files) {
-            var path = f.TryGetLocalPath();
-            if (!string.IsNullOrEmpty(path)) { vm.RealSeedFile = path; break; }
-          }
+        var path = FirstLocalPath(files);
+        if (path != null) vm.RealSeedFile = path;
       }
-      catch { }
+      catch (Exception) { /* cancelled */ }
     }
 
     // ---- Tools ----
@@ -95,11 +103,29 @@ namespace Seedforger.App.Views {
 
     private void OnCampaigns(object sender, RoutedEventArgs e) => new CampaignWindow(vm).ShowDialog(this);
 
-    private void OnAdvanced(object sender, RoutedEventArgs e) {
-      var dlg = new AdvancedWindow(vm.Proxy);
-      dlg.ShowDialog(this).ContinueWith(_ => {
-        if (dlg.Result != null) vm.Proxy = dlg.Result.Value;
-      }, TaskScheduler.FromCurrentSynchronizationContext());
+    private async void OnAdvanced(object sender, RoutedEventArgs e) {
+      var dlg = new AdvancedWindow(vm.Preferences);
+      await dlg.ShowDialog(this);
+      if (dlg.Saved) vm.SavePreferences();
+    }
+
+    private void OnAnnounceNow(object sender, RoutedEventArgs e) => vm.AnnounceNow();
+
+    private void OnStopCampaign(object sender, RoutedEventArgs e) => vm.StopCampaign();
+
+    private void OnConnectionProfile(object sender, RoutedEventArgs e) {
+      if (sender is MenuItem mi && mi.Header is string name) vm.ApplyConnectionProfile(name);
+    }
+
+    /// <summary>Fills the connection-profile submenu once the menu exists.</summary>
+    private void FillConnectionProfiles() {
+      var menu = this.FindControl<MenuItem>("ConnectionMenu");
+      if (menu == null) return;
+      foreach (var p in ConnectionProfiles.All) {
+        var item = new MenuItem { Header = p.Name };
+        item.Click += OnConnectionProfile;
+        menu.Items.Add(item);
+      }
     }
 
     // ---- Help ----

@@ -9,8 +9,7 @@ namespace Seedforger.App {
     // Avalonia entry point. Kept minimal — the app is configured in App.axaml(.cs).
     [STAThread]
     public static void Main(string[] args) {
-      // Legacy code pages (Windows-1252) used by the BEncode/tracker layer.
-      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+      Encodings.Register();
       BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

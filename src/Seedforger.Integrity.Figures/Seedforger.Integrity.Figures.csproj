@@ -9,11 +9,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
     <RootNamespace>Seedforger.Integrity.Figures</RootNamespace>
     <AssemblyName>Seedforger.Integrity.Figures</AssemblyName>
-    <Version>2.20.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

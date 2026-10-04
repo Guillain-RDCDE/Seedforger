@@ -15,6 +15,8 @@ namespace Seedforger {
     // --- Goal ---
     /// <summary>"ratio" or "upload".</summary>
     public string Goal { get; set; } = "upload";
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool IsRatioGoal => string.Equals(Goal, "ratio", StringComparison.OrdinalIgnoreCase);
     public double TargetRatio { get; set; } = 2.0;
     public double UploadGoalGB { get; set; } = 100;
     /// <summary>Spread the goal over this many hours (0 = as fast as credible).</summary>

@@ -17,6 +17,15 @@ namespace Seedforger {
   /// residential up/down speeds converted to kB/s (1 Mbps ~= 122 kB/s).
   /// </summary>
   internal static class ConnectionProfiles {
+
+    /// <summary>The profile with that name (case-insensitive), or null.</summary>
+    internal static ConnectionProfile Find(string name) {
+      foreach (var p in All) if (string.Equals(p.Name, name, System.StringComparison.OrdinalIgnoreCase)) return p;
+      return null;
+    }
+
+    /// <summary>The upstream of a named profile in kB/s, or 0 when unknown.</summary>
+    internal static int UpKBpsOf(string name) => Find(name)?.UpKBps ?? 0;
     internal static readonly ConnectionProfile[] All = {
       new ConnectionProfile("ADSL  (1 up / 10 down Mbps)",        120,   1220),
       new ConnectionProfile("ADSL2+  (1 / 20 Mbps)",              120,   2440),

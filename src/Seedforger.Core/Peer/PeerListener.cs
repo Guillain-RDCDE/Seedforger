@@ -99,29 +99,18 @@ namespace Seedforger {
       var text = Latin1.GetString(buffer, 0, buffer.Length);
       if (text.IndexOf("BitTorrent protocol", StringComparison.Ordinal) >= 0 &&
           text.IndexOf(Latin1.GetString(torrent.InfoHash), StringComparison.Ordinal) >= 0) {
-        var handshake = Handshake();
+        var handshake = PeerProtocol.BuildHandshake(torrent.InfoHash, wirePeerId);
         stream.Write(handshake, 0, handshake.Length);
         var pieces = torrent.PieceCount;
         if (pieces > 0) {
-          var bitfield = PeerWire.FullBitfieldMessage(pieces);
+          var bitfield = PeerProtocol.FullBitfield(pieces);
           stream.Write(bitfield, 0, bitfield.Length);
-          var choke = PeerWire.ChokeMessage();
+          var choke = PeerProtocol.Choke();
           stream.Write(choke, 0, choke.Length);
           log?.Invoke("Answered a peer as a full seeder (bitfield + choke)");
         }
       }
     }
 
-    private byte[] Handshake() {
-      const string proto = "BitTorrent protocol";
-      var buf = new byte[68]; // 1 + 19 + 8 reserved + 20 infohash + 20 peer_id
-      var i = 0;
-      buf[i++] = (byte) proto.Length;
-      Latin1.GetBytes(proto, 0, proto.Length, buf, i); i += proto.Length;
-      i += 8; // reserved
-      Buffer.BlockCopy(torrent.InfoHash, 0, buf, i, torrent.InfoHash.Length); i += torrent.InfoHash.Length;
-      Buffer.BlockCopy(wirePeerId, 0, buf, i, Math.Min(20, wirePeerId.Length));
-      return buf;
-    }
   }
 }

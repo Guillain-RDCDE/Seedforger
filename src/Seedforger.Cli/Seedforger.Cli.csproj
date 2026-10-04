@@ -4,13 +4,9 @@
     <OutputType>Exe</OutputType>
     <!-- net8.0 (no -windows): runs on Windows, Linux and macOS. -->
     <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
-    <RootNamespace>Seedforger.Cli</RootNamespace>
+    <RootNamespace>Seedforger.ConsoleHost</RootNamespace>
     <AssemblyName>Seedforger.Cli</AssemblyName>
-    <Version>2.20.0</Version>
     <InvariantGlobalization>true</InvariantGlobalization>
-
   </PropertyGroup>
 
   <Import Project="..\Publish.props" />

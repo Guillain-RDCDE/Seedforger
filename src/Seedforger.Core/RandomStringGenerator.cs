@@ -44,30 +44,8 @@ namespace Seedforger {
       return stringBuilder.ToString();
     }
 
-    public string Generate(string inputString, bool upperCase) {
-      // TODO: Use StringBuilder
-      var result = string.Empty;
-      for (var i = 0; i < inputString.Length; i += 1) {
-        if (char.IsLetterOrDigit(inputString[i]) && inputString[i] < 127) {
-          result += inputString[i];
-        }
-        else {
-          result += "%";
-          var temp = Convert.ToString(inputString[i], 16);
-          if (upperCase) {
-            temp = temp.ToUpper();
-          }
-
-          if (temp.Length == 1) {
-            result += "0" + temp;
-          }
-          else {
-            result += temp;
-          }
-        }
-      }
-
-      return result;
-    }
+    /// <summary>Percent-encodes a raw byte string (the legacy escape rule, kept as
+    /// a thin alias of <see cref="Announce.PercentEncode"/>).</summary>
+    public string Generate(string inputString, bool upperCase) => Announce.PercentEncode(inputString, upperCase);
   }
 }

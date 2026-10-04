@@ -4,24 +4,17 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
     <RootNamespace>Seedforger</RootNamespace>
     <AssemblyName>Seedforger</AssemblyName>
     <ApplicationIcon>Resources\Main.ico</ApplicationIcon>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
 
-    <Product>Seedforger</Product>
     <AssemblyTitle>Seedforger</AssemblyTitle>
     <Description>The most powerful cheat/spoof torrent client simulator.</Description>
-    <Version>2.20.0</Version>
-    <Company>Seedforger</Company>
-    <Copyright>Copyright © 2026</Copyright>
 
     <!-- Single-file publish defaults: dotnet publish -c Release -r win-x64 -->
     <RuntimeIdentifier Condition="'$(PublishSingleFile)' == 'true'">win-x64</RuntimeIdentifier>
     <SelfContained Condition="'$(PublishSingleFile)' == 'true'">false</SelfContained>
-
   </PropertyGroup>
 
   <Import Project="..\Publish.props" />

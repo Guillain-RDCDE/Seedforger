@@ -1,0 +1,31 @@
+<!--
+  Settings shared by every project in the solution. A project only states what
+  makes it different (its target framework flavour, output type, references).
+-->
+<Project>
+
+  <PropertyGroup>
+    <!-- One version number for the whole product: bump it here, nowhere else. -->
+    <Version>3.0.0</Version>
+    <Product>Seedforger</Product>
+    <Company>Seedforger</Company>
+    <Authors>Seedforger contributors</Authors>
+    <Copyright>Copyright © 2026</Copyright>
+    <RepositoryUrl>https://github.com/Guillain-RDCDE/Seedforger</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <!-- Built-in code analysis on, at the level that matches the SDK. -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+</Project>

@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Seedforger.UI;
 
 namespace Seedforger {
 
@@ -29,7 +30,7 @@ namespace Seedforger {
     /// <summary>The campaign to run, set when the user clicks Start.</summary>
     internal Campaign Result { get; private set; }
 
-    private static string P(string en, string fr) => Localization.Pick(en, fr);
+    private static string P(string en, string fr) => UiStrings.Pick(en, fr);
 
     internal CampaignForm(Campaign preset = null) {
       Text = P("New campaign", "Nouvelle campagne");
@@ -72,8 +73,6 @@ namespace Seedforger {
       CancelButton = cancel;
 
       Apply(preset ?? new Campaign());
-      Theme.Apply(this);
-      Localization.Apply(this);
     }
 
     // ---- layout helpers ----

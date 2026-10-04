@@ -1,5 +1,8 @@
 namespace Seedforger {
-  public class TorrentClient {
+
+  /// <summary>One concrete fingerprint: a client profile with a freshly generated
+  /// key and peer_id, ready to announce.</summary>
+  internal class TorrentClient {
     internal TorrentClient(string name) {
       DefNumWant = 200;
       StartOffset = 10000000;

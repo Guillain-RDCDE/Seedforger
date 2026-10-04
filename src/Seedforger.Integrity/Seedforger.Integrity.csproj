@@ -13,11 +13,8 @@
   -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
     <RootNamespace>Seedforger.Integrity</RootNamespace>
     <AssemblyName>Seedforger.Integrity</AssemblyName>
-    <Version>2.20.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

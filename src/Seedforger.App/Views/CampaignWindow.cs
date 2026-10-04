@@ -6,6 +6,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Seedforger;
+using Seedforger.UI;
 using Seedforger.App.ViewModels;
 
 namespace Seedforger.App.Views {
@@ -31,7 +32,7 @@ namespace Seedforger.App.Views {
     private readonly CheckBox rotate = new CheckBox { IsChecked = true };
     private readonly NumericUpDown deadlineDays = Num(14, 0, 3650);
 
-    private static string P(string en, string fr) => AppOptions.Language == Language.French ? fr : en;
+    private static string P(string en, string fr) => UiStrings.Pick(en, fr);
 
     public CampaignWindow(MainViewModel vm) {
       this.vm = vm;
@@ -51,7 +52,10 @@ namespace Seedforger.App.Views {
       start.Classes.Add("accent");
       var stop = new Button { Content = P("Stop campaign", "Arrêter la campagne"), MinWidth = 140 };
       var cancel = new Button { Content = P("Close", "Fermer"), MinWidth = 90 };
-      start.Click += (s, e) => { if (Validate()) { vm.RunCampaign(Build()); Close(); } };
+      start.Click += (s, e) => {
+        if (!Validate()) { Title = P("New campaign — pick an existing torrent folder and a target above 0", "Nouvelle campagne — dossier de torrents existant et cible > 0 requis"); return; }
+        vm.RunCampaign(Build()); Close();
+      };
       stop.Click += (s, e) => { vm.StopCampaign(); };
       cancel.Click += (s, e) => Close();
 
@@ -113,8 +117,8 @@ namespace Seedforger.App.Views {
       browse.Click += async (s, e) => {
         try {
           var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions { AllowMultiple = false });
-          if (folders != null)
-            foreach (var f in folders) { var p = f.TryGetLocalPath(); if (!string.IsNullOrEmpty(p)) { tb.Text = p; break; } }
+          var p = MainWindow.FirstLocalPath(folders);
+          if (p != null) tb.Text = p;
         }
         catch { }
       };

@@ -1,4 +1,5 @@
 using Seedforger;
+using Seedforger.Wire;
 using Xunit;
 
 namespace Seedforger.Tests {
@@ -35,37 +36,43 @@ namespace Seedforger.Tests {
     }
   }
 
-  public class BandwidthTests {
+  public class UpstreamBudgetTests {
 
     [Fact]
     public void Disabled_ReturnsRequestUnchanged() {
-      Bandwidth.GlobalUpKBps = 0;
-      Assert.Equal(1_000_000, Bandwidth.CapUpload(1_000_000));
+      var budget = new UpstreamBudget();
+      Assert.False(budget.Enabled);
+      Assert.Equal(1_000_000, budget.CapUpload(1_000_000));
     }
 
     [Fact]
-    public void SharesGlobalCapAcrossActiveTabs() {
-      Bandwidth.GlobalUpKBps = 1000; // 1000 kB/s = 1_024_000 B/s
-      Bandwidth.RegisterActive();
-      Bandwidth.RegisterActive(); // 2 active
-      try {
-        Assert.Equal(2, Bandwidth.ActiveCount);
-        Assert.Equal(512_000, Bandwidth.CapUpload(5_000_000)); // capped to fair share
-        Assert.Equal(100_000, Bandwidth.CapUpload(100_000));   // under share -> unchanged
-      }
-      finally {
-        Bandwidth.UnregisterActive();
-        Bandwidth.UnregisterActive();
-        Bandwidth.GlobalUpKBps = 0;
-      }
+    public void SharesTheLineAcrossActiveEngines() {
+      var budget = new UpstreamBudget(1000); // 1000 kB/s = 1_024_000 B/s
+      budget.Register();
+      budget.Register(); // 2 active
+      Assert.Equal(2, budget.ActiveCount);
+      Assert.Equal(512_000, budget.CapUpload(5_000_000)); // capped to fair share
+      Assert.Equal(100_000, budget.CapUpload(100_000));   // under share -> unchanged
+      budget.Unregister();
+      Assert.Equal(1_024_000, budget.CapUpload(5_000_000)); // alone on the line again
+    }
+
+    [Fact]
+    public void InstancesAreIndependent_SoACampaignNeverTouchesTheSharedLine() {
+      var shared = new UpstreamBudget(100);
+      var campaign = new UpstreamBudget(5000);
+      campaign.Register();
+      Assert.Equal(100, shared.TotalKBps);
+      Assert.Equal(0, shared.ActiveCount);
+      Assert.Equal(1, campaign.ActiveCount);
     }
   }
 
-  public class PeerWireTests {
+  public class PeerProtocolTests {
 
     [Fact]
     public void FullBitfield_FullBytes() {
-      var m = PeerWire.FullBitfieldMessage(16); // 2 full bytes, no spare
+      var m = PeerProtocol.FullBitfield(16); // 2 full bytes, no spare
       Assert.Equal(4 + 1 + 2, m.Length);
       Assert.Equal(5, m[4]);       // bitfield id
       Assert.Equal(0xFF, m[5]);
@@ -74,20 +81,22 @@ namespace Seedforger.Tests {
 
     [Fact]
     public void FullBitfield_ClearsSpareBits() {
-      var m = PeerWire.FullBitfieldMessage(12); // 2 bytes, 4 spare low bits in last
+      var m = PeerProtocol.FullBitfield(12); // 2 bytes, 4 spare low bits in last
       Assert.Equal(4 + 1 + 2, m.Length);
       Assert.Equal(0xFF, m[5]);
       Assert.Equal(0xF0, m[6]);    // 0xFF << 4
     }
 
     [Fact]
-    public void FullBitfield_ZeroPieces_Empty() {
-      Assert.Empty(PeerWire.FullBitfieldMessage(0));
+    public void FullBitfield_ZeroPieces_HasAnEmptyPayload() {
+      var m = PeerProtocol.FullBitfield(0);
+      Assert.Equal(5, m.Length);   // length prefix (1) + id, nothing else
+      Assert.Equal(5, m[4]);
     }
 
     [Fact]
     public void Choke_IsFiveBytes() {
-      Assert.Equal(new byte[] { 0, 0, 0, 1, 0 }, PeerWire.ChokeMessage());
+      Assert.Equal(new byte[] { 0, 0, 0, 1, 0 }, PeerProtocol.Choke());
     }
   }
 }
