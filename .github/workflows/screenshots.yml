@@ -5,14 +5,11 @@ name: Screenshots
 # the main window and commits the PNGs to docs/screenshots. Also runs the test
 # suite first, so a screenshot is never taken of a build that doesn't pass.
 #
-# Run it by hand from the Actions tab (workflow_dispatch), or by pushing to the
-# UI branch listed below.
+# Run it by hand from the Actions tab (workflow_dispatch) on the branch whose
+# window you want captured; it commits the PNGs back to that branch.
 
 on:
   workflow_dispatch: {}
-  push:
-    branches: ['claude/exciting-allen-p16m44']
-    paths-ignore: ['docs/screenshots/**']
 
 permissions:
   contents: write

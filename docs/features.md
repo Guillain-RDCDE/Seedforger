@@ -97,7 +97,12 @@ See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orches
 
 <p align="center">
   <img src="screenshots/main.png" width="460" alt="Seedforger">
-  <br><sub><em>Screenshot of an earlier release — the current window is the same content in a classic menu-bar / group-box layout.</em></sub>
+  <br><sub><em>The Windows build, seeding against a tracker: menu bar, Torrent and Status groups, log, status bar.</em></sub>
+</p>
+
+<p align="center">
+  <img src="screenshots/main-linux.png" width="460" alt="Seedforger — the cross-platform Avalonia window on Linux">
+  <br><sub><em>The same layout in the cross-platform Avalonia build (Linux). Both captures are taken by CI from the current code.</em></sub>
 </p>
 
 ## Emulated clients (built-in)
