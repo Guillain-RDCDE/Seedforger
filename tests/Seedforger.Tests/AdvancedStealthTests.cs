@@ -68,7 +68,7 @@ namespace Seedforger.Tests {
     }
   }
 
-  public class PeerProtocolTests {
+  public class PeerProtocolFramingTests {
 
     [Fact]
     public void FullBitfield_FullBytes() {

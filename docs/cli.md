@@ -1,6 +1,6 @@
 # Command line
 
-Seedforger runs the same proven announce engine with no window, so it scripts cleanly — cron, CI, a headless server, or just automating a routine. The engine core is WinForms-free, so the dedicated CLI runs on **Linux, macOS and Windows** as a self-contained single file.
+Seedforger runs the same engine with no window, so it scripts cleanly — cron, CI, a headless server, or just automating a routine. The command line lives in the core and is shared: the dedicated CLI runs on **Linux, macOS and Windows** as a self-contained single file, and the Windows GUI executable switches to it when started with these flags.
 
 ```
 # cross-platform CLI (Linux / macOS / Windows)
@@ -14,18 +14,21 @@ Seedforger.exe [mode] [options]
 
 | Flag | Effect |
 |---|---|
-| *(none)* | Launch the graphical interface. |
+| *(none)* | Launch the graphical interface (Windows exe) / show the help (console exe). |
 | `--cli`, `--headless`, `--nogui` | Run without a window (automation). Needs a torrent. |
-| `--test-announce`, `--dry-run` | Announce once as a seeder, print the tracker's answer, exit. |
-| `--list-clients` | List every client and version you can impersonate, exit. |
+| `--test-announce`, `--dry-run` | One `started` announce as a complete seeder (and a `stopped` right after): prints accepted / rejected with the tracker's reason, and the swarm. |
+| `--daemon`, `--folder <dir>` | Run one torrent or a whole folder 24/7 behind the [web dashboard](daemon.md). |
+| `--list-clients` | List every client/version and every connection profile, exit. |
 | `--help`, `-h` | Show the built-in help, exit. |
 
-## Torrent (required for `--cli` and dry-run)
+Unknown options are an error (exit code 2), and an option is never taken as another option's value — `-t --quiet` reports a missing torrent.
+
+## Torrent (required)
 
 | Flag | Meaning |
 |---|---|
 | `--torrent`, `-t <file>` | Path to a `.torrent` file. |
-| `--magnet <uri>` | A magnet link instead. |
+| `--folder <dir>` | Every `.torrent` in a folder (implies `--daemon`). Magnet links need the GUI, which asks for the size they lack. |
 
 ## Impersonate
 
@@ -47,8 +50,18 @@ Run `--list-clients` for the exact names and versions.
 | `--leech` | Leecher: Finished 0 %. |
 | `--finished <0-100>` | Explicit finished percentage. |
 | `--serve-real <file>` | Serve genuine hash-valid pieces of a real, matching file — opens the announced port and answers monitoring peers with real data. |
-| `--connection <profile>` | Apply a connection profile's up/down caps (see `--help` for the list). |
-| `--interval <sec>` | Base announce interval (the tracker may override it). |
+| `--connection <profile>` | A believable line: sets upload/download and the shared upstream budget (`--list-clients` prints the names). |
+| `--interval <sec>` | Base announce interval; the tracker's own interval and `min interval` always win. |
+| `--port <n>` | Announced listening port (default: random, like a real client). |
+
+## Stop by itself
+
+| Flag | Meaning |
+|---|---|
+| `--stop-after <minutes>` | Stop after that long. |
+| `--stop-uploaded <MB>` | Stop once that much upload was reported. |
+| `--stop-ratio <ratio>` | Stop once uploaded ÷ downloaded reaches it. |
+| `--duration <minutes>` | Hard limit for the whole run. `0` (or omitted) = until `Ctrl+C`. |
 
 ## Believability
 
@@ -61,26 +74,25 @@ Run `--list-clients` for the exact names and versions.
 
 | Flag | Meaning |
 |---|---|
-| `--proxy-type none\|http\|socks4\|socks4a\|socks5` | Proxy protocol. |
+| `--proxy-type none\|http\|socks4\|socks4a\|socks5` | Proxy protocol. HTTPS trackers work through a proxy too (CONNECT tunnel, TLS inside). SOCKS4a, SOCKS5 and HTTP CONNECT let the proxy resolve the tracker's name. |
 | `--proxy-host <h>` | Proxy host. |
 | `--proxy-port <p>` | Proxy port. |
 | `--proxy-user <u>` | Username (if required). |
 | `--proxy-pass <p>` | Password (if required). |
 
-## Run
+## Output
 
 | Flag | Meaning |
 |---|---|
-| `--duration <minutes>` | Stop automatically after N minutes. `0` (or omitted) = run until `Ctrl+C`. |
-| `--quiet`, `-q` | Suppress the per-announce log. |
+| `--quiet`, `-q` | Suppress the per-announce log (DNS notes included). |
 
 ## Exit codes
 
 | Code | Meaning |
 |---|---|
 | `0` | Success (seeded, dry-run accepted, or help/list printed). |
-| `1` | Runtime error, tracker rejection, or dry-run timeout. |
-| `2` | Bad usage (no torrent, file not found). |
+| `1` | Tracker rejection or no usable answer (dry run), or the dashboard could not start. |
+| `2` | Bad usage (unknown option, no torrent, file not found). |
 
 ## Examples
 
@@ -95,11 +107,11 @@ Seedforger.exe --cli -t movie.torrent -u 800 --duration 120
 Seedforger.exe --cli -t movie.torrent --client Transmission --client-version 4.0.6 \
   --proxy-type socks5 --proxy-host 127.0.0.1 --proxy-port 9050
 
-# Use a connection profile and a random client, run until Ctrl+C
-Seedforger.exe --cli -t movie.torrent --connection "VDSL2 (100/40)" --randomize-client
+# Use a connection profile and a random current client, stop once 5 GB were reported
+Seedforger.exe --cli -t movie.torrent --connection "VDSL2  (10 / 50 Mbps)" --randomize-client --stop-uploaded 5120
 
-# Seed from a magnet link, quietly
-Seedforger.exe --cli --magnet "magnet:?xt=urn:btih:…" -u 500 --quiet
+# A whole folder, 24/7, behind the dashboard on the LAN
+./Seedforger.Cli --folder ~/torrents --connection "Fibre  100 / 100 Mbps" --web-bind 0.0.0.0 --web-port 8080
 ```
 
 > **Reminder.** This is an educational / security-research tool. Faking your ratio breaks the rules of virtually every private tracker and can get you banned. Automating it does not make it safer — use it only where you are permitted to.

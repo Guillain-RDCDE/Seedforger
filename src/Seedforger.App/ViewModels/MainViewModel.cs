@@ -144,7 +144,7 @@ namespace Seedforger.App.ViewModels {
     public string ActivityText { get => activityText; set => Set(ref activityText, value); }
 
     public bool HasTorrent => torrent != null;
-    public Torrent CurrentTorrent => torrent;
+    internal Torrent CurrentTorrent => torrent;
 
     // ---- actions ----
 

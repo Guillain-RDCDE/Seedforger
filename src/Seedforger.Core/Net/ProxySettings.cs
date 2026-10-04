@@ -3,7 +3,7 @@ using System;
 namespace Seedforger.Net {
 
   /// <summary>How outbound tracker connections leave the machine.</summary>
-  internal enum ProxyType {
+  public enum ProxyType {
     None,
     HttpConnect,
     Socks4,

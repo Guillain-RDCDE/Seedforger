@@ -4,7 +4,7 @@ using System.Globalization;
 namespace Seedforger {
 
   /// <summary>What ends a run on its own.</summary>
-  internal enum StopKind {
+  public enum StopKind {
     Never,
     /// <summary>After <see cref="StopRule.Value"/> minutes.</summary>
     AfterMinutes,

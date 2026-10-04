@@ -14,7 +14,7 @@ The client half is a genuinely serious attempt at believable ratio faking — so
 | **Stealth** — speed ramp-up with variation, announce-interval jitter, a day/night rhythm, active-hours windows, and believability warnings. | **Real peer-wire engine** — optionally serve genuine, SHA-1-verified blocks over TCP, capped by a statistical governor, to satisfy monitoring peers. |
 | **Goal-seeking campaigns** — set a ratio or a volume-by-deadline; it staggers starts, allocates bandwidth by demand, paces, and stops itself. | **Daemon + web dashboard** — run a folder 24/7 on a seedbox/NAS behind a self-contained dark dashboard and JSON API. |
 | **Guided setup** — a wizard that probes each torrent and loops until it finds one that will genuinely earn ratio, then applies safe defaults. | **Connectivity** — HTTPS trackers over `SslStream`, SOCKS4/4a/5 & HTTP-CONNECT proxies, magnet links, batch loading, DNS-over-HTTPS. |
-| **Cross-platform** — a WinForms-free core drives a headless **CLI** and an **Avalonia GUI** on Windows, Linux & macOS. | **Tested** — **172 xUnit tests**, green CI on Windows + Linux, incl. a peer-wire integration test and an end-to-end CLI run against a live mock tracker. |
+| **One engine** — a portable core drives the Windows GUI, the cross-platform **Avalonia GUI**, the **CLI** and the daemon alike; Core, CLI and Avalonia run on Windows, Linux & macOS. | **Tested** — an xUnit suite green on Windows + Linux, incl. a peer-wire integration test, the transport and proxies against in-process fakes, and an end-to-end CLI run against a live mock tracker. |
 
 Full catalogue in [Features](../docs/features.md).
 

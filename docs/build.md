@@ -8,7 +8,7 @@ Requires the **.NET 8 SDK** (`dotnet --version` ≥ 8).
 # build everything
 dotnet build Seedforger.sln -c Release
 
-# run the tests (xUnit) — 172 of them
+# run the tests (xUnit)
 dotnet test tests/Seedforger.Tests/Seedforger.Tests.csproj
 
 # lite single-file exe — tiny & fast (needs the .NET 8 Desktop runtime installed)
@@ -38,38 +38,42 @@ Or build both Windows executables at once with **`scripts/build-release.cmd`** (
 
 ## Project layout
 
-A standard `src/` + `tests/` layout. A portable **Core** (no WinForms) drives every front-end; the **Integrity** projects are the reproducible science annex.
+A standard `src/` + `tests/` layout. One portable **Core** holds the engine, the protocol, the client database and the command line; the three executables are thin front-ends over it. The **Integrity** projects are the reproducible science annex. Shared build settings (the single version number, analyzers, code style) live in `Directory.Build.props`, `.editorconfig` and `global.json` at the root.
 
 ```
 src/
-  Seedforger.Core/              net8.0 — the portable engine (Windows/Linux/macOS, no WinForms)
-  │  ├─ SeedEngine.cs                 headless announce/seed loop (the portable engine)
-  │  ├─ Announce.cs                   announce URL + info_hash + response parsing
-  │  ├─ TrackerTransport.cs           HTTP (proxy) / HTTPS fetch, shared by GUI + CLI
-  │  ├─ HttpsTransport.cs · SecureDns.cs      TLS transport + DNS-over-HTTPS
-  │  ├─ TorrentClientFactory.cs · DefaultClientProfiles.cs   the 50 client fingerprints
-  │  ├─ SpeedShaper.cs · Stealth.cs · SwarmModel.cs · Bandwidth.cs   believability
-  │  ├─ Settings.cs · Language.cs     portable JSON settings + language enum
+  Seedforger.Core/              net8.0 — the engine, shared by every front-end (Windows/Linux/macOS)
+  │  ├─ SeedEngine.cs · SeedOptions.cs     one run of one torrent: announces, shaped counters, stop rules
+  │  ├─ StealthOptions.cs · UpstreamBudget.cs   believability profile + shared uplink (instances, not globals)
+  │  ├─ AnnounceProbe.cs              the dry-run announce (accepted / rejected / swarm)
+  │  ├─ Announce.cs · TrackerResponse.cs       announce URL + info_hash + bencoded answer
+  │  ├─ TrackerTransport.cs · SecureDns.cs     one HTTP/HTTPS path (proxy-aware) + DNS-over-HTTPS
+  │  ├─ Net/                          ProxyConnector (direct, HTTP CONNECT, SOCKS4/4a/5) + ProxySettings
+  │  ├─ TorrentClientFactory.cs · DefaultClientProfiles.cs   the client fingerprints
+  │  ├─ SpeedShaper.cs · Stealth.cs · SwarmModel.cs          the shaping maths
+  │  ├─ Settings.cs · RunPreferences.cs · UI/UiStrings.cs    portable JSON settings, Advanced values, EN/FR
+  │  ├─ Cli/                          CliApp (the command line), CommandLine, DaemonHost
   │  ├─ Peer/                         the real peer-wire engine (stages A–D + governor)
-  │  ├─ Campaign/                     campaign model + policy
-  │  ├─ BitTorrent/                   bencode + .torrent parsing
-  │  └─ BytesRoads/                   SOCKS / HTTP-CONNECT proxy sockets
-  Seedforger.Cli/               net8.0 — the cross-platform headless command line
+  │  ├─ Campaign/                     campaign model, planner and orchestrator
+  │  ├─ BitTorrent/                   bencode + .torrent parsing, magnets
+  │  └─ Web/                          the daemon's dashboard + JSON status
+  Seedforger.Cli/               net8.0 — the console executable (one line: it calls CliApp)
   Seedforger.App/               net8.0 — the cross-platform Avalonia GUI (Views/, ViewModels/)
-  Seedforger/                   net8.0-windows — the WinForms GUI (UI/, wizards, Theme…)
+  Seedforger/                   net8.0-windows — the Windows GUI (UI/MainForm, GuideForm, CampaignForm…);
+                                        started with CLI flags it runs CliApp too
   Seedforger.Integrity/         net8.0 — the reproducible science model (the "No Free Ratio" annex)
   Seedforger.Integrity.Figures/ net8.0 — regenerates the paper figures from the model
 tests/
-  Seedforger.Tests/             net8.0 — 172 xUnit tests, run on Windows AND Linux in CI
+  Seedforger.Tests/             net8.0 — the xUnit suite, run on Windows AND Linux in CI
 scripts/                        build-release.cmd (Windows two-in-one publish)
 docs/  ·  packaging/  ·  tools/  (mock tracker for the E2E test)
 ```
 
-The Core, CLI and Avalonia GUI build and run on Windows, Linux and macOS; the WinForms app is Windows-only.
+Every front-end builds its run from a `SeedOptions` and hands it to a `SeedEngine`; the engine reads no settings and no globals, which is what keeps the Windows window, the cross-platform window, the CLI, the daemon and campaigns byte-for-byte identical on the wire. The Core, CLI and Avalonia GUI build and run on Windows, Linux and macOS; the WinForms app is Windows-only.
 
 ## Tests
 
-**172 xUnit tests** cover the client fingerprints (incl. Transmission checksum), bencode round-trips, the speed shaper, stealth/swarm/bandwidth math, the peer-wire protocol and a **loopback integration test** (one node downloads a hash-valid piece from another), the campaign planner, JSON settings/clients round-trips, the HTTPS transport (a real TLS fetch, skipped gracefully offline), the **announce core** (a byte-exact announce URL, the `info_hash` percent-encoding, and parsing a tracker's answer straight from a raw HTTP response — all WinForms-free, in `Announce.cs`), and the **science model** in `Seedforger.Integrity` (the figures are pinned to the code with tolerances, so the papers can't drift).
+The xUnit suite covers the client fingerprints (incl. Transmission checksum), bencode round-trips, the speed shaper, stealth/swarm/budget math, the peer-wire protocol and a **loopback integration test** (one node downloads a hash-valid piece from another), the campaign planner, JSON settings round-trips (including files written by older versions), the **tracker transport and proxy connector against in-process fakes** (a fake HTTP tracker, a SOCKS5 proxy with credentials, HTTP CONNECT, SOCKS4a — no outbound network), the **dry-run probe** (accepted, rejected with a reason, empty swarm, unreachable), stop rules, the command-line reader, the **announce core** (a byte-exact announce URL, the `info_hash` percent-encoding, and parsing a tracker's answer straight from a raw HTTP response), and the **science model** in `Seedforger.Integrity` (the figures are pinned to the code with tolerances, so the papers can't drift).
 
 ## Contributing
 

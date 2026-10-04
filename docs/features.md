@@ -77,10 +77,10 @@ See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orches
 | | |
 |---|---|
 | **HTTPS trackers** | Full TLS via `SslStream`, sending a raw hand-built request so header order / User-Agent stay byte-accurate. |
-| **Proxy** | SOCKS4 / 4a / 5 and HTTP-CONNECT for HTTP trackers. |
-| **Magnet & batch** | Open **magnet links** (infohash-only) and load a whole folder of `.torrent`s into tabs at once. |
-| **Auto-stop targets** | Stop on time, uploaded, downloaded, **ratio**, or seeders/leechers. |
-| **Dry-run** | *Run → Test announce* (or the **Test announce** button, F7) sends a single announce and shows whether the tracker accepted it — before you commit. |
+| **Proxy** | SOCKS4 / 4a / 5 (with username/password) and HTTP CONNECT, for HTTP **and HTTPS** trackers (a CONNECT tunnel with TLS inside). SOCKS4a/5 and CONNECT let the proxy resolve the tracker name. |
+| **Magnet & batch** | Open **magnet links** (infohash-only; the GUI asks for the size), or run a whole folder of `.torrent`s as a campaign or a daemon. |
+| **Auto-stop rules** | Stop by itself on time, uploaded, downloaded, **ratio**, or when seeders/leechers fall below a threshold — in the GUIs (Advanced) and on the command line (`--stop-*`). |
+| **Dry-run** | *Run → Test announce* (or the **Test announce** button, F7) sends one seeder announce, reports accepted / rejected with the tracker's own reason and the swarm, then sends a `stopped` so no phantom peer is left behind. |
 
 ## 🎨 Experience
 
