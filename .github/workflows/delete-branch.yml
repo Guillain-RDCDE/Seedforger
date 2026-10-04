@@ -1,0 +1,28 @@
+name: Delete branch
+
+# One-shot maintenance: deletes a remote branch (never main). Run from the
+# Actions tab with the branch name.
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to delete'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Delete the branch
+        env:
+          BRANCH: ${{ inputs.branch }}
+        run: |
+          set -eu
+          [ "$BRANCH" != "main" ] || { echo "refusing to delete main"; exit 1; }
+          git push origin --delete "$BRANCH"
