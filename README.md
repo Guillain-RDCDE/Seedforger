@@ -11,7 +11,7 @@ A modern **.NET 8** revival of RatioMaster: it tells a tracker you uploaded giga
 [![CI](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml/badge.svg)](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![Release](https://img.shields.io/github/v/release/Guillain-RDCDE/Seedforger?color=2ea043&label=release)](../../releases/latest)
-[![Tests](https://img.shields.io/badge/tests-172%20passing-2ea043)](tests/Seedforger.Tests)
+[![Tests](https://img.shields.io/badge/tests-226%20passing-2ea043)](tests/Seedforger.Tests)
 [![Platforms](https://img.shields.io/badge/Windows%20·%20Linux%20·%20macOS-30363d)](../../releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
