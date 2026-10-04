@@ -132,11 +132,12 @@ conventions:
 
   | Client | Prefix | Meaning |
   |--------|--------|---------|
-  | qBittorrent 5.2.3 | `-qB5230-` | qB, version 5.2.3 |
+  | qBittorrent 5.2.4 | `-qB5240-` | qB, version 5.2.4 |
   | Transmission 4.1.3 | `-TR4130-` | TR, 4.1.3 |
-  | Deluge 2.1.1 | `-DE2110-` | DE, 2.1.1 |
-  | libtorrent 2.1.0 | `-LT2100-` | LT, 2.1.0 |
-  | µTorrent 3.5.5 | `-UT355S-` | UT, 3.5.5 |
+  | Deluge 2.2.0 | `-DE2200-` | DE, 2.2.0 |
+  | libtorrent 2.0.15 | `-LT20F0-` | LT, 2.0.15 (15 → `F`) |
+  | BiglyBT 4.1.0.0 | `-BI4100-` | BI, 4.1.0.0 |
+  | µTorrent 3.6.0 | `-UT360S-` | UT, 3.6.0, stable |
 
   The version chars use `0-9`, then `A-Z`, then `a-z` for values ≥ 10 — this is
   libtorrent's `generate_fingerprint` scheme, which qBittorrent/Deluge/libtorrent
@@ -163,11 +164,11 @@ query string. All binary values are **percent-encoded** byte-by-byte.
 ### 6.1 The announce request
 
 ```
-GET /announce?info_hash=%4a%bc...&peer_id=-qB5230-%8c%c0...&port=6881
+GET /announce?info_hash=%4a%bc...&peer_id=-qB5240-%8c%c0...&port=6881
     &uploaded=0&downloaded=0&left=1024000&corrupt=0&key=1A2B3C4D
     &event=started&numwant=200&compact=1&no_peer_id=1&supportcrypto=1 HTTP/1.1
 Host: tracker.example.org
-User-Agent: qBittorrent/5.2.3
+User-Agent: qBittorrent/5.2.4
 Accept-Encoding: gzip
 Connection: close
 ```
@@ -389,7 +390,7 @@ Mapping the anti-cheat table (§12) to Seedforger's features:
 
 | Anti-cheat signal | Seedforger countermeasure |
 |-------------------|---------------------------|
-| Client whitelist | accurate, current fingerprints (`-qB5230-`, `-TR4130-`, …), **client rotation**, and client-specific quirks like **Transmission's peer_id checksum** |
+| Client whitelist | accurate, current fingerprints (`-qB5240-`, `-TR4130-`, …), **client rotation**, and client-specific quirks like **Transmission's peer_id checksum** |
 | Impossible speed | **connection profiles** (ADSL→fibre) + **believability warnings** + a **global upstream budget** shared across all tabs (one uplink) |
 | **Uploading to nobody** | **swarm-aware speeds**: read the tracker's leecher/seeder counts and scale accordingly — 0 leechers ⇒ a trickle, your share diluted by competing seeders |
 | Announce cadence | **interval jitter** (drift later, never earlier than the tracker's `interval`) |

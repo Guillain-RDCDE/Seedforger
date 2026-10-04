@@ -6,8 +6,8 @@ namespace Seedforger.Tests {
   public class DefaultClientProfilesTests {
 
     [Fact]
-    public void All_ContainsExactly50Profiles() {
-      Assert.Equal(50, DefaultClientProfiles.All.Count);
+    public void All_ContainsExactly57Profiles() {
+      Assert.Equal(57, DefaultClientProfiles.All.Count);
     }
 
     [Fact]
@@ -29,8 +29,8 @@ namespace Seedforger.Tests {
 
     [Fact]
     public void FullName_CombinesFamilyAndVersion() {
-      var profile = DefaultClientProfiles.All.First(p => p.Family == "qBittorrent" && p.Version == "5.2.3");
-      Assert.Equal("qBittorrent 5.2.3", profile.FullName);
+      var profile = DefaultClientProfiles.All.First(p => p.Family == "qBittorrent" && p.Version == "5.2.4");
+      Assert.Equal("qBittorrent 5.2.4", profile.FullName);
     }
   }
 }

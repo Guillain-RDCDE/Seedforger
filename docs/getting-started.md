@@ -40,11 +40,11 @@ It's the same verification an expert does by hand — automated.
 
 ## 3. Or drive it yourself
 
-1. **Browse…** and pick your `.torrent` file.
+1. **Browse…** and pick your `.torrent` file — or drop it anywhere on the window.
 2. Set the **Upload Speed** (in kB/s) — how fast you want to "seed".
-3. Choose a **Client** to impersonate — **qBittorrent 5.2.3** is a great, modern default.
-4. Hit the green **START** button. Watch the **Ratio** and the log update.
-5. Hit the red **STOP** when you're done.
+3. Choose a **Client** to impersonate — **qBittorrent 5.2.4** is a great, modern default.
+4. Hit **Start seeding** (or press F5). Watch the **Status** box and the log update.
+5. Hit **Stop** (F6) when you're done.
 
 ## 4. The golden rules: stay believable
 

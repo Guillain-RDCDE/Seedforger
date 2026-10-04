@@ -32,7 +32,7 @@ Seedforger.exe [mode] [options]
 | Flag | Meaning |
 |---|---|
 | `--client <name>` | Which client to report — e.g. `qBittorrent`, `Transmission`, `µTorrent`. |
-| `--client-version <ver>` | e.g. `5.2.3`. Defaults to the newest known version of that client. |
+| `--client-version <ver>` | e.g. `5.2.4`. Defaults to the newest known version of that client. |
 | `--randomize-client` | Pick a random modern client fingerprint on start. |
 
 Run `--list-clients` for the exact names and versions.

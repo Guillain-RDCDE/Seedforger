@@ -42,9 +42,9 @@ namespace Seedforger.Tests {
       var back = JsonSerializer.Deserialize<List<ClientProfile>>(json,
         new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-      var qbt = back.Single(p => p.FullName == "qBittorrent 5.2.3");
-      Assert.Equal("-qB5230-", qbt.PeerIdPrefix);
-      Assert.Contains("qBittorrent/5.2.3", qbt.Headers);
+      var qbt = back.Single(p => p.FullName == "qBittorrent 5.2.4");
+      Assert.Equal("-qB5240-", qbt.PeerIdPrefix);
+      Assert.Contains("qBittorrent/5.2.4", qbt.Headers);
     }
   }
 }

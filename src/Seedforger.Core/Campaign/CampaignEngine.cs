@@ -140,7 +140,7 @@ namespace Seedforger {
       var pool = TorrentClientFactory.ModernClients;
       if (campaign.RotateClient && pool != null && pool.Length > 0)
         return TorrentClientFactory.GetClient(pool[rand.Next(pool.Length)]);
-      return TorrentClientFactory.GetClient("qBittorrent 5.2.3");
+      return TorrentClientFactory.GetClient("qBittorrent 5.2.4");
     }
 
     private static int ProfileUpKBps(string connectionName) {

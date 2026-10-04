@@ -6,18 +6,20 @@ using System.Windows.Forms;
 namespace Seedforger {
 
   /// <summary>
-  /// A small live dashboard that plots the current tab's uploaded bytes over
-  /// time (and shows the ratio). Owner-drawn, self-contained, dark by design.
+  /// A small live dashboard that plots the engine's uploaded bytes over time
+  /// (and shows the ratio). Owner-drawn, self-contained, in the plain light
+  /// colours of the rest of the interface.
   /// </summary>
   internal sealed class GraphForm : Form {
 
     private readonly Func<RM> provider;
     private readonly Timer timer;
 
-    private static readonly Color Bg = Color.FromArgb(0x14, 0x16, 0x1A);
-    private static readonly Color Grid = Color.FromArgb(0x28, 0x2C, 0x33);
-    private static readonly Color Green = Color.FromArgb(0x2E, 0xC9, 0x86);
-    private static readonly Color TextCol = Color.FromArgb(0xD7, 0xDB, 0xE2);
+    private static readonly Color Bg = SystemColors.Window;
+    private static readonly Color Grid = Color.FromArgb(0xE3, 0xE6, 0xEA);
+    private static readonly Color Green = Color.FromArgb(0x1B, 0x7F, 0x3B);
+    private static readonly Color TextCol = SystemColors.WindowText;
+    private static readonly Color Muted = SystemColors.GrayText;
 
     internal GraphForm(Func<RM> provider) {
       this.provider = provider;
@@ -79,7 +81,7 @@ namespace Seedforger {
 
       if (hist.Length < 2) {
         using (var f = new Font("Segoe UI", 9f))
-        using (var b = new SolidBrush(Grid))
+        using (var b = new SolidBrush(Muted))
           g.DrawString("Start a torrent to see the graph…", f, b, plot.Left + 8, plot.Top + plot.Height / 2 - 8);
         return;
       }

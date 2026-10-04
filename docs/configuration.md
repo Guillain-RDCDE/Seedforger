@@ -14,17 +14,17 @@ On first launch Seedforger drops a **`clients.sample.json`** next to the exe. Co
 [
   {
     "family": "qBittorrent",
-    "version": "5.2.3",
+    "version": "5.2.4",
     "httpProtocol": "HTTP/1.1",
     "hashUpperCase": false,
     "key": { "type": "hex", "length": 8, "urlEncode": false, "upperCase": true },
-    "peerIdPrefix": "-qB5230-",
+    "peerIdPrefix": "-qB5240-",
     "peerIdRandom": { "type": "random", "length": 12, "urlEncode": true, "upperCase": false },
-    "headers": "Host: {host}\r\nUser-Agent: qBittorrent/5.2.3\r\nAccept-Encoding: gzip\r\nConnection: close\r\n",
+    "headers": "Host: {host}\r\nUser-Agent: qBittorrent/5.2.4\r\nAccept-Encoding: gzip\r\nConnection: close\r\n",
     "query": "info_hash={infohash}&peer_id={peerid}&port={port}&uploaded={uploaded}&downloaded={downloaded}&left={left}&corrupt=0&key={key}{event}&numwant={numwant}&compact=1&no_peer_id=1&supportcrypto=1&redundant=0",
     "defNumWant": 200,
     "parse": true,
-    "searchString": "&peer_id=-qB5230-",
+    "searchString": "&peer_id=-qB5240-",
     "processName": "qbittorrent",
     "startOffset": 0,
     "maxOffset": 200000000
@@ -38,7 +38,7 @@ Keep fingerprints accurate: a wrong `peer_id` gets *users* banned.
 
 ## Campaigns (goal-seeking orchestrator)
 
-The **Campaigns** button opens the [visual builder](screenshots/campaign-builder.png) — pick a goal (ratio / GB by a deadline), a connection profile, active hours, a torrent folder, and hit **Start** (or Save / Load). No JSON to hand-write.
+*Tools → Campaigns…* opens the [visual builder](screenshots/campaign-builder.png) — pick a goal (ratio / GB by a deadline), a connection profile, active hours, a torrent folder, and hit **Start** (or Save / Load). No JSON to hand-write.
 
 Under the hood it's a `campaign.json` (Save/Load in the dialog; a `campaign.sample.json` is dropped next to the exe):
 

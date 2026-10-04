@@ -62,7 +62,7 @@ namespace Seedforger {
 
     public bool NewValues { get; set; } = true;
     public string Client { get; set; } = "qBittorrent";
-    public string ClientVersion { get; set; } = "5.2.3";
+    public string ClientVersion { get; set; } = "5.2.4";
     public string UploadRate { get; set; } = "10240";
     public string DownloadRate { get; set; } = "30";
     public string Interval { get; set; } = "300";

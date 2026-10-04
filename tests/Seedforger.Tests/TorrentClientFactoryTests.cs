@@ -6,11 +6,11 @@ namespace Seedforger.Tests {
   public class TorrentClientFactoryTests {
 
     [Theory]
-    [InlineData("qBittorrent 5.2.3", "-qB5230-", "qBittorrent/5.2.3")]
+    [InlineData("qBittorrent 5.2.4", "-qB5240-", "qBittorrent/5.2.4")]
     [InlineData("qBittorrent 4.6.7", "-qB4670-", "qBittorrent/4.6.7")]
     [InlineData("Transmission 4.1.3", "-TR4130-", "Transmission/4.1.3")]
-    [InlineData("Deluge 2.1.1", "-DE2110-", "Deluge/2.1.1")]
-    [InlineData("libtorrent 2.1.0", "-LT2100-", "libtorrent/2.1.0")]
+    [InlineData("Deluge 2.2.0", "-DE2200-", "Deluge/2.2.0")]
+    [InlineData("libtorrent 2.0.15", "-LT20F0-", "libtorrent/2.0.15")]
     public void GetClient_ModernFingerprints_HavePrefixAndUserAgent(
       string name, string expectedPrefix, string expectedUserAgent) {
       var client = TorrentClientFactory.GetClient(name);
@@ -56,7 +56,7 @@ namespace Seedforger.Tests {
     [Fact]
     public void GetVersions_QBittorrent_ContainsKnownVersions() {
       var versions = TorrentClientFactory.GetVersions("qBittorrent");
-      Assert.Contains("5.2.3", versions);
+      Assert.Contains("5.2.4", versions);
       Assert.Contains("4.6.7", versions);
     }
 

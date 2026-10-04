@@ -24,7 +24,7 @@ namespace Seedforger.Tests {
       // A few representative per-tab defaults
       Assert.True(s.NewValues);
       Assert.Equal("qBittorrent", s.Client);
-      Assert.Equal("5.2.3", s.ClientVersion);
+      Assert.Equal("5.2.4", s.ClientVersion);
       Assert.True(s.TCPlistener);
       Assert.True(s.ScrapeInfo);
       Assert.Equal("Never", s.StopWhen);

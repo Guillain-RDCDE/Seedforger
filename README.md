@@ -21,7 +21,7 @@ A modern **.NET 8** revival of RatioMaster: it tells a tracker you uploaded giga
 [![Getting started](https://img.shields.io/badge/Getting_started-30363d?style=for-the-badge)](docs/getting-started.md) &nbsp;
 [![Read the science](https://img.shields.io/badge/Read_the_science-No_Free_Ratio-1f6feb?style=for-the-badge)](https://guillain-rdcde.github.io/Seedforger/)
 
-<img src="docs/screenshots/main.png" width="760" alt="The Seedforger main window: client picker, live ratio, and per-torrent up/down">
+<img src="docs/screenshots/main.png" width="760" alt="The Seedforger main window (earlier release): torrent, client picker, live status and log">
 
 </div>
 

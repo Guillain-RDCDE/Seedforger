@@ -34,8 +34,8 @@ namespace Seedforger.Tests {
 
     [Fact]
     public void GetClient_NonTransmission_TailUnchanged() {
-      var c = TorrentClientFactory.GetClient("qBittorrent 5.2.3");
-      Assert.StartsWith("-qB5230-", c.PeerID);
+      var c = TorrentClientFactory.GetClient("qBittorrent 5.2.4");
+      Assert.StartsWith("-qB5240-", c.PeerID);
     }
   }
 }

@@ -21,6 +21,10 @@ namespace Seedforger.App.ViewModels {
     private readonly StringBuilder logBuffer = new StringBuilder();
     private Torrent torrent;
     private SeedEngine engine;
+    private DateTime? startedAt;
+
+    private static readonly IBrush IdleBrush = new SolidColorBrush(Color.Parse("#6B7280"));
+    private static readonly IBrush RunningBrush = new SolidColorBrush(Color.Parse("#15803D"));
 
     public ObservableCollection<string> Families { get; } = new ObservableCollection<string>();
     public ObservableCollection<string> Versions { get; } = new ObservableCollection<string>();
@@ -67,11 +71,20 @@ namespace Seedforger.App.ViewModels {
     private string selectedFamily;
     public string SelectedFamily {
       get => selectedFamily;
-      set { if (Set(ref selectedFamily, value)) RefreshVersions(); }
+      set { if (Set(ref selectedFamily, value)) { RefreshVersions(); Raise(nameof(ClientSummary)); } }
     }
 
     private string selectedVersion;
-    public string SelectedVersion { get => selectedVersion; set => Set(ref selectedVersion, value); }
+    public string SelectedVersion {
+      get => selectedVersion;
+      set { if (Set(ref selectedVersion, value)) Raise(nameof(ClientSummary)); }
+    }
+
+    /// <summary>"Client: qBittorrent 5.2.4" for the status bar.</summary>
+    public string ClientSummary =>
+      string.Format(Seedforger.UI.UiStrings.Get("status.client"), ((SelectedFamily ?? "") + " " + (SelectedVersion ?? "")).Trim());
+
+    public string VersionText => "v" + AppInfo.Version;
 
     private int selectedModeIndex;
     public int SelectedModeIndex { get => selectedModeIndex; set => Set(ref selectedModeIndex, value); }
@@ -98,13 +111,19 @@ namespace Seedforger.App.ViewModels {
     private string uploadedText = "0 bytes";
     public string UploadedText { get => uploadedText; set => Set(ref uploadedText, value); }
 
-    private string swarmText = "–  /  –";
+    private string downloadedText = "0 bytes";
+    public string DownloadedText { get => downloadedText; set => Set(ref downloadedText, value); }
+
+    private string swarmText = "– / –";
     public string SwarmText { get => swarmText; set => Set(ref swarmText, value); }
+
+    private string elapsedText = "–";
+    public string ElapsedText { get => elapsedText; set => Set(ref elapsedText, value); }
 
     private string statusText = Seedforger.UI.UiStrings.Get("idle");
     public string StatusText { get => statusText; set => Set(ref statusText, value); }
 
-    private IBrush statusColor = new SolidColorBrush(Color.Parse("#8A909C"));
+    private IBrush statusColor = IdleBrush;
     public IBrush StatusColor { get => statusColor; set => Set(ref statusColor, value); }
 
     private string activityText = "";
@@ -118,7 +137,7 @@ namespace Seedforger.App.ViewModels {
         TorrentDisplay = string.IsNullOrEmpty(torrent.Name) ? System.IO.Path.GetFileName(path) : torrent.Name;
         StartCommand.RaiseCanExecuteChanged();
       }
-      catch (Exception ex) { AppendLog("Couldn't read that .torrent: " + ex.Message); }
+      catch (Exception ex) { AppendLog(Seedforger.UI.UiStrings.Get("dlg.read_error") + ex.Message); }
     }
 
     /// <summary>Proxy config from the Advanced dialog (default: none).</summary>
@@ -128,7 +147,7 @@ namespace Seedforger.App.ViewModels {
     internal SeedEngine CreateEngine() => torrent == null ? null : BuildEngine();
     public void StartSeeding() => Start();
 
-    /// <summary>Optional real file to serve genuine pieces from (set via Tools).</summary>
+    /// <summary>Optional real file to serve genuine pieces from (set via Run → Serve a real file).</summary>
     internal string RealSeedFile;
 
     private SeedEngine BuildEngine() {
@@ -145,6 +164,7 @@ namespace Seedforger.App.ViewModels {
       SecureDns.Log = AppendLog;
       engine = BuildEngine();
       IsRunning = true;
+      startedAt = DateTime.UtcNow;
       // The announce is a blocking network call — keep the UI responsive.
       System.Threading.Tasks.Task.Run(() => {
         try { engine.Start(); } catch (Exception ex) { AppendLog("error: " + ex.Message); }
@@ -153,13 +173,14 @@ namespace Seedforger.App.ViewModels {
 
     private void Stop() {
       IsRunning = false;
+      startedAt = null;
       var e = engine;
       System.Threading.Tasks.Task.Run(() => { try { e?.Stop(); } catch { } });
     }
 
     /// <summary>One-shot dry-run announce (seeder), logs the tracker's answer.</summary>
     public void RunTestAnnounce() {
-      if (torrent == null) { AppendLog(Seedforger.UI.UiStrings.Get("no_torrent")); return; }
+      if (torrent == null) { AppendLog(Seedforger.UI.UiStrings.Get("dlg.no_torrent")); return; }
       AppendLog("Dry-run: announcing once as a seeder…");
       SecureDns.Log = AppendLog;
       var probe = BuildEngine();
@@ -190,40 +211,63 @@ namespace Seedforger.App.ViewModels {
       System.Threading.Tasks.Task.Run(() => { try { c?.Stop(); } catch { } });
     }
 
+    // ---- language ----
+
     public void SetLanguage(bool french) {
       AppOptions.Language = french ? Language.French : Language.English;
       try { Settings.Current.Language = french ? "fr" : "en"; Settings.Current.Save(); } catch { }
       RebuildModes();
       if (torrent == null) TorrentDisplay = Seedforger.UI.UiStrings.Get("no_torrent");
-      RefreshLive();
+      RefreshLive(true);
       Raise(nameof(L)); // refresh every {Binding L[...]}
+      Raise(nameof(ClientSummary));
+      Raise(nameof(IsEnglish));
+      Raise(nameof(IsFrench));
     }
+
+    // Check-box menu items bind to these; picking one switches, re-clicking the
+    // active one is a no-op (the re-raise keeps its check mark in place).
+    public bool IsEnglish {
+      get => AppOptions.Language != Language.French;
+      set { if (value) SetLanguage(false); else { Raise(nameof(IsEnglish)); Raise(nameof(IsFrench)); } }
+    }
+    public bool IsFrench {
+      get => AppOptions.Language == Language.French;
+      set { if (value) SetLanguage(true); else { Raise(nameof(IsEnglish)); Raise(nameof(IsFrench)); } }
+    }
+
+    // ---- settings toggles ----
 
     public bool Realistic {
       get => AppOptions.RealisticSpeed;
-      set { AppOptions.RealisticSpeed = value; Save(s => s.RealisticSpeed = value); }
+      set { AppOptions.RealisticSpeed = value; Save(s => s.RealisticSpeed = value); Raise(nameof(Realistic)); }
     }
     public bool SwarmAware {
       get => AppOptions.SwarmAware;
-      set { AppOptions.SwarmAware = value; Save(s => s.SwarmAware = value); }
+      set { AppOptions.SwarmAware = value; Save(s => s.SwarmAware = value); Raise(nameof(SwarmAware)); }
     }
     public bool RandomizeClient {
       get => AppOptions.RandomizeClientOnStart;
-      set { AppOptions.RandomizeClientOnStart = value; Save(s => s.RandomizeClientOnStart = value); }
+      set { AppOptions.RandomizeClientOnStart = value; Save(s => s.RandomizeClientOnStart = value); Raise(nameof(RandomizeClient)); }
     }
     private static void Save(Action<Settings> apply) { try { apply(Settings.Current); Settings.Current.Save(); } catch { } }
 
-    private void RefreshLive() {
-      if (engine == null) return;
-      var up = Math.Max(0, engine.UploadedBytes);
-      var down = Math.Max(0, engine.DownloadedBytes);
+    // ---- live readout ----
+
+    private void RefreshLive(bool force = false) {
+      if (engine == null && !force) return;
+      var up = engine == null ? 0 : Math.Max(0, engine.UploadedBytes);
+      var down = engine == null ? 0 : Math.Max(0, engine.DownloadedBytes);
       RatioText = down > 0 ? ((double) up / down).ToString("0.00") : "—";
       UploadedText = FormatSize(up);
-      var s = engine.SeederCount; var l = engine.LeecherCount;
-      SwarmText = (s < 0 ? "–" : s.ToString()) + "  /  " + (l < 0 ? "–" : l.ToString());
-      var running = engine.IsRunning && IsRunning;
+      DownloadedText = FormatSize(down);
+      var s = engine == null ? -1 : engine.SeederCount;
+      var l = engine == null ? -1 : engine.LeecherCount;
+      SwarmText = (s < 0 ? "–" : s.ToString()) + " / " + (l < 0 ? "–" : l.ToString());
+      var running = engine != null && engine.IsRunning && IsRunning;
+      ElapsedText = running && startedAt != null ? (DateTime.UtcNow - startedAt.Value).ToString(@"hh\:mm\:ss") : "–";
       StatusText = running ? Seedforger.UI.UiStrings.Get("seeding") : Seedforger.UI.UiStrings.Get("idle");
-      StatusColor = new SolidColorBrush(Color.Parse(running ? "#22C55E" : "#8A909C"));
+      StatusColor = running ? RunningBrush : IdleBrush;
     }
 
     private void RefreshVersions() {

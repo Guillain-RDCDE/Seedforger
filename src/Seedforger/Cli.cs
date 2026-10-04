@@ -183,8 +183,7 @@ namespace Seedforger {
       Console.WriteLine($@"{AppInfo.Name} v{AppInfo.Version} — report torrent stats without moving bytes.
 
 USAGE
-  Seedforger.exe                       Launch the classic GUI.
-  Seedforger.exe --new                 Launch the new interface.
+  Seedforger.exe                       Launch the graphical interface.
   Seedforger.exe --cli --torrent F …   Seed headless (no window).
   Seedforger.exe --test-announce -t F  Dry-run one announce and exit.
 
@@ -200,7 +199,7 @@ TORRENT (one required in --cli / dry-run)
 
 IMPERSONATE
   --client <name>              e.g. qBittorrent, Transmission, µTorrent.
-  --client-version <ver>       e.g. 5.2.3 (defaults to the newest known).
+  --client-version <ver>       e.g. 5.2.4 (defaults to the newest known).
   --randomize-client           Pick a random modern client on start.
 
 SPEED & MODE

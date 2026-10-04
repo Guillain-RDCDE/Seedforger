@@ -10,8 +10,8 @@ For *why* these matter, read [How it actually works](how-it-works.md); for the p
 
 | | |
 |---|---|
-| **Client database** | Data-driven profiles (**50 clients**), not a hard-coded switch. Add or override any client via an external [`clients.json`](configuration.md#custom--updated-fingerprints-without-rebuilding) — **no recompile**. |
-| **Modern fingerprints** | qBittorrent `-qB`, Transmission `-TR`, Deluge `-DE`, libtorrent `-LT`, µTorrent, plus the whole legacy zoo. Verified against libtorrent's `generate_fingerprint` and each client's source. |
+| **Client database** | Data-driven profiles (**57 clients**, refreshed October 2026), not a hard-coded switch. Add or override any client via an external [`clients.json`](configuration.md#custom--updated-fingerprints-without-rebuilding) — **no recompile**. |
+| **Modern fingerprints** | qBittorrent 5.2.4 `-qB`, Transmission 4.1.3 `-TR`, Deluge 2.2.0 `-DE`, libtorrent 2.1.2 / 2.0.15 `-LT`, BiglyBT 4.1 `-BI`, µTorrent 3.6 `-UT`, BitComet 2.22 `-BC`, plus the whole legacy zoo. Verified against libtorrent's `generate_fingerprint` and each client's source. |
 | **peer_id fidelity** | Reproduces client-specific quirks, including **Transmission's peer_id checksum**, so ids validate byte-for-byte. |
 | **Client rotation** | Optionally pick a fresh modern client on every start, so you don't always look like the same machine. |
 | **Byte-accurate HTTP** | Header order and `User-Agent` are hand-built to match the impersonated client exactly — including over TLS. |
@@ -39,7 +39,7 @@ For *why* these matter, read [How it actually works](how-it-works.md); for the p
 
 ## 🔬 The real peer-wire engine (advanced)
 
-*Tools → Serve a real file* arms a genuine TCP **peer-wire engine** — the answer to trackers that inject monitoring peers which *request-and-verify*. See the [deep-dive §13½](how-bittorrent-works.md#deep-end).
+*Run → Serve a real file* arms a genuine TCP **peer-wire engine** — the answer to trackers that inject monitoring peers which *request-and-verify*. See the [deep-dive §13½](how-bittorrent-works.md#deep-end).
 
 | Stage | What it does |
 |---|---|
@@ -56,7 +56,7 @@ For *why* these matter, read [How it actually works](how-it-works.md); for the p
 | | |
 |---|---|
 | **Goal-seeking campaigns** | Give it an intent — *reach ratio 2.0* or *upload 200 GB by a deadline* — and it derives the actions over time. |
-| **Visual builder** | The **Campaigns** button opens a themed form: goal, connection profile, active hours, torrent folder, stagger, concurrency. **No JSON by hand.** |
+| **Visual builder** | *Tools → Campaigns…* opens a plain form: goal, connection profile, active hours, torrent folder, stagger, concurrency. **No JSON by hand.** |
 | **Human pacing** | **Staggered** starts (launching everything at once is a tell), upstream **budget split by real demand**, **pacing** so you don't finish suspiciously early, then **auto-stop** at the goal. |
 
 See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orchestrator) for the `campaign.json` format.
@@ -80,26 +80,26 @@ See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orches
 | **Proxy** | SOCKS4 / 4a / 5 and HTTP-CONNECT for HTTP trackers. |
 | **Magnet & batch** | Open **magnet links** (infohash-only) and load a whole folder of `.torrent`s into tabs at once. |
 | **Auto-stop targets** | Stop on time, uploaded, downloaded, **ratio**, or seeders/leechers. |
-| **Dry-run** | *Tools → Test announce* sends a single announce and shows whether the tracker accepted it — before you commit. |
+| **Dry-run** | *Run → Test announce* (or the **Test announce** button, F7) sends a single announce and shows whether the tracker accepted it — before you commit. |
 
 ## 🎨 Experience
 
 | | |
 |---|---|
 | **Guided setup (newbie mode)** | A step-by-step wizard that probes each torrent against the tracker — accepted? enough leechers? — and loops until it finds one that will actually earn ratio, then sets believable defaults and starts. See [Getting started](getting-started.md#guided-setup). |
-| **Flat dark interface** | A from-scratch dark UI: owner-drawn flat cards, pill buttons, a dark title bar (DWM), a terminal-style log. |
+| **Classic interface** | A plain Windows layout: a menu bar, labelled group boxes, standard controls in the system font and colours, a log and a status bar — readable at any size and DPI, in light or dark system themes. |
 | **English / French** | The whole interface follows the language toggle at runtime (*Settings → Language*). |
-| **Closing doesn't stop the run** | The close button minimises to the taskbar instead of quitting, so a run in progress survives a stray click — and the window stays where you can see it. The minimise button can tuck into the notification area instead (toggleable, with a first-time hint). Quit for real from the ⚙ menu or the tray icon. |
-| **Live graph** | *Tools → Live graph* — a dashboard tracing cumulative upload + ratio for the running engine. |
+| **Closing doesn't stop the run** | The close button minimises to the taskbar instead of quitting, so a run in progress survives a stray click — and the window stays where you can see it. The minimise button can tuck into the notification area instead (toggleable, with a first-time hint). Quit for real from *File → Exit* or the tray icon. |
+| **Live graph** | *Tools → Live graph* — a small window tracing cumulative upload + ratio for the running engine. |
 | **Portable settings** | Everything lives in `settings.json` next to the exe. **No registry**, fully portable (USB-friendly). |
-| **Header navigation** | A flat, from-scratch UI whose header reaches guided setup, campaigns, tools and settings — no menu bar. |
+| **Menu bar & shortcuts** | *File / Run / Tools / Settings / Help* reach every feature. Ctrl+O loads a torrent, F5 starts, F6 stops, F7 dry-runs an announce — and a `.torrent` dropped anywhere on the window loads it. |
 | **Command line** | A headless mode (`--cli` / `--test-announce`) that scripts cleanly for cron, CI or a server. See [Command line](cli.md). |
 
 <p align="center">
   <img src="screenshots/main.png" width="460" alt="Seedforger">
-  <br><sub><em>Flat cards, pill buttons, a header that reaches every feature, a terminal-style log.</em></sub>
+  <br><sub><em>Screenshot of an earlier release — the current window is the same content in a classic menu-bar / group-box layout.</em></sub>
 </p>
 
 ## Emulated clients (built-in)
 
-qBittorrent · Transmission · Deluge · libtorrent · µTorrent · BitTorrent · BitComet · Vuze · Azureus · BitLord · ABC · BTuga · BitTornado · Burst · BitTyrant · BitSpirit · KTorrent · Gnome BT — several versions each, 50 profiles in all.
+qBittorrent · Transmission · Deluge · libtorrent · BiglyBT · µTorrent · BitTorrent · BitComet · Vuze · Azureus · BitLord · ABC · BTuga · BitTornado · Burst · BitTyrant · BitSpirit · KTorrent · Gnome BT — several versions each, 57 profiles in all.

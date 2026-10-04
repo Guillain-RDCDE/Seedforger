@@ -14,14 +14,13 @@ namespace Seedforger.App.Views {
 
   /// <summary>
   /// A condensed guided setup: the safety rule, pick a torrent, ask the tracker
-  /// (dry-run), then start. Drives the same MainViewModel / SeedEngine.
+  /// (dry-run), then start. Drives the same MainViewModel / SeedEngine. Plain
+  /// themed controls — no custom palette.
   /// </summary>
   public sealed class GuideWindow : Window {
 
     private readonly MainViewModel vm;
-    private readonly TextBlock status = new TextBlock {
-      Foreground = Brush.Parse("#ECEEF2"), TextWrapping = TextWrapping.Wrap, MinHeight = 60,
-    };
+    private readonly TextBlock status = new TextBlock { TextWrapping = TextWrapping.Wrap, MinHeight = 60 };
     private readonly Button analyze;
     private readonly Button start;
 
@@ -30,19 +29,18 @@ namespace Seedforger.App.Views {
     public GuideWindow(MainViewModel vm) {
       this.vm = vm;
       Title = P("Guided setup", "Assistant guidé");
-      Width = 520; SizeToContent = SizeToContent.Height; CanResize = false;
+      Width = 540; SizeToContent = SizeToContent.Height; CanResize = false;
       WindowStartupLocation = WindowStartupLocation.CenterOwner;
-      Background = Brush.Parse("#15161A");
 
       var rule = new TextBlock {
-        Foreground = Brush.Parse("#ECEEF2"), TextWrapping = TextWrapping.Wrap, FontWeight = FontWeight.SemiBold,
+        TextWrapping = TextWrapping.Wrap, FontWeight = FontWeight.SemiBold,
         Text = P("Only seed a file you actually HAVE — downloaded once, for real, through this tracker. The swarm has monitoring peers that request real pieces; claiming a file you don't have is how you get caught.",
                  "Ne seedez qu'un fichier que vous AVEZ vraiment — téléchargé une fois, pour de vrai, via ce tracker. Le swarm contient des pairs de surveillance qui demandent de vrais morceaux ; prétendre avoir un fichier qu'on n'a pas, c'est se faire prendre."),
       };
 
-      var browse = Pill(P("Browse for a .torrent…", "Parcourir un .torrent…"), "#4C8DF6");
-      analyze = Pill(P("Analyze (ask the tracker)", "Analyser (interroger le tracker)"), "#24262C");
-      start = Pill(P("Start seeding", "Démarrer le seed"), "#22C55E");
+      var browse = Wide(P("Browse for a .torrent…", "Parcourir un .torrent…"));
+      analyze = Wide(P("Analyze (ask the tracker)", "Analyser (interroger le tracker)"));
+      start = Wide(P("Start seeding", "Démarrer le seed"), accent: true);
       start.IsEnabled = false;
 
       browse.Click += async (s, e) => await Browse();
@@ -56,8 +54,7 @@ namespace Seedforger.App.Views {
       Content = new StackPanel {
         Margin = new Thickness(22), Spacing = 14,
         Children = {
-          new TextBlock { Text = P("Build ratio, believably", "Gagner du ratio, de façon crédible"),
-                          Foreground = Brush.Parse("#ECEEF2"), FontSize = 16, FontWeight = FontWeight.Bold },
+          new TextBlock { Text = P("Build ratio, believably", "Gagner du ratio, de façon crédible"), FontSize = 17, FontWeight = FontWeight.Bold },
           rule,
           browse,
           status,
@@ -112,7 +109,7 @@ namespace Seedforger.App.Views {
             }
             else {
               status.Text = P("The tracker didn't accept the announce (see the main log).",
-                              "Le tracker n'a pas accepté l'annonce (voir le log principal).");
+                              "Le tracker n'a pas accepté l'annonce (voir le journal principal).");
             }
           });
         }
@@ -120,10 +117,14 @@ namespace Seedforger.App.Views {
       });
     }
 
-    private static Button Pill(string text, string bg) => new Button {
-      Content = text, Background = Brush.Parse(bg), Foreground = Brushes.White,
-      HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Center,
-      CornerRadius = new CornerRadius(9), Padding = new Thickness(12, 10), FontWeight = FontWeight.SemiBold,
-    };
+    private static Button Wide(string text, bool accent = false) {
+      var b = new Button {
+        Content = text,
+        HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Center,
+        Padding = new Thickness(12, 8),
+      };
+      if (accent) b.Classes.Add("accent");
+      return b;
+    }
   }
 }

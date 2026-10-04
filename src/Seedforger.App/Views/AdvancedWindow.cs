@@ -2,30 +2,31 @@ using System.Text;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using Avalonia.Media;
 using Seedforger;
 using Seedforger.BytesRoads;
 
 namespace Seedforger.App.Views {
 
-  /// <summary>Advanced settings — proxy configuration (SOCKS / HTTP-CONNECT).</summary>
+  /// <summary>Advanced settings — proxy configuration (SOCKS / HTTP-CONNECT), as a
+  /// plain labelled form in the theme's own controls.</summary>
   public sealed class AdvancedWindow : Window {
 
     internal ProxyInfo? Result { get; private set; }
 
-    private readonly ComboBox type = new ComboBox { Width = 200, HorizontalAlignment = HorizontalAlignment.Left };
-    private readonly TextBox host = Field();
-    private readonly TextBox port = Field();
-    private readonly TextBox user = Field();
-    private readonly TextBox pass = Field();
+    private readonly ComboBox type = new ComboBox { HorizontalAlignment = HorizontalAlignment.Stretch };
+    private readonly TextBox host = new TextBox();
+    private readonly TextBox port = new TextBox();
+    private readonly TextBox user = new TextBox();
+    private readonly TextBox pass = new TextBox { PasswordChar = '•' };
+
+    private static string P(string en, string fr) => AppOptions.Language == Language.French ? fr : en;
 
     internal AdvancedWindow(ProxyInfo current) {
-      Title = "Advanced — proxy";
-      Width = 420; SizeToContent = SizeToContent.Height; CanResize = false;
+      Title = P("Advanced settings — proxy", "Réglages avancés — proxy");
+      Width = 460; SizeToContent = SizeToContent.Height; CanResize = false;
       WindowStartupLocation = WindowStartupLocation.CenterOwner;
-      Background = Brush.Parse("#15161A");
 
-      type.ItemsSource = new[] { "None", "HTTP CONNECT", "SOCKS4", "SOCKS4a", "SOCKS5" };
+      type.ItemsSource = new[] { P("None", "Aucun"), "HTTP CONNECT", "SOCKS4", "SOCKS4a", "SOCKS5" };
       type.SelectedIndex = (int) current.ProxyType;
       host.Text = current.ProxyServer ?? "";
       port.Text = current.ProxyPort > 0 ? current.ProxyPort.ToString() : "";
@@ -33,22 +34,23 @@ namespace Seedforger.App.Views {
       user.Text = current.ProxyUser != null ? enc.GetString(current.ProxyUser) : "";
       pass.Text = current.ProxyPassword != null ? enc.GetString(current.ProxyPassword) : "";
 
-      var ok = new Button { Content = "OK", Width = 90, Background = Brush.Parse("#4C8DF6"), Foreground = Brushes.White };
-      var cancel = new Button { Content = "Cancel", Width = 90 };
+      var ok = new Button { Content = "OK", MinWidth = 90 };
+      ok.Classes.Add("accent");
+      var cancel = new Button { Content = P("Cancel", "Annuler"), MinWidth = 90 };
       ok.Click += (s, e) => { Result = Build(); Close(); };
       cancel.Click += (s, e) => { Result = null; Close(); };
 
       Content = new StackPanel {
-        Margin = new Thickness(20), Spacing = 10,
+        Margin = new Thickness(20), Spacing = 8,
         Children = {
-          Label("Proxy type"), type,
-          Label("Host"), host,
-          Label("Port"), port,
-          Label("Username (optional)"), user,
-          Label("Password (optional)"), pass,
+          Row(P("Proxy type", "Type de proxy"), type),
+          Row(P("Host", "Hôte"), host),
+          Row(P("Port", "Port"), port),
+          Row(P("Username (optional)", "Utilisateur (option)"), user),
+          Row(P("Password (optional)", "Mot de passe (option)"), pass),
           new StackPanel {
             Orientation = Orientation.Horizontal, Spacing = 10, HorizontalAlignment = HorizontalAlignment.Right,
-            Margin = new Thickness(0, 12, 0, 0), Children = { cancel, ok },
+            Margin = new Thickness(0, 14, 0, 0), Children = { cancel, ok },
           },
         },
       };
@@ -73,13 +75,12 @@ namespace Seedforger.App.Views {
       };
     }
 
-    private static TextBox Field() => new TextBox {
-      Background = Brush.Parse("#16171B"), Foreground = Brush.Parse("#ECEEF2"),
-      BorderBrush = Brush.Parse("#2C2F36"), CornerRadius = new CornerRadius(8), Padding = new Thickness(10, 7),
-    };
-
-    private static TextBlock Label(string t) => new TextBlock {
-      Text = t, Foreground = Brush.Parse("#8A909C"), FontSize = 12, Margin = new Thickness(0, 4, 0, 0),
-    };
+    private static Control Row(string label, Control field) {
+      var g = new Grid { ColumnDefinitions = new ColumnDefinitions("170,*") };
+      var l = new TextBlock { Text = label, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) };
+      Grid.SetColumn(l, 0); Grid.SetColumn(field, 1);
+      g.Children.Add(l); g.Children.Add(field);
+      return g;
+    }
   }
 }

@@ -75,7 +75,7 @@ namespace Seedforger {
     private int remWork;
     internal string DefaultDirectory = "";
     private const string DefaultClient = "qBittorrent";
-    private const string DefaultClientVersion = "5.2.3";
+    private const string DefaultClientVersion = "5.2.4";
 
     // internal delegate SocketEx createSocketCallback();
     internal delegate void SetTextCallback(string logLine);

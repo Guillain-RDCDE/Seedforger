@@ -10,7 +10,7 @@ The client half is a genuinely serious attempt at believable ratio faking — so
 
 | | |
 |---|---|
-| **Client impersonation** — 50 clients with accurate `peer_id` / `User-Agent` fingerprints, verified against libtorrent, with rotation and Transmission checksums. | **Swarm-aware realism** — reported speeds scale with the tracker's live leecher/seeder counts; no demand means a trickle, not an implausible claim. |
+| **Client impersonation** — 57 clients with accurate `peer_id` / `User-Agent` fingerprints, verified against libtorrent, with rotation and Transmission checksums. | **Swarm-aware realism** — reported speeds scale with the tracker's live leecher/seeder counts; no demand means a trickle, not an implausible claim. |
 | **Stealth** — speed ramp-up with variation, announce-interval jitter, a day/night rhythm, active-hours windows, and believability warnings. | **Real peer-wire engine** — optionally serve genuine, SHA-1-verified blocks over TCP, capped by a statistical governor, to satisfy monitoring peers. |
 | **Goal-seeking campaigns** — set a ratio or a volume-by-deadline; it staggers starts, allocates bandwidth by demand, paces, and stops itself. | **Daemon + web dashboard** — run a folder 24/7 on a seedbox/NAS behind a self-contained dark dashboard and JSON API. |
 | **Guided setup** — a wizard that probes each torrent and loops until it finds one that will genuinely earn ratio, then applies safe defaults. | **Connectivity** — HTTPS trackers over `SslStream`, SOCKS4/4a/5 & HTTP-CONNECT proxies, magnet links, batch loading, DNS-over-HTTPS. |

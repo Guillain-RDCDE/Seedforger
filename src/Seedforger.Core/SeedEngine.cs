@@ -66,7 +66,7 @@ namespace Seedforger {
     public bool IsRunning => running;
     public double Ratio => downloaded > 0 ? (double) uploaded / downloaded : 0;
     public string TorrentName => torrent?.Name ?? "";
-    /// <summary>The impersonated client's display name (e.g. "qBittorrent 5.2.3").</summary>
+    /// <summary>The impersonated client's display name (e.g. "qBittorrent 5.2.4").</summary>
     public string ClientName => client?.Name ?? "";
     /// <summary>True once a real, hash-verified file is being served over the wire.</summary>
     public bool RealSeedEnabled => pieceSource != null;

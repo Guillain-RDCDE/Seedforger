@@ -4,7 +4,11 @@ namespace Seedforger {
 
   /// <summary>
   /// Built-in client fingerprints. Transcribed one-for-one from the historical
-  /// switch in <see cref="TorrentClientFactory"/>, plus a set of modern clients.
+  /// switch in <see cref="TorrentClientFactory"/>, plus a set of modern clients
+  /// (last refreshed October 2026: qBittorrent 5.2.4, Transmission 4.1.3,
+  /// Deluge 2.2.0, libtorrent 2.1.2 / 2.0.15, BiglyBT 4.1.0.0, µTorrent 3.6.0,
+  /// BitComet 2.22). The peer_id version chars follow libtorrent's
+  /// generate_fingerprint scheme: 0-9 then A-Z (so 2.0.15 is -LT20F0-).
   /// Values not explicitly set fall back to the model defaults, which match the
   /// TorrentClient constructor defaults (DefNumWant=200, StartOffset=10000000,
   /// MaxOffset=25000000, Parse=false, SearchString="", ProcessName="").
@@ -13,6 +17,17 @@ namespace Seedforger {
     public static IReadOnlyList<ClientProfile> All { get; } = new List<ClientProfile> {
 
       // ===================== qBittorrent (modern) =====================
+      new ClientProfile {
+        Family = "qBittorrent", Version = "5.2.4",
+        HttpProtocol = "HTTP/1.1", HashUpperCase = false,
+        Key = new IdSpec { Type = "hex", Length = 8, UrlEncode = false, UpperCase = true },
+        PeerIdPrefix = "-qB5240-",
+        PeerIdRandom = new IdSpec { Type = "random", Length = 12, UrlEncode = true, UpperCase = false },
+        Headers = "Host: {host}\r\nUser-Agent: qBittorrent/5.2.4\r\nAccept-Encoding: gzip\r\nConnection: close\r\n",
+        Query = "info_hash={infohash}&peer_id={peerid}&port={port}&uploaded={uploaded}&downloaded={downloaded}&left={left}&corrupt=0&key={key}{event}&numwant={numwant}&compact=1&no_peer_id=1&supportcrypto=1&redundant=0",
+        DefNumWant = 200, Parse = true, SearchString = "&peer_id=-qB5240-", ProcessName = "qbittorrent",
+        StartOffset = 0, MaxOffset = 200000000,
+      },
       new ClientProfile {
         Family = "qBittorrent", Version = "5.2.3",
         HttpProtocol = "HTTP/1.1", HashUpperCase = false,
@@ -59,6 +74,17 @@ namespace Seedforger {
       },
 
       // ===================== uTorrent =====================
+      new ClientProfile {
+        Family = "uTorrent", Version = "3.6.0 (build 47390)",
+        HttpProtocol = "HTTP/1.1", HashUpperCase = false,
+        Key = new IdSpec { Type = "hex", Length = 8, UrlEncode = false, UpperCase = true },
+        PeerIdPrefix = "-UT360S-",
+        PeerIdRandom = new IdSpec { Type = "random", Length = 12, UrlEncode = true, UpperCase = false },
+        Headers = "Host: {host}\r\nUser-Agent: uTorrent/3600(47390)\r\nAccept-Encoding: gzip\r\n",
+        Query = "info_hash={infohash}&peer_id={peerid}&port={port}&uploaded={uploaded}&downloaded={downloaded}&left={left}&corrupt=0&key={key}{event}&numwant={numwant}&compact=1&no_peer_id=1",
+        DefNumWant = 200, Parse = true, SearchString = "&peer_id=-UT360S-", ProcessName = "uTorrent",
+        StartOffset = 0, MaxOffset = 200000000,
+      },
       new ClientProfile {
         Family = "uTorrent", Version = "3.3.2",
         HttpProtocol = "HTTP/1.1", HashUpperCase = false,
@@ -205,6 +231,17 @@ namespace Seedforger {
 
       // ===================== BitComet =====================
       new ClientProfile {
+        Family = "BitComet", Version = "2.22",
+        HttpProtocol = "HTTP/1.1", HashUpperCase = true,
+        Key = new IdSpec { Type = "numeric", Length = 5, UrlEncode = false, UpperCase = false },
+        PeerIdPrefix = "-BC0222-",
+        PeerIdRandom = new IdSpec { Type = "random", Length = 12, UrlEncode = true, UpperCase = true },
+        Headers = "Host: {host}\r\nConnection: close\r\nAccept: */*\r\nAccept-Encoding: gzip\r\nUser-Agent: BitComet/2.22\r\nPragma: no-cache\r\nCache-Control: no-cache\r\n",
+        Query = "info_hash={infohash}&peer_id={peerid}&port={port}&natmapped=1&localip={localip}&port_type=wan&uploaded={uploaded}&downloaded={downloaded}&left={left}&numwant={numwant}&compact=1&no_peer_id=1&key={key}{event}",
+        DefNumWant = 200, Parse = true, SearchString = "&peer_id=-BC0222-", ProcessName = "BitComet",
+        StartOffset = 0, MaxOffset = 200000000,
+      },
+      new ClientProfile {
         Family = "BitComet", Version = "1.20",
         HttpProtocol = "HTTP/1.1", HashUpperCase = true,
         Key = new IdSpec { Type = "numeric", Length = 5, UrlEncode = false, UpperCase = false },
@@ -337,6 +374,19 @@ namespace Seedforger {
         Query = "info_hash={infohash}&peer_id={peerid}&supportcrypto=1&port={port}&azudp={port}&uploaded={uploaded}&downloaded={downloaded}&left={left}{event}&numwant={numwant}&no_peer_id=1&compact=1&key={key}&azver=3",
         DefNumWant = 50, Parse = true, SearchString = "&peer_id=-AZ2504-", ProcessName = "Azureus",
         StartOffset = 0, MaxOffset = 100000000,
+      },
+
+      // ===================== BiglyBT (the maintained Azureus/Vuze descendant) =====================
+      new ClientProfile {
+        Family = "BiglyBT", Version = "4.1.0.0",
+        HttpProtocol = "HTTP/1.1", HashUpperCase = true,
+        Key = new IdSpec { Type = "alphanumeric", Length = 8, UrlEncode = false, UpperCase = false },
+        PeerIdPrefix = "-BI4100-",
+        PeerIdRandom = new IdSpec { Type = "alphanumeric", Length = 12, UrlEncode = false, UpperCase = false },
+        Headers = "User-Agent: BiglyBT 4.1.0.0;Windows 11;Java 21.0.4\r\nConnection: close\r\nAccept-Encoding: gzip\r\nHost: {host}\r\nAccept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2\r\n",
+        Query = "info_hash={infohash}&peer_id={peerid}&supportcrypto=1&port={port}&azudp={port}&uploaded={uploaded}&downloaded={downloaded}&left={left}&corrupt=0{event}&numwant={numwant}&no_peer_id=1&compact=1&key={key}&azver=3",
+        DefNumWant = 50, Parse = true, SearchString = "&peer_id=-BI4100-", ProcessName = "BiglyBT",
+        StartOffset = 0, MaxOffset = 200000000,
       },
 
       // ===================== Vuze =====================
@@ -519,6 +569,17 @@ namespace Seedforger {
 
       // ===================== Deluge =====================
       new ClientProfile {
+        Family = "Deluge", Version = "2.2.0",
+        HttpProtocol = "HTTP/1.1", HashUpperCase = false,
+        Key = new IdSpec { Type = "alphanumeric", Length = 8, UrlEncode = false, UpperCase = false },
+        PeerIdPrefix = "-DE2200-",
+        PeerIdRandom = new IdSpec { Type = "alphanumeric", Length = 12, UrlEncode = false, UpperCase = false },
+        Headers = "Host: {host}\r\nUser-Agent: Deluge/2.2.0 libtorrent/2.0.11.0\r\nAccept-Encoding: gzip\r\nConnection: close\r\n",
+        Query = "info_hash={infohash}&peer_id={peerid}&port={port}&uploaded={uploaded}&downloaded={downloaded}&left={left}&corrupt=0&key={key}{event}&numwant={numwant}&compact=1&no_peer_id=1&supportcrypto=1&redundant=0",
+        DefNumWant = 200, Parse = true, SearchString = "&peer_id=-DE2200-", ProcessName = "deluge",
+        StartOffset = 0, MaxOffset = 100000000,
+      },
+      new ClientProfile {
         Family = "Deluge", Version = "2.1.1",
         HttpProtocol = "HTTP/1.1", HashUpperCase = false,
         Key = new IdSpec { Type = "alphanumeric", Length = 8, UrlEncode = false, UpperCase = false },
@@ -590,6 +651,28 @@ namespace Seedforger {
       },
 
       // ===================== libtorrent (modern) =====================
+      new ClientProfile {
+        Family = "libtorrent", Version = "2.1.2",
+        HttpProtocol = "HTTP/1.1", HashUpperCase = false,
+        Key = new IdSpec { Type = "hex", Length = 8, UrlEncode = false, UpperCase = true },
+        PeerIdPrefix = "-LT2120-",
+        PeerIdRandom = new IdSpec { Type = "random", Length = 12, UrlEncode = true, UpperCase = false },
+        Headers = "Host: {host}\r\nUser-Agent: libtorrent/2.1.2\r\nAccept-Encoding: gzip\r\nConnection: close\r\n",
+        Query = "info_hash={infohash}&peer_id={peerid}&port={port}&uploaded={uploaded}&downloaded={downloaded}&left={left}&corrupt=0&key={key}{event}&numwant={numwant}&compact=1&no_peer_id=1&supportcrypto=1&redundant=0",
+        DefNumWant = 200, Parse = true, SearchString = "&peer_id=-LT2120-", ProcessName = "libtorrent",
+        StartOffset = 0, MaxOffset = 100000000,
+      },
+      new ClientProfile {
+        Family = "libtorrent", Version = "2.0.15",
+        HttpProtocol = "HTTP/1.1", HashUpperCase = false,
+        Key = new IdSpec { Type = "hex", Length = 8, UrlEncode = false, UpperCase = true },
+        PeerIdPrefix = "-LT20F0-",
+        PeerIdRandom = new IdSpec { Type = "random", Length = 12, UrlEncode = true, UpperCase = false },
+        Headers = "Host: {host}\r\nUser-Agent: libtorrent/2.0.15\r\nAccept-Encoding: gzip\r\nConnection: close\r\n",
+        Query = "info_hash={infohash}&peer_id={peerid}&port={port}&uploaded={uploaded}&downloaded={downloaded}&left={left}&corrupt=0&key={key}{event}&numwant={numwant}&compact=1&no_peer_id=1&supportcrypto=1&redundant=0",
+        DefNumWant = 200, Parse = true, SearchString = "&peer_id=-LT20F0-", ProcessName = "libtorrent",
+        StartOffset = 0, MaxOffset = 100000000,
+      },
       new ClientProfile {
         Family = "libtorrent", Version = "2.1.0",
         HttpProtocol = "HTTP/1.1", HashUpperCase = false,

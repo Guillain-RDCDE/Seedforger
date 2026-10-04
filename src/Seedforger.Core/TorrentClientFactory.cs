@@ -13,14 +13,16 @@ namespace Seedforger {
     /// <summary>Current, tracker-friendly clients used by the "randomize client
     /// on start" rotation (avoids picking an ancient, easily-flagged version).</summary>
     public static readonly string[] ModernClients = {
+      "qBittorrent 5.2.4",
       "qBittorrent 5.2.3",
       "qBittorrent 5.1.4",
       "qBittorrent 5.0.5",
-      "qBittorrent 4.6.7",
       "Transmission 4.1.3",
       "Transmission 4.0.6",
-      "Deluge 2.1.1",
-      "libtorrent 2.1.0",
+      "Deluge 2.2.0",
+      "libtorrent 2.1.2",
+      "libtorrent 2.0.15",
+      "BiglyBT 4.1.0.0",
     };
 
     private static List<ClientProfile> profiles;

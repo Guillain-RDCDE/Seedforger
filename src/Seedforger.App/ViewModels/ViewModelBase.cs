@@ -20,7 +20,7 @@ namespace Seedforger.App.ViewModels {
     }
   }
 
-  /// <summary>Binding proxy for localized strings: <c>{Binding L[card.torrent]}</c>.
+  /// <summary>Binding proxy for localized strings: <c>{Binding L[grp.torrent]}</c>.
   /// Raise PropertyChanged("L") to refresh every localized binding on language change.</summary>
   public sealed class LocProxy {
     public string this[string key] => Seedforger.UI.UiStrings.Get(key);

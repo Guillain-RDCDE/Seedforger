@@ -262,7 +262,7 @@ DAEMON / WEB DASHBOARD
 
 IMPERSONATE
   --client <name>              e.g. qBittorrent, Transmission (default qBittorrent).
-  --client-version <ver>       e.g. 5.2.3 (defaults to the newest known).
+  --client-version <ver>       e.g. 5.2.4 (defaults to the newest known).
   --randomize-client           Pick a random modern client fingerprint.
 
 SPEED & MODE

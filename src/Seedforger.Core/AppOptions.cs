@@ -34,8 +34,12 @@ namespace Seedforger {
     /// (leechers/seeders from the tracker) so the numbers are physically plausible.</summary>
     internal static bool SwarmAware = true;
 
-    /// <summary>Debug escape hatch: set SF_NOTHEME to disable the theme engine.</summary>
+    /// <summary>
+    /// The interface uses the plain system look (standard Windows controls, colours
+    /// and fonts). The legacy flat/dark restyle engine is kept for anyone who wants
+    /// it back: set SF_THEME=1 in the environment to re-enable it.
+    /// </summary>
     internal static readonly bool ThemingEnabled =
-      System.Environment.GetEnvironmentVariable("SF_NOTHEME") == null;
+      System.Environment.GetEnvironmentVariable("SF_THEME") == "1";
   }
 }

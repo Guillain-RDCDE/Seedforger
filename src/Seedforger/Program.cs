@@ -35,14 +35,14 @@ namespace Seedforger {
         return;
       }
 
-      // The legacy WinForms layout was designed for system-DPI scaling (the old
-      // manifest used dpiAware=true). PerMonitorV2 mis-scales the hand-placed
+      // The hidden legacy engine form was designed for system-DPI scaling (the old
+      // manifest used dpiAware=true). PerMonitorV2 mis-scales its hand-placed
       // controls on high-DPI screens, so keep the original System-aware behaviour.
+      // The visible window itself is laid out with table layouts and scales by font.
       Application.SetHighDpiMode(HighDpiMode.SystemAware);
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
-      Theme.EnableDarkAppMode(); // enable per-window dark mode before any control exists
-      Application.Run(new UI.NewMainForm());
+      Application.Run(new UI.MainForm());
 
       GC.KeepAlive(singleInstanceMutex);
     }
