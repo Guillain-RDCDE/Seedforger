@@ -1,0 +1,169 @@
+name: Screenshots
+
+# Builds both graphical front-ends, opens them on a real desktop (a Windows
+# runner for the WinForms window, Xvfb on Linux for the Avalonia one), captures
+# the main window and commits the PNGs to docs/screenshots. Also runs the test
+# suite first, so a screenshot is never taken of a build that doesn't pass.
+#
+# Run it by hand from the Actions tab (workflow_dispatch), or by pushing to the
+# UI branch listed below.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ['claude/exciting-allen-p16m44']
+    paths-ignore: ['docs/screenshots/**']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build + test
+        shell: bash
+        run: |
+          dotnet build Seedforger.sln -c Release
+          dotnet test tests/Seedforger.Tests/Seedforger.Tests.csproj -c Release --no-build
+
+      - name: Sample torrent + mock tracker
+        shell: bash
+        run: |
+          python tools/mock_tracker.py make-torrent sample.torrent http://127.0.0.1:8071/announce
+          # keep the tracker alive for the rest of the job
+          nohup python tools/mock_tracker.py serve --port 8071 --complete 9 --incomplete 6 --interval 30 > tracker.log 2>&1 &
+          sleep 1
+
+      - name: Open the WinForms window, load the torrent, start seeding, capture
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          New-Item -ItemType Directory -Force shots | Out-Null
+          $exe = Resolve-Path 'src\Seedforger\bin\Release\net8.0-windows\Seedforger.exe'
+          $torrent = Join-Path $env:GITHUB_WORKSPACE 'sample.torrent'
+          $p = Start-Process -FilePath $exe -PassThru
+
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          Add-Type @"
+          using System; using System.Runtime.InteropServices;
+          public static class W {
+            [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+            [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int cmd);
+            [DllImport("dwmapi.dll")]  public static extern int DwmGetWindowAttribute(IntPtr h, int attr, out RECT r, int size);
+            [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
+            [StructLayout(LayoutKind.Sequential)] public struct RECT { public int L, T, R, B; }
+          }
+          "@
+
+          # wait for the main window
+          $h = [IntPtr]::Zero
+          for ($i = 0; $i -lt 60 -and $h -eq [IntPtr]::Zero; $i++) { Start-Sleep -Milliseconds 500; $p.Refresh(); $h = $p.MainWindowHandle }
+          if ($h -eq [IntPtr]::Zero) { Write-Host '::error::no main window appeared'; exit 1 }
+          Start-Sleep -Seconds 3
+          [W]::ShowWindow($h, 9) | Out-Null   # SW_RESTORE
+          [W]::SetForegroundWindow($h) | Out-Null
+          Start-Sleep -Seconds 1
+
+          # File > Load a .torrent (Ctrl+O), type the path, Enter; then Start (F5)
+          [System.Windows.Forms.SendKeys]::SendWait('^o'); Start-Sleep -Seconds 3
+          [System.Windows.Forms.SendKeys]::SendWait($torrent); Start-Sleep -Seconds 1
+          [System.Windows.Forms.SendKeys]::SendWait('{ENTER}'); Start-Sleep -Seconds 3
+          [W]::SetForegroundWindow($h) | Out-Null
+          [System.Windows.Forms.SendKeys]::SendWait('{F5}'); Start-Sleep -Seconds 15
+          [W]::SetForegroundWindow($h) | Out-Null
+          Start-Sleep -Seconds 1
+
+          # capture the window's visible frame (DWMWA_EXTENDED_FRAME_BOUNDS = 9)
+          $r = New-Object W+RECT
+          if ([W]::DwmGetWindowAttribute($h, 9, [ref]$r, 16) -ne 0) { [W]::GetWindowRect($h, [ref]$r) | Out-Null }
+          $w = $r.R - $r.L; $hh = $r.B - $r.T
+          Write-Host "window rect: $($r.L),$($r.T) ${w}x${hh}"
+          $bmp = New-Object System.Drawing.Bitmap $w, $hh
+          $g = [System.Drawing.Graphics]::FromImage($bmp)
+          $g.CopyFromScreen($r.L, $r.T, 0, 0, $bmp.Size)
+          $bmp.Save((Join-Path $PWD 'shots\main.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+          $g.Dispose(); $bmp.Dispose()
+
+          # full desktop too, for debugging the automation
+          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          $full = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+          $fg = [System.Drawing.Graphics]::FromImage($full)
+          $fg.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+          $full.Save((Join-Path $PWD 'shots\desktop-windows.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+
+          Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+          Get-Content tracker.log -ErrorAction SilentlyContinue | Select-Object -Last 20
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shots-windows
+          path: shots/*
+
+  linux:
+    runs-on: ubuntu-latest
+    needs: [windows]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Desktop tooling
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb imagemagick x11-utils xdotool fonts-dejavu-core > /dev/null
+
+      - name: Build the Avalonia GUI
+        run: dotnet build src/Seedforger.App/Seedforger.App.csproj -c Release
+
+      - name: Open the Avalonia window on Xvfb and capture
+        run: |
+          set -x
+          mkdir -p shots
+          Xvfb :99 -screen 0 1280x900x24 > /dev/null 2>&1 &
+          export DISPLAY=:99
+          sleep 2
+          dotnet src/Seedforger.App/bin/Release/net8.0/Seedforger.App.dll > app.log 2>&1 &
+          APP=$!
+          for i in $(seq 1 60); do
+            WID=$(xdotool search --onlyvisible --name 'Seedforger' 2>/dev/null | head -1 || true)
+            [ -n "$WID" ] && break
+            sleep 1
+          done
+          echo "window id: ${WID:-none}"
+          sleep 4
+          import -window root shots/desktop-linux.png
+          if [ -n "$WID" ]; then import -window "$WID" shots/main-linux.png; fi
+          kill $APP 2>/dev/null || true
+          tail -n 30 app.log || true
+          ls -la shots
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: shots-windows
+          path: shots/windows
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shots-all
+          path: shots/**
+
+      - name: Commit the screenshots
+        run: |
+          set -e
+          cp shots/windows/main.png docs/screenshots/main.png
+          [ -f shots/main-linux.png ] && cp shots/main-linux.png docs/screenshots/main-linux.png
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/screenshots
+          git diff --cached --quiet && { echo 'screenshots unchanged'; exit 0; }
+          git commit -m 'docs: refresh the main-window screenshots (captured in CI) [skip ci]'
+          git push origin HEAD:${{ github.ref_name }}
