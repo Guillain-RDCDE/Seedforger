@@ -17,8 +17,8 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
 
@@ -62,7 +62,7 @@ jobs:
           cp out/cli/Seedforger.Cli.exe       dist/Seedforger-cli-win-x64.exe
           cp out/gui-avalonia/Seedforger.App.exe dist/Seedforger-gui-win-x64.exe
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: windows
           path: dist/*
@@ -73,8 +73,8 @@ jobs:
       matrix:
         rid: [linux-x64, linux-arm64, osx-x64, osx-arm64]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
 
@@ -91,7 +91,7 @@ jobs:
           cp out/cli/Seedforger.Cli dist/Seedforger-cli-${{ matrix.rid }}
           cp out/gui/Seedforger.App dist/Seedforger-gui-${{ matrix.rid }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.rid }}
           path: dist/*
@@ -100,7 +100,7 @@ jobs:
     needs: [windows, unix]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           path: staged
       - name: Collect + checksum
@@ -111,7 +111,7 @@ jobs:
           sha256sum * > SHA256SUMS.txt
           ls -la
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: release/*
