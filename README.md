@@ -25,6 +25,14 @@ A modern **.NET 8** revival of RatioMaster: it tells a tracker you uploaded giga
 
 </div>
 
+<!-- opening -->
+> A tool that fakes file-sharing statistics, shipped together with the proof that it cannot win.
+>
+> A .NET 8 client that impersonates real peers byte for byte, plus two short papers and a runnable model showing the tracker-side reconciliation bound.
+>
+> Build the thing properly, then publish its limits. Part of the work of [Guillain d’Erceville](https://github.com/Guillain-RDCDE), forward deployed engineer.
+<!-- opening -->
+
 ---
 
 ## What it is
