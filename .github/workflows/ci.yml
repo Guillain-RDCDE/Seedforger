@@ -29,8 +29,11 @@ jobs:
       - name: Restore
         run: dotnet restore Seedforger.sln
 
-      - name: Build
-        run: dotnet build Seedforger.sln -c Release --no-restore
+      # Compiler and analyzer warnings fail the build; NuGet vulnerability
+      # advisories (NU1901-NU1904) stay warnings so an upstream advisory alone
+      # doesn't block CI (Dependabot proposes the bump).
+      - name: Build (warnings as errors)
+        run: dotnet build Seedforger.sln -c Release --no-restore -p:TreatWarningsAsErrors=true -p:WarningsNotAsErrors=NU1901%3BNU1902%3BNU1903%3BNU1904
 
       - name: Test
         run: dotnet test tests/Seedforger.Tests/Seedforger.Tests.csproj -c Release --no-build
@@ -48,13 +51,14 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Build core + CLI + Avalonia GUI + Integrity
+      - name: Build core + CLI + Avalonia GUI + Integrity (warnings as errors)
         run: |
-          dotnet build src/Seedforger.Core/Seedforger.Core.csproj -c Release
-          dotnet build src/Seedforger.Cli/Seedforger.Cli.csproj -c Release
-          dotnet build src/Seedforger.App/Seedforger.App.csproj -c Release
-          dotnet build src/Seedforger.Integrity/Seedforger.Integrity.csproj -c Release
-          dotnet build src/Seedforger.Integrity.Figures/Seedforger.Integrity.Figures.csproj -c Release
+          WAE="-p:TreatWarningsAsErrors=true -p:WarningsNotAsErrors=NU1901%3BNU1902%3BNU1903%3BNU1904"
+          dotnet build src/Seedforger.Core/Seedforger.Core.csproj -c Release $WAE
+          dotnet build src/Seedforger.Cli/Seedforger.Cli.csproj -c Release $WAE
+          dotnet build src/Seedforger.App/Seedforger.App.csproj -c Release $WAE
+          dotnet build src/Seedforger.Integrity/Seedforger.Integrity.csproj -c Release $WAE
+          dotnet build src/Seedforger.Integrity.Figures/Seedforger.Integrity.Figures.csproj -c Release $WAE
 
       - name: Test on Linux
         run: dotnet test tests/Seedforger.Tests/Seedforger.Tests.csproj -c Release
