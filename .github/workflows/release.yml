@@ -13,9 +13,15 @@ on:
 permissions:
   contents: write
 
+# Never cancel a release half-way through.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   windows:
     runs-on: windows-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v5
@@ -69,6 +75,7 @@ jobs:
 
   unix:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     strategy:
       matrix:
         rid: [linux-x64, linux-arm64, osx-x64, osx-arm64]
@@ -99,6 +106,7 @@ jobs:
   release:
     needs: [windows, unix]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/download-artifact@v7
         with:
