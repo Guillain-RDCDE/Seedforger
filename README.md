@@ -75,4 +75,4 @@ New to this? The [**guided setup**](docs/getting-started.md) probes each torrent
 
 ## License
 
-[MIT](LICENSE). Provided as-is, without warranty.
+[MIT](LICENSE). Provided as-is, without warranty. Lineage and upstream copyrights: [NOTICE](NOTICE).

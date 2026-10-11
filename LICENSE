@@ -1,11 +1,7 @@
 MIT License
 
 Copyright (c) 2026 Guillain d'Erceville
-
-Seedforger builds on the RatioMaster lineage:
-  RatioMaster -> NikolayIT/RatioMaster.NET (MIT) -> sergiye/RatioMaster -> Seedforger
-The prior works are distributed under the MIT License; their respective
-copyrights remain with their authors.
+Copyright (c) 2006-2016 Nikolay Kostov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

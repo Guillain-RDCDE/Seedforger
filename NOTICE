@@ -1,0 +1,24 @@
+Seedforger
+Copyright (c) 2026 Guillain d'Erceville
+Licensed under the MIT License (see LICENSE).
+
+Lineage
+-------
+
+Seedforger builds on the RatioMaster lineage:
+
+  RatioMaster -> NikolayIT/RatioMaster.NET -> sergiye/RatioMaster -> Seedforger
+
+- RatioMaster.NET
+  https://github.com/NikolayIT/RatioMaster.NET
+  Copyright (c) 2006-2016 Nikolay Kostov
+  Licensed under the MIT License; its copyright line is reproduced in LICENSE.
+
+- sergiye/RatioMaster
+  https://github.com/sergiye/RatioMaster
+  "Copyright © 2023 Sergiy Egoshyn" (from its Properties/AssemblyInfo.cs).
+  Its first commit carried the RatioMaster.NET MIT licence file. The
+  repository does not carry a licence file today; see it for its current
+  terms.
+
+Copyrights in the prior works remain with their respective authors.
