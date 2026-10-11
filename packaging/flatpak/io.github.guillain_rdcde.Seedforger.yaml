@@ -19,5 +19,5 @@ modules:
       - install -Dm755 Seedforger-gui-linux-x64 /app/bin/seedforger-gui
     sources:
       - type: file
-        url: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v2.18.0/Seedforger-gui-linux-x64
-        sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+        url: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v2.19.0/Seedforger-gui-linux-x64
+        sha256: 'aad8dfe2a49471246a3b9475eb6f2ca114c4ed164ac47f6a8f4213c01b040b11'
