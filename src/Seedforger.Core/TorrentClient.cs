@@ -27,16 +27,18 @@ namespace Seedforger {
 
     internal bool HashUpperCase { get; set; }
 
-    internal string Headers { get; set; }
+    /// <summary>The client's header block; null only for a clients.json profile that omits it.</summary>
+    internal required string? Headers { get; set; }
 
-    internal string HttpProtocol { get; set; }
+    internal required string HttpProtocol { get; set; }
 
-    internal string Key { get; set; }
+    internal required string Key { get; set; }
 
     internal string Name { get; set; }
 
-    internal string PeerID { get; set; }
+    internal required string PeerID { get; set; }
+    /// <summary>The query template; null only for a clients.json profile that omits it.</summary>
+    internal required string? Query { get; set; }
 
-    internal string Query { get; set; }
   }
 }

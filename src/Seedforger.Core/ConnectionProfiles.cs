@@ -19,7 +19,7 @@ namespace Seedforger {
   internal static class ConnectionProfiles {
 
     /// <summary>The profile with that name (case-insensitive), or null.</summary>
-    internal static ConnectionProfile Find(string name) {
+    internal static ConnectionProfile? Find(string? name) {
       foreach (var p in All) if (string.Equals(p.Name, name, System.StringComparison.OrdinalIgnoreCase)) return p;
       return null;
     }

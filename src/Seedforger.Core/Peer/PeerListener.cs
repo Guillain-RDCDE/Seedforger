@@ -22,17 +22,17 @@ namespace Seedforger {
 
     private readonly Torrent torrent;
     private readonly byte[] wirePeerId;
-    private readonly IPieceSource source;   // null => stingy seeder
-    private readonly Governor governor;
+    private readonly IPieceSource? source;  // null => stingy seeder
+    private readonly Governor? governor;
     private readonly Func<int> uploadCapBytesPerSec;
     private readonly int port;
-    private readonly Action<string> log;
+    private readonly Action<string>? log;
 
-    private TcpListener listener;
+    private TcpListener? listener;
     private volatile bool running;
 
-    internal PeerListener(Torrent torrent, byte[] wirePeerId, IPieceSource source, Governor governor,
-                          Func<int> uploadCapBytesPerSec, int port, Action<string> log) {
+    internal PeerListener(Torrent torrent, byte[] wirePeerId, IPieceSource? source, Governor? governor,
+                          Func<int> uploadCapBytesPerSec, int port, Action<string>? log) {
       this.torrent = torrent;
       this.wirePeerId = wirePeerId;
       this.source = source;
@@ -65,8 +65,10 @@ namespace Seedforger {
 
     private void AcceptLoop() {
       while (running) {
+        var l = listener;
+        if (l == null) break; // stopped
         Socket socket;
-        try { socket = listener.AcceptSocket(); }
+        try { socket = l.AcceptSocket(); }
         catch { break; }
 
         if (source != null) {

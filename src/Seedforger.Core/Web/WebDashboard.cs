@@ -15,9 +15,9 @@ namespace Seedforger.Web {
 
     private readonly HttpListener listener = new HttpListener();
     private readonly Func<string> statusJson;
-    private readonly Action stopAll;
-    private readonly Action<string> log;
-    private Thread thread;
+    private readonly Action? stopAll;
+    private readonly Action<string>? log;
+    private Thread? thread;
     private volatile bool running;
 
     public string Url { get; }
@@ -27,7 +27,7 @@ namespace Seedforger.Web {
     /// <param name="port">TCP port (default 8080).</param>
     /// <param name="statusJson">Returns the current status as a JSON string.</param>
     /// <param name="stopAll">Invoked when the page asks the daemon to stop (optional).</param>
-    public WebDashboard(string bind, int port, Func<string> statusJson, Action stopAll, Action<string> log) {
+    public WebDashboard(string? bind, int port, Func<string> statusJson, Action? stopAll, Action<string>? log) {
       this.statusJson = statusJson;
       this.stopAll = stopAll;
       this.log = log;

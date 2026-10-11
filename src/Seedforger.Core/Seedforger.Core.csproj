@@ -6,6 +6,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Seedforger</RootNamespace>
     <AssemblyName>Seedforger.Core</AssemblyName>
+    <!-- The engine is nullable-annotated; the front-ends keep the solution default. -->
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -21,7 +21,7 @@ namespace Seedforger.Wire {
 
     // ---- Handshake ----
 
-    internal static byte[] BuildHandshake(byte[] infoHash, byte[] peerId, byte[] reserved = null) {
+    internal static byte[] BuildHandshake(byte[] infoHash, byte[] peerId, byte[]? reserved = null) {
       if (infoHash == null || infoHash.Length != 20) throw new ArgumentException("infoHash must be 20 bytes");
       if (peerId == null || peerId.Length != 20) throw new ArgumentException("peerId must be 20 bytes");
       var buf = new byte[HandshakeLength];
@@ -40,7 +40,7 @@ namespace Seedforger.Wire {
       internal byte[] Reserved, InfoHash, PeerId;
     }
 
-    internal static bool TryParseHandshake(byte[] b, out Handshake hs) {
+    internal static bool TryParseHandshake(byte[]? b, out Handshake hs) {
       hs = default;
       if (b == null || b.Length < HandshakeLength) return false;
       if (b[0] != Pstr.Length) return false;
@@ -54,13 +54,13 @@ namespace Seedforger.Wire {
 
     // ---- Messages: <length(4, big-endian)><id(1)><payload> ; keep-alive = <0000> ----
 
-    internal static byte[] Message(MsgId id, byte[] payload = null) {
+    internal static byte[] Message(MsgId id, byte[]? payload = null) {
       var plen = payload?.Length ?? 0;
       var len = 1 + plen;
       var m = new byte[4 + len];
       WriteInt(m, 0, len);
       m[4] = (byte) id;
-      if (plen > 0) Buffer.BlockCopy(payload, 0, m, 5, plen);
+      if (payload != null && plen > 0) Buffer.BlockCopy(payload, 0, m, 5, plen);
       return m;
     }
 
@@ -102,7 +102,7 @@ namespace Seedforger.Wire {
     // ---- Stream helpers ----
 
     /// <summary>Reads exactly n bytes or returns null on EOF/short read.</summary>
-    internal static byte[] ReadExact(Stream s, int n) {
+    internal static byte[]? ReadExact(Stream s, int n) {
       var buf = new byte[n];
       var got = 0;
       while (got < n) {

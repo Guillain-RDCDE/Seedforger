@@ -16,11 +16,11 @@ namespace Seedforger.Wire {
     private readonly byte[] infoHash;
     private readonly byte[] peerId;
     private readonly IPieceSource source;
-    private readonly Governor governor;
+    private readonly Governor? governor;
     private readonly int maxServeBytesPerSec;
 
     internal PeerSession(byte[] infoHash, byte[] peerId, IPieceSource source,
-      Governor governor, int maxServeBytesPerSec = 0) {
+      Governor? governor, int maxServeBytesPerSec = 0) {
       this.infoHash = infoHash;
       this.peerId = peerId;
       this.source = source;

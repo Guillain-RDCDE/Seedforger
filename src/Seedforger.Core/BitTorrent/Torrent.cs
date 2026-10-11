@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -7,13 +8,13 @@ namespace Seedforger.BitTorrent {
   internal class Torrent {
     // if the torrent is multiple files, an array of them
 
-    private string localTorrentFile; // path of the local torrent file
+    private string localTorrentFile = string.Empty; // path of the local torrent file
 
     private Int64 pieceLength; // length of each piece in bytes
 
-    private Piece[] pieceArray; // an array of the torrent pieces
+    private Piece[]? pieceArray; // an array of the torrent pieces (null for a virtual torrent)
 
-    private byte[] infohash; // a hash of the pieces
+    private byte[]? infohash; // a hash of the pieces
 
     private int pieces; // number of pieces the file is made up of
 
@@ -41,7 +42,7 @@ namespace Seedforger.BitTorrent {
       info.Add("name", new ValueString(string.IsNullOrEmpty(magnet.Name) ? magnet.HashHex : magnet.Name));
       info.Add("length", new ValueNumber((long) sizeBytes));
       t.Data.Add("info", info);
-      string announce = null;
+      string? announce = null;
       foreach (var tr in magnet.Trackers)
         if (tr.StartsWith("http", StringComparison.OrdinalIgnoreCase)) { announce = tr; break; }
       t.SetVirtual(magnet.InfoHash, sizeBytes, announce, magnet.Name);
@@ -58,7 +59,7 @@ namespace Seedforger.BitTorrent {
 
     // Set for magnet/infohash-only torrents, where we have the hash but not the
     // "info" dictionary to compute it from.
-    private byte[] overrideHash;
+    private byte[]? overrideHash;
 
     internal byte[] InfoHash {
       get {
@@ -73,14 +74,15 @@ namespace Seedforger.BitTorrent {
     /// user-supplied total size (magnet links carry neither piece data nor size).
     /// Enough to announce and scrape.
     /// </summary>
-    internal void SetVirtual(byte[] infoHash, ulong length, string announce, string name) {
+    internal void SetVirtual(byte[] infoHash, ulong length, string? announce, string? name) {
       overrideHash = infoHash;
       totalLength = length;
       if (!string.IsNullOrEmpty(announce)) Announce = announce;
       if (!string.IsNullOrEmpty(name)) Name = name;
     }
 
-    internal string Name {
+    [DisallowNull]
+    internal string? Name {
       get =>
         // if (data.Contains("info") == false)
         // data.Add("info", new ValueDictionary());
@@ -92,13 +94,15 @@ namespace Seedforger.BitTorrent {
       }
     }
 
-    internal string Comment {
+    [DisallowNull]
+    internal string? Comment {
       get => BEncode.String(Data["comment"]);
 
       set => Data.SetStringValue("comment", value);
     }
 
-    internal string Announce {
+    [DisallowNull]
+    internal string? Announce {
       get => BEncode.String(Data["announce"]);
 
       set => Data.SetStringValue("announce", value);
@@ -114,7 +118,7 @@ namespace Seedforger.BitTorrent {
     internal System.Collections.Generic.IReadOnlyList<string> AnnounceList {
       get {
         var list = new System.Collections.Generic.List<string>();
-        void Add(string u) {
+        void Add(string? u) {
           u = (u ?? string.Empty).Trim();
           if (u.Length == 0) return;
           foreach (var e in list) if (string.Equals(e, u, StringComparison.OrdinalIgnoreCase)) return;
@@ -138,19 +142,20 @@ namespace Seedforger.BitTorrent {
       }
     }
 
-    internal string CreatedBy {
+    [DisallowNull]
+    internal string? CreatedBy {
       get => BEncode.String(Data["created by"]);
 
       set => Data.SetStringValue("created by", value);
     }
 
+    [MemberNotNull(nameof(Data))]
     internal bool OpenTorrent(string localFilename) {
-      Data = null; // clear any old data
       var hasOpened = false;
       localTorrentFile = localFilename;
-      Data = new ValueDictionary();
-      FileStream fs = null;
-      BinaryReader r = null;
+      Data = new ValueDictionary(); // clear any old data
+      FileStream? fs = null;
+      BinaryReader? r = null;
 
       try {
         fs = File.OpenRead(localFilename);
@@ -189,8 +194,6 @@ namespace Seedforger.BitTorrent {
       }
     }
 
-    internal int Pieces => pieceArray.Length;
-
     /// <summary>Piece count, or 0 when unknown (e.g. a magnet/virtual torrent).</summary>
     internal int PieceCount => pieceArray?.Length ?? 0;
 
@@ -198,7 +201,7 @@ namespace Seedforger.BitTorrent {
     internal long PieceLength => pieceLength;
 
     /// <summary>The raw concatenated 20-byte SHA-1 piece hashes, or null.</summary>
-    internal byte[] PieceHashesRaw {
+    internal byte[]? PieceHashesRaw {
       get {
         try { return ((ValueString) ((ValueDictionary) Data["info"])["pieces"]).Bytes; }
         catch { return null; }
@@ -245,7 +248,6 @@ namespace Seedforger.BitTorrent {
     private void ParseMultipleFiles() {
       var info = (ValueDictionary) Data["info"];
       var files = (ValueList) info["files"];
-      PhysicalFiles = null;
       PhysicalFiles = new Collection<TorrentFile>();
       foreach (ValueDictionary o in files) {
         var components = (ValueList) o["path"];

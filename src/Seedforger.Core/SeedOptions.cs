@@ -12,10 +12,10 @@ namespace Seedforger {
   internal sealed class SeedOptions {
 
     /// <summary>The torrent to announce (a real .torrent, or a virtual one from a magnet).</summary>
-    public Torrent Torrent { get; set; }
+    public Torrent? Torrent { get; set; }
 
     /// <summary>The client to impersonate (see <see cref="TorrentClientFactory"/>).</summary>
-    public TorrentClient Client { get; set; }
+    public TorrentClient? Client { get; set; }
 
     public ProxySettings Proxy { get; set; } = ProxySettings.None;
 
@@ -36,7 +36,7 @@ namespace Seedforger {
 
     /// <summary>Optional downloaded file matching the torrent: genuine hash-valid
     /// pieces are then served to peers that ask (defeats monitoring peers).</summary>
-    public string RealFile { get; set; }
+    public string? RealFile { get; set; }
 
     /// <summary>Answer inbound peer connections on the announced port (a reachable,
     /// complete-but-choked seeder). Skipped automatically behind a proxy.</summary>
@@ -46,15 +46,15 @@ namespace Seedforger {
     public int Port { get; set; }
 
     /// <summary>Fingerprint overrides for the Advanced dialog; null/0 = the client's own.</summary>
-    public string PeerIdOverride { get; set; }
-    public string KeyOverride { get; set; }
+    public string? PeerIdOverride { get; set; }
+    public string? KeyOverride { get; set; }
     public int NumWant { get; set; }
 
     public StealthOptions Stealth { get; set; } = StealthOptions.Shared;
     public UpstreamBudget Budget { get; set; } = UpstreamBudget.Shared;
 
     /// <summary>Log sink. Called from background threads.</summary>
-    public Action<string> Log { get; set; }
+    public Action<string>? Log { get; set; }
 
     internal void Validate() {
       if (Torrent == null) throw new ArgumentException("A torrent is required.");

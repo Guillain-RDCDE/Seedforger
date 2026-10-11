@@ -16,13 +16,13 @@ namespace Seedforger {
   internal static class SecureDns {
 
     /// <summary>Optional sink for a one-line note when a block is bypassed.</summary>
-    internal static Action<string> Log;
+    internal static Action<string>? Log;
 
     private static readonly HttpClient http = new HttpClient { Timeout = TimeSpan.FromSeconds(6) };
     private static readonly ConcurrentDictionary<string, IPAddress> cache = new ConcurrentDictionary<string, IPAddress>();
 
     /// <summary>Resolve a host to a real, routable IP (or null to let the caller try the OS resolver).</summary>
-    internal static IPAddress Resolve(string host) {
+    internal static IPAddress? Resolve(string? host) {
       if (string.IsNullOrEmpty(host)) return null;
       if (IPAddress.TryParse(host, out var literal)) return literal;
       if (cache.TryGetValue(host, out var hit)) return hit;
@@ -44,10 +44,10 @@ namespace Seedforger {
       return null;
     }
 
-    private static bool IsBogus(IPAddress a) =>
+    private static bool IsBogus(IPAddress? a) =>
       a == null || IPAddress.IsLoopback(a) || a.Equals(IPAddress.Any) || a.Equals(IPAddress.IPv6Any);
 
-    private static IPAddress ResolveDoH(string host) {
+    private static IPAddress? ResolveDoH(string host) {
       foreach (var server in new[] { "1.1.1.1", "1.0.0.1" }) {
         try {
           using (var req = new HttpRequestMessage(HttpMethod.Get,

@@ -95,11 +95,12 @@ namespace Seedforger.BitTorrent {
   }
 
   internal class ValueString : IBEncodeValue {
-    private string v;
+    // Empty until Parse (or the String setter) fills them in.
+    private string v = "";
 
     internal int Length => v.Length;
 
-    internal byte[] Bytes { get; private set; }
+    internal byte[] Bytes { get; private set; } = Array.Empty<byte>();
 
     internal string String {
       get => v;
@@ -150,9 +151,10 @@ namespace Seedforger.BitTorrent {
   }
 
   internal class ValueNumber : IBEncodeValue {
-    private string v;
+    // Empty until Parse (or the String setter) fills them in.
+    private string v = "";
 
-    private byte[] data;
+    private byte[] data = Array.Empty<byte>();
 
     internal string String {
       get => v;
@@ -206,7 +208,7 @@ namespace Seedforger.BitTorrent {
       return Parse(d, (byte) d.ReadByte());
     }
 
-    internal static string String(IBEncodeValue v) {
+    internal static string? String(IBEncodeValue? v) {
       if (v is ValueString) return ((ValueString) v).String;
       else if (v is ValueNumber) return ((ValueNumber) v).String;
       else return null;

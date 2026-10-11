@@ -17,8 +17,8 @@ namespace Seedforger.Wire {
 
     /// <summary>Downloads a piece over an already-connected duplex stream. Returns
     /// the verified bytes, or null on failure/hash-mismatch.</summary>
-    internal static byte[] DownloadPiece(Stream stream, byte[] infoHash, byte[] peerId,
-      int index, int pieceLength, byte[] expectedHash, int timeoutMs = 8000) {
+    internal static byte[]? DownloadPiece(Stream stream, byte[] infoHash, byte[] peerId,
+      int index, int pieceLength, byte[]? expectedHash, int timeoutMs = 8000) {
 
       stream.Write(PeerProtocol.BuildHandshake(infoHash, peerId), 0, PeerProtocol.HandshakeLength);
       stream.Flush();
@@ -82,8 +82,8 @@ namespace Seedforger.Wire {
     }
 
     /// <summary>Connects to host:port and downloads/verifies a piece.</summary>
-    internal static byte[] DownloadPiece(string host, int port, byte[] infoHash, byte[] peerId,
-      int index, int pieceLength, byte[] expectedHash, int timeoutMs = 8000) {
+    internal static byte[]? DownloadPiece(string host, int port, byte[] infoHash, byte[] peerId,
+      int index, int pieceLength, byte[]? expectedHash, int timeoutMs = 8000) {
       using var tcp = new TcpClient();
       var ar = tcp.BeginConnect(host, port, null, null);
       if (!ar.AsyncWaitHandle.WaitOne(timeoutMs)) return null;

@@ -27,7 +27,7 @@ namespace Seedforger {
     internal static readonly string FilePath = Path.Combine(AppContext.BaseDirectory, "settings.json");
 
     private static readonly object gate = new object();
-    private static Settings current;
+    private static Settings? current;
 
     /// <summary>The one shared instance every window and command reads and writes.</summary>
     internal static Settings Current {

@@ -38,7 +38,7 @@ namespace Seedforger {
     private readonly ProxySettings proxy;
     private readonly StealthOptions stealth;
     private readonly UpstreamBudget budget;
-    private readonly Action<string> log;
+    private readonly Action<string>? log;
     private readonly Random rand = new Random();
     private readonly SpeedShaper upShaper;
     private readonly SpeedShaper downShaper;
@@ -65,29 +65,30 @@ namespace Seedforger {
     private int minInterval = -1;
     private volatile bool completedSent;
     private volatile bool running;
-    private volatile string lastFailure;
+    private volatile string? lastFailure;
     private int stopOnce;
-    private Timer announceTimer;
-    private Timer counterTimer;
+    private Timer? announceTimer;
+    private Timer? counterTimer;
     private DateTime startedUtc;
     private DateTime stoppedUtc;
     private DateTime nextAnnounceUtc;
 
     // Optional real peer-wire serving (opens the announced port).
-    private IPieceSource pieceSource;
-    private Governor governor;
-    private PeerListener peerListener;
+    private IPieceSource? pieceSource;
+    private Governor? governor;
+    private PeerListener? peerListener;
 
     /// <summary>Raised (on a background thread) when a stop rule ended the run,
     /// with the reason.</summary>
-    public event Action<SeedEngine, string> AutoStopped;
+    public event Action<SeedEngine, string>? AutoStopped;
 
     internal SeedEngine(SeedOptions options) {
       if (options == null) throw new ArgumentNullException(nameof(options));
       options.Validate();
       this.options = options;
-      torrent = options.Torrent;
-      client = options.Client;
+      // Validate() has thrown already when either is missing.
+      torrent = options.Torrent ?? throw new ArgumentException("A torrent is required.");
+      client = options.Client ?? throw new ArgumentException("A client to impersonate is required.");
       proxy = options.Proxy;
       stealth = options.Stealth;
       budget = options.Budget;
@@ -148,7 +149,7 @@ namespace Seedforger {
     /// <summary>How many trackers this engine announces to (primary + announce-list).</summary>
     public int TrackerCount => trackers.Count;
     /// <summary>The tracker's last "failure reason", or null while it accepts us.</summary>
-    public string LastFailure => lastFailure;
+    public string? LastFailure => lastFailure;
     public bool Rejected => lastFailure != null;
     public TimeSpan Elapsed => startedUtc == default ? TimeSpan.Zero : (running ? DateTime.UtcNow : stoppedUtc) - startedUtc;
     public TimeSpan UntilNextAnnounce => running && nextAnnounceUtc > DateTime.UtcNow ? nextAnnounceUtc - DateTime.UtcNow : TimeSpan.Zero;

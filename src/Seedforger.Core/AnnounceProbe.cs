@@ -15,9 +15,9 @@ namespace Seedforger {
     public bool GotResponse { get; private set; }
     public bool Accepted { get; private set; }
     /// <summary>Set when the tracker answered with a "failure reason".</summary>
-    public string FailureReason { get; private set; }
+    public string? FailureReason { get; private set; }
     /// <summary>Set when no usable answer came back (network, decode).</summary>
-    public string Error { get; private set; }
+    public string? Error { get; private set; }
     public int Seeders { get; private set; } = -1;
     public int Leechers { get; private set; } = -1;
     public int Interval { get; private set; } = -1;
@@ -27,7 +27,7 @@ namespace Seedforger {
 
     /// <summary>Sends the probe synchronously (a few seconds at most) and returns
     /// what happened. Never throws.</summary>
-    internal static AnnounceProbe Run(Torrent torrent, TorrentClient client, ProxySettings proxy, Action<string> log) {
+    internal static AnnounceProbe Run(Torrent torrent, TorrentClient client, ProxySettings? proxy, Action<string>? log) {
       var probe = new AnnounceProbe();
       try {
         var tracker = PrimaryTracker(torrent);
@@ -62,7 +62,7 @@ namespace Seedforger {
       }
     }
 
-    internal static string PrimaryTracker(Torrent torrent) {
+    internal static string? PrimaryTracker(Torrent? torrent) {
       if (torrent == null) return null;
       var list = torrent.AnnounceList;
       if (list != null && list.Count > 0) return list[0];
@@ -72,10 +72,10 @@ namespace Seedforger {
 
   /// <summary>Hex helpers for info-hashes.</summary>
   internal static class Hex {
-    public static string Lower(byte[] bytes) => ToHex(bytes, "0123456789abcdef");
-    public static string Upper(byte[] bytes) => ToHex(bytes, "0123456789ABCDEF");
+    public static string Lower(byte[]? bytes) => ToHex(bytes, "0123456789abcdef");
+    public static string Upper(byte[]? bytes) => ToHex(bytes, "0123456789ABCDEF");
+    private static string ToHex(byte[]? bytes, string digits) {
 
-    private static string ToHex(byte[] bytes, string digits) {
       if (bytes == null) return "";
       var c = new char[bytes.Length * 2];
       for (var i = 0; i < bytes.Length; i++) {

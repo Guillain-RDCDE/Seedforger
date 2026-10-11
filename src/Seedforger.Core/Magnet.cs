@@ -1,26 +1,29 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Seedforger {
 
   internal sealed class MagnetInfo {
-    internal byte[] InfoHash;                         // 20 raw bytes
-    internal string HashHex;                          // 40 hex chars
-    internal string Name;
+    internal required byte[] InfoHash;                // 20 raw bytes
+    internal required string HashHex;                 // 40 hex chars
+    internal string? Name;
     internal readonly List<string> Trackers = new List<string>();
   }
 
   /// <summary>Parses magnet links (xt=urn:btih:…, dn, tr). Pure and testable.</summary>
   internal static class Magnet {
 
-    internal static bool IsMagnet(string uri) =>
+    internal static bool IsMagnet([NotNullWhen(true)] string? uri) =>
       uri != null && uri.TrimStart().StartsWith("magnet:?", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Returns the parsed magnet, or null if it isn't a valid btih magnet.</summary>
-    internal static MagnetInfo Parse(string uri) {
+    internal static MagnetInfo? Parse(string? uri) {
       if (!IsMagnet(uri)) return null;
       var query = uri.Trim().Substring("magnet:?".Length);
-      var result = new MagnetInfo();
+      byte[]? infoHash = null;
+      string? name = null;
+      var trackers = new List<string>();
 
       foreach (var pair in query.Split('&')) {
         var eq = pair.IndexOf('=');
@@ -30,22 +33,24 @@ namespace Seedforger {
 
         if (key == "xt" && value.StartsWith("urn:btih:", StringComparison.OrdinalIgnoreCase)) {
           var h = value.Substring("urn:btih:".Length).Trim();
-          result.InfoHash = HashToBytes(h);
-          if (result.InfoHash != null) result.HashHex = ToHex(result.InfoHash);
+          infoHash = HashToBytes(h);
         }
         else if (key == "dn") {
-          result.Name = value;
+          name = value;
         }
         else if (key == "tr" && value.Length > 0) {
-          result.Trackers.Add(value);
+          trackers.Add(value);
         }
       }
 
-      return result.InfoHash != null ? result : null;
+      if (infoHash == null) return null;
+      var result = new MagnetInfo { InfoHash = infoHash, HashHex = ToHex(infoHash), Name = name };
+      result.Trackers.AddRange(trackers);
+      return result;
     }
 
     /// <summary>Decodes a btih value (40-char hex or 32-char base32) to 20 bytes.</summary>
-    internal static byte[] HashToBytes(string s) {
+    internal static byte[]? HashToBytes(string? s) {
       if (string.IsNullOrEmpty(s)) return null;
       s = s.Trim();
       if (s.Length == 40 && IsHex(s)) return FromHex(s);
@@ -67,7 +72,7 @@ namespace Seedforger {
     }
 
     // RFC 4648 base32 (A-Z, 2-7), no padding, 32 chars -> 20 bytes.
-    private static byte[] FromBase32(string s) {
+    private static byte[]? FromBase32(string s) {
       const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
       s = s.ToUpperInvariant();
       var output = new List<byte>(20);

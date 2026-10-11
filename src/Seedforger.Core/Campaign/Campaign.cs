@@ -48,7 +48,7 @@ namespace Seedforger {
       WriteIndented = true, PropertyNameCaseInsensitive = true,
     };
 
-    internal static Campaign Load(string path) {
+    internal static Campaign? Load(string path) {
       try {
         if (!File.Exists(path)) return null;
         return JsonSerializer.Deserialize<Campaign>(File.ReadAllText(path), Opts);

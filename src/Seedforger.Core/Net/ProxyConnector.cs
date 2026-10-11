@@ -27,8 +27,8 @@ namespace Seedforger.Net {
     /// <see cref="SocketException"/>) when the connection or the proxy handshake
     /// fails — the message says which.
     /// </summary>
-    internal static Stream Connect(string host, int port, ProxySettings proxy, int timeoutMs = DefaultTimeoutMs,
-                                   Func<string, IPAddress> resolve = null) {
+    internal static Stream Connect(string host, int port, ProxySettings? proxy, int timeoutMs = DefaultTimeoutMs,
+                                   Func<string, IPAddress?>? resolve = null) {
       if (string.IsNullOrWhiteSpace(host)) throw new ArgumentException("A host is required.", nameof(host));
       if (port <= 0 || port > 65535) throw new ArgumentOutOfRangeException(nameof(port));
       proxy ??= ProxySettings.None;

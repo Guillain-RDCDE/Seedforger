@@ -38,7 +38,7 @@ namespace Seedforger {
 
     /// <summary>Returns a human-readable reason when the run should stop now, else null.
     /// Swarm counts of -1 mean "unknown yet" and never trigger a stop.</summary>
-    internal string Evaluate(TimeSpan elapsed, long uploaded, long downloaded, int seeders, int leechers) {
+    internal string? Evaluate(TimeSpan elapsed, long uploaded, long downloaded, int seeders, int leechers) {
       const double mb = 1024.0 * 1024.0;
       switch (Kind) {
         case StopKind.AfterMinutes:

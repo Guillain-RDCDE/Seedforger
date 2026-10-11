@@ -37,7 +37,7 @@ namespace Seedforger.Net {
 
     /// <summary>Parses the names used by settings files and the command line
     /// ("none", "http", "httpconnect", "https", "socks4", "socks4a", "socks5").</summary>
-    internal static ProxyType ParseType(string name) {
+    internal static ProxyType ParseType(string? name) {
       switch ((name ?? "").Trim().ToLowerInvariant()) {
         case "http": case "https": case "httpconnect": case "http connect": case "http-connect": return ProxyType.HttpConnect;
         case "socks4": return ProxyType.Socks4;
@@ -68,10 +68,10 @@ namespace Seedforger.Net {
       s.ProxyPass = Password ?? "";
     }
 
-    public static bool operator ==(ProxySettings a, ProxySettings b) => Equals(a, b);
-    public static bool operator !=(ProxySettings a, ProxySettings b) => !Equals(a, b);
+    public static bool operator ==(ProxySettings? a, ProxySettings? b) => Equals(a, b);
+    public static bool operator !=(ProxySettings? a, ProxySettings? b) => !Equals(a, b);
+    public override bool Equals(object? obj) =>
 
-    public override bool Equals(object obj) =>
       obj is ProxySettings o && o.Type == Type && o.Host == Host && o.Port == Port && o.User == User && o.Password == Password;
 
     public override int GetHashCode() => HashCode.Combine(Type, Host, Port, User, Password);

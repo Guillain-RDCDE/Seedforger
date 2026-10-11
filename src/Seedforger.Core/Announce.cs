@@ -15,19 +15,19 @@ namespace Seedforger {
 
     /// <summary>Everything needed to build one announce URL — plain data, no UI.</summary>
     internal sealed class Params {
-      public string Tracker;         // the announce URL (may already carry a query)
-      public string QueryTemplate;   // the client's query with {infohash}/{peerid}/… placeholders
-      public string InfoHashHex;     // 40-hex-char SHA-1
-      public string PeerId;          // already percent-ready peer_id string
-      public string Port;
+      public required string Tracker;         // the announce URL (may already carry a query)
+      public required string? QueryTemplate;  // the client's query with {infohash}/{peerid}/… placeholders
+      public required string InfoHashHex;     // 40-hex-char SHA-1
+      public required string PeerId;          // already percent-ready peer_id string
+      public required string Port;
       public long Uploaded;
       public long Downloaded;
       public long Left;
       public long TotalSize;
-      public string Key;
-      public string NumWant;         // "0" means "let the tracker default to 200"
-      public string Event;           // "&event=started" etc. (as the legacy caller passes it)
-      public string LocalIp;
+      public required string Key;
+      public required string NumWant;         // "0" means "let the tracker default to 200"
+      public required string Event;           // "&event=started" etc. (as the legacy caller passes it)
+      public string? LocalIp;
       public bool HashUpperCase;
     }
 
@@ -37,7 +37,7 @@ namespace Seedforger {
     /// shared by the engine and the dry-run probe so both build identical URLs.</summary>
     internal static Params ParamsFor(string tracker, TorrentClient client, string infoHashHex, string peerId, string key,
                                      string port, string numWant, long uploaded, long downloaded, long left, long totalSize,
-                                     string ev) => new Params {
+                                     string? ev) => new Params {
       Tracker = tracker,
       QueryTemplate = client.Query,
       InfoHashHex = infoHashHex,
@@ -118,7 +118,7 @@ namespace Seedforger {
 
     /// <summary>Structured reading of a tracker's announce answer.</summary>
     internal sealed class Result {
-      public string Failure;         // set when the tracker rejected the announce
+      public string? Failure;        // set when the tracker rejected the announce
       public int Seeders = -1;       // "complete"
       public int Leechers = -1;      // "incomplete"
       public int Interval = -1;
@@ -128,7 +128,7 @@ namespace Seedforger {
     }
 
     /// <summary>Reads complete/incomplete/interval/failure from a parsed dict.</summary>
-    internal static Result FromDict(ValueDictionary d) {
+    internal static Result FromDict(ValueDictionary? d) {
       var r = new Result();
       if (d == null) return r;
       if (d.Contains("failure reason")) r.Failure = BEncode.String(d["failure reason"]);

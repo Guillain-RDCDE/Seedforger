@@ -28,10 +28,10 @@ namespace Seedforger {
 
     /// <summary>Announces to <paramref name="url"/> as <paramref name="client"/> and
     /// returns the parsed tracker response, or null (after logging why).</summary>
-    internal static TrackerResponse Fetch(Uri url, TorrentClient client, ProxySettings proxy, Action<string> log) =>
+    internal static TrackerResponse? Fetch(Uri url, TorrentClient client, ProxySettings? proxy, Action<string>? log) =>
       Fetch(url, client, proxy, log, MaxRedirects);
 
-    private static TrackerResponse Fetch(Uri url, TorrentClient client, ProxySettings proxy, Action<string> log, int redirectsLeft) {
+    private static TrackerResponse? Fetch(Uri url, TorrentClient client, ProxySettings? proxy, Action<string>? log, int redirectsLeft) {
       var tls = string.Equals(url.Scheme, "https", StringComparison.OrdinalIgnoreCase);
       var request = BuildRequest(url, client);
       log?.Invoke($"Connecting to tracker {url.Host}:{url.Port}{(tls ? " over TLS" : "")} ({proxy ?? ProxySettings.None})");
@@ -71,7 +71,8 @@ namespace Seedforger {
     /// own header block (with {host} filled in), and the blank line.</summary>
     internal static string BuildRequest(Uri url, TorrentClient client) =>
       "GET " + url.PathAndQuery + " " + client.HttpProtocol + "\r\n" +
-      client.Headers.Replace("{host}", url.Host) + "\r\n";
+      (client.Headers ?? throw new InvalidOperationException($"The {client.Name} profile has no Headers."))
+        .Replace("{host}", url.Host) + "\r\n";
 
     /// <summary>
     /// Opens the connection (direct or via proxy, TLS or not), writes
@@ -79,14 +80,14 @@ namespace Seedforger {
     /// it closes the connection (clients send "Connection: close"). Connection
     /// attempts are retried a few times; a failure is thrown with its reason.
     /// </summary>
-    internal static byte[] FetchRaw(string host, int port, bool tls, string rawRequest, ProxySettings proxy,
-                                    int timeoutMs = TimeoutMs, Action<string> log = null,
-                                    Func<string, System.Net.IPAddress> resolve = null) {
+    internal static byte[] FetchRaw(string host, int port, bool tls, string rawRequest, ProxySettings? proxy,
+                                    int timeoutMs = TimeoutMs, Action<string>? log = null,
+                                    Func<string, System.Net.IPAddress?>? resolve = null) {
       proxy ??= ProxySettings.None;
       resolve ??= SecureDns.Resolve;
-      Exception last = null;
+      Exception? last = null;
       for (var attempt = 1; attempt <= ConnectAttempts; attempt++) {
-        Stream stream = null;
+        Stream? stream = null;
         try {
           // Direct connections resolve through SecureDns (bypasses ISP sinkholes);
           // SOCKS4a/5 and HTTP CONNECT let the proxy resolve the name instead.

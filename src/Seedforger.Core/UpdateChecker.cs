@@ -49,7 +49,7 @@ namespace Seedforger {
       return latest != null && have != null && latest > have;
     }
 
-    private static Version ParseVersion(string s) {
+    private static Version? ParseVersion(string? s) {
       if (string.IsNullOrWhiteSpace(s)) return null;
       s = s.Trim().TrimStart('v', 'V');
       var end = 0;

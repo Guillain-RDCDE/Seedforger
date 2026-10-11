@@ -105,6 +105,7 @@ namespace Seedforger.Cli {
 
       if (daemon) return RunDaemon(opt, torrentPath, folder, Options, stdout, stderr, log);
 
+      if (string.IsNullOrEmpty(torrentPath)) return Usage; // not reached: checked above when no --folder is given
       Torrent torrent;
       try { torrent = new Torrent(torrentPath); }
       catch (Exception ex) { stderr.WriteLine("error: couldn't read that .torrent: " + ex.Message); return Usage; }
@@ -116,8 +117,9 @@ namespace Seedforger.Cli {
     // ---- commands ----
 
     private static int DryRun(Torrent torrent, SeedOptions o, TextWriter stdout, TextWriter stderr, Action<string> log) {
-      stdout.WriteLine($"Dry run: announcing \"{torrent.Name}\" once as a complete seeder ({o.Client.Name})…");
-      var probe = AnnounceProbe.Run(torrent, o.Client, o.Proxy, log);
+      var client = o.Client ?? throw new ArgumentException("A client to impersonate is required.");
+      stdout.WriteLine($"Dry run: announcing \"{torrent.Name}\" once as a complete seeder ({client.Name})…");
+      var probe = AnnounceProbe.Run(torrent, client, o.Proxy, log);
       if (probe.Accepted) {
         stdout.WriteLine("accepted as a seeder.");
         stdout.WriteLine($"  seeders (complete):    {probe.Seeders}");
@@ -136,7 +138,7 @@ namespace Seedforger.Cli {
       if (!string.IsNullOrEmpty(real)) o.RealFile = Path.GetFullPath(real);
       using var engine = new SeedEngine(o);
 
-      stdout.WriteLine($"Seeding \"{torrent.Name}\" as {o.Client.Name}" + (o.UploadKBps > 0 ? $" at ~{o.UploadKBps} kB/s" : "")
+      stdout.WriteLine($"Seeding \"{torrent.Name}\" as {engine.ClientName}" + (o.UploadKBps > 0 ? $" at ~{o.UploadKBps} kB/s" : "")
                        + (o.StopWhen.IsSet ? $", stopping {o.StopWhen}" : "") + ".");
       engine.Start();
 
@@ -161,7 +163,7 @@ namespace Seedforger.Cli {
 
     /// <summary>Runs one torrent or a whole folder headless behind a live web
     /// dashboard, until Ctrl+C, a duration, or the page's stop button.</summary>
-    private static int RunDaemon(CommandLine opt, string torrentPath, string folder, Func<Torrent, Random, SeedOptions> options,
+    private static int RunDaemon(CommandLine opt, string? torrentPath, string? folder, Func<Torrent, Random, SeedOptions> options,
                                  TextWriter stdout, TextWriter stderr, Action<string> log) {
       var paths = new List<string>();
       if (!string.IsNullOrEmpty(folder)) {
@@ -170,7 +172,7 @@ namespace Seedforger.Cli {
         paths.AddRange(Directory.GetFiles(dir, "*.torrent"));
         if (paths.Count == 0) { stderr.WriteLine("error: no .torrent files in " + dir); return Usage; }
       }
-      else {
+      else if (!string.IsNullOrEmpty(torrentPath)) { // always set without --folder (checked by the caller)
         paths.Add(torrentPath);
       }
 
@@ -184,8 +186,11 @@ namespace Seedforger.Cli {
         var o = options(t, rand);
         if (!string.IsNullOrEmpty(realSeed)) {
           if (Directory.Exists(realSeed)) {
-            var cand = Path.Combine(realSeed, t.Name);
-            if (File.Exists(cand)) o.RealFile = Path.GetFullPath(cand);
+            var name = t.Name;
+            if (name != null) {
+              var cand = Path.Combine(realSeed, name);
+              if (File.Exists(cand)) o.RealFile = Path.GetFullPath(cand);
+            }
           }
           else if (File.Exists(realSeed) && paths.Count == 1) o.RealFile = Path.GetFullPath(realSeed);
         }

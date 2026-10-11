@@ -27,7 +27,7 @@ namespace Seedforger.Cli {
 
     /// <summary>The token after the option, or null when absent or when the next
     /// token is itself an option.</summary>
-    internal string Value(params string[] names) {
+    internal string? Value(params string[] names) {
       for (var i = 0; i < args.Length - 1; i++)
         foreach (var name in names)
           if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase))

@@ -26,7 +26,8 @@ namespace Seedforger {
       var text1 = GetNewLineStr(reader1);
       Headers = string.Empty;
       do {
-        text2 = reader1.ReadLine();
+        // A response that ends inside its headers is malformed.
+        text2 = reader1.ReadLine() ?? throw new InvalidDataException("The tracker response ended inside its headers.");
         var num1 = text2.IndexOf("302 Found");
         if (num1 >= 0) {
           response_status_302 = true;
@@ -70,8 +71,7 @@ namespace Seedforger {
           stream1.Write(buffer2, 0, buffer2.Length);
         }
         else {
-          var text3 = string.Empty;
-          text3 = reader1.ReadLine();
+          var text3 = reader1.ReadLine() ?? throw new InvalidDataException("The tracker response has no chunk header.");
           var num2 = Convert.ToInt32(text3.Split(' ')[0], 0x10);
           while (num2 > 0) {
             var buffer1 = new byte[num2];
@@ -79,7 +79,12 @@ namespace Seedforger {
             responseStream.Read(buffer1, 0, num2);
             stream1.Write(buffer1, 0, num2);
             reader1.ReadLine();
-            text3 = reader1.ReadLine();
+            var next = reader1.ReadLine();
+            if (next == null) {
+              num2 = 0; // end of stream: no further chunk
+              continue;
+            }
+            text3 = next;
             try {
               num2 = Convert.ToInt32(text3.Split(' ')[0], 0x10);
               continue;
@@ -108,7 +113,8 @@ namespace Seedforger {
 
     internal string ContentEncoding { get; private set; }
 
-    internal ValueDictionary Dict { get; private set; }
+    /// <summary>The decoded bencoded body; null on a redirect or an undecodable body.</summary>
+    internal ValueDictionary? Dict { get; private set; }
 
     internal string Headers { get; private set; }
 
@@ -128,8 +134,8 @@ namespace Seedforger {
       return text1;
     }
 
-    private ValueDictionary ParseBEncodeDict(MemoryStream responseStream) {
-      ValueDictionary dictionary1 = null;
+    private ValueDictionary? ParseBEncodeDict(MemoryStream responseStream) {
+      ValueDictionary? dictionary1 = null;
       if (ContentEncoding == "gzip" || ContentEncoding == "x-gzip") {
         var stream1 = new GZipStream(responseStream, CompressionMode.Decompress);
         try {

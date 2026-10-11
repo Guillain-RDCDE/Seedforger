@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -12,7 +13,7 @@ namespace Seedforger.Wire {
     /// <summary>Do we have a verified copy of this piece to serve?</summary>
     bool HasPiece(int index);
     /// <summary>Reads a block; returns false if out of range or unavailable.</summary>
-    bool TryReadBlock(int index, int begin, int length, out byte[] data);
+    bool TryReadBlock(int index, int begin, int length, [NotNullWhen(true)] out byte[]? data);
   }
 
   /// <summary>
@@ -60,7 +61,7 @@ namespace Seedforger.Wire {
     public bool HasPiece(int index) {
       if (index < 0 || index >= hashes.Length) return false;
       lock (gate) {
-        if (verified[index].HasValue) return verified[index].Value;
+        if (verified[index] is bool known) return known;
         var ok = VerifyPiece(index);
         verified[index] = ok;
         return ok;
@@ -87,7 +88,7 @@ namespace Seedforger.Wire {
       catch { return false; }
     }
 
-    public bool TryReadBlock(int index, int begin, int length, out byte[] data) {
+    public bool TryReadBlock(int index, int begin, int length, [NotNullWhen(true)] out byte[]? data) {
       data = null;
       if (index < 0 || index >= hashes.Length || begin < 0 || length <= 0) return false;
       var pieceLen = LengthOfPiece(index);

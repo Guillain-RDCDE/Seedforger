@@ -23,20 +23,20 @@ namespace Seedforger {
     private const int TickMilliseconds = 15_000;
 
     private sealed class Slot {
-      public string Path;
+      public required string Path;
       public int OffsetMin;
-      public SeedEngine Engine;
+      public SeedEngine? Engine;
       public bool Started;
     }
 
     private readonly Campaign campaign;
-    private readonly Action<string> log;
+    private readonly Action<string>? log;
     private readonly ProxySettings proxy;
     private readonly StealthOptions stealth;
     private readonly UpstreamBudget budget = new UpstreamBudget();
     private readonly List<Slot> slots = new List<Slot>();
     private readonly Random rand = new Random();
-    private Timer timer;
+    private Timer? timer;
     private int ticking;
     private DateTime startTime;
     private long goalBytes;
@@ -44,14 +44,14 @@ namespace Seedforger {
     private volatile bool done;
 
     /// <summary>Raised (on a background thread) once the goal is reached.</summary>
-    public event Action<CampaignEngine> Completed;
+    public event Action<CampaignEngine>? Completed;
 
     /// <param name="campaign">The plan.</param>
     /// <param name="log">Log sink (the engines' lines go there too).</param>
     /// <param name="proxy">Proxy for every engine; null = direct.</param>
     /// <param name="baseStealth">Realistic/swarm-aware flags to start from (cloned,
     /// then the campaign's own active-hours window is applied).</param>
-    internal CampaignEngine(Campaign campaign, Action<string> log, ProxySettings proxy = null, StealthOptions baseStealth = null) {
+    internal CampaignEngine(Campaign campaign, Action<string>? log, ProxySettings? proxy = null, StealthOptions? baseStealth = null) {
       this.campaign = campaign ?? throw new ArgumentNullException(nameof(campaign));
       this.log = log;
       this.proxy = proxy ?? ProxySettings.None;
@@ -69,7 +69,7 @@ namespace Seedforger {
     public long TotalDownloaded => slots.Sum(s => s.Engine?.DownloadedBytes ?? 0);
     public TimeSpan Elapsed => Running || done ? DateTime.Now - startTime : TimeSpan.Zero;
     /// <summary>The engines started so far (for a per-torrent read-out).</summary>
-    public IReadOnlyList<SeedEngine> Engines => slots.Where(s => s.Engine != null).Select(s => s.Engine).ToList();
+    public IReadOnlyList<SeedEngine> Engines => slots.Select(s => s.Engine).OfType<SeedEngine>().ToList();
 
     /// <summary>Starts the campaign. Returns false, after logging why, when the
     /// folder is missing or holds no torrents.</summary>
@@ -149,15 +149,15 @@ namespace Seedforger {
       var ceiling = CampaignPlanner.PaceCeiling(goalBytes, elapsedMin, campaign.DeadlineHours * 60.0);
       var aheadOfPace = !campaign.IsRatioGoal && totalUp >= ceiling;
 
-      var active = slots.Where(s => s.Engine != null && s.Engine.IsRunning).ToList();
+      var active = slots.Select(s => s.Engine).OfType<SeedEngine>().Where(e => e.IsRunning).ToList();
       if (globalUpKBps > 0) {
-        var leechers = active.Select(s => Math.Max(0, s.Engine.LeecherCount)).ToArray();
+        var leechers = active.Select(e => Math.Max(0, e.LeecherCount)).ToArray();
         var alloc = CampaignPlanner.AllocateByDemand(globalUpKBps, leechers);
         for (var i = 0; i < active.Count; i++)
-          active[i].Engine.SetUploadKBps(aheadOfPace ? 1 : Math.Max(1, alloc[i]));
+          active[i].SetUploadKBps(aheadOfPace ? 1 : Math.Max(1, alloc[i]));
       }
       else if (aheadOfPace) {
-        foreach (var s in active) s.Engine.SetUploadKBps(1);
+        foreach (var e in active) e.SetUploadKBps(1);
       }
     }
 
@@ -173,8 +173,11 @@ namespace Seedforger {
           Stealth = stealth, Budget = budget, Log = log,
         };
         if (!string.IsNullOrEmpty(campaign.RealFileFolder) && Directory.Exists(campaign.RealFileFolder)) {
-          var candidate = Path.Combine(campaign.RealFileFolder, torrent.Name);
-          if (File.Exists(candidate)) opts.RealFile = candidate;
+          var name = torrent.Name;
+          if (name != null) {
+            var candidate = Path.Combine(campaign.RealFileFolder, name);
+            if (File.Exists(candidate)) opts.RealFile = candidate;
+          }
         }
         var engine = new SeedEngine(opts);
         engine.Start();

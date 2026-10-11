@@ -14,18 +14,18 @@ namespace Seedforger.Cli {
   internal sealed class DaemonHost : IDisposable {
 
     private readonly List<SeedEngine> engines = new List<SeedEngine>();
-    private readonly Action<string> log;
+    private readonly Action<string>? log;
     private readonly ManualResetEventSlim stopSignal = new ManualResetEventSlim(false);
-    private WebDashboard web;
+    private WebDashboard? web;
     private DateTime startedUtc;
 
-    public DaemonHost(Action<string> log) { this.log = log; }
+    public DaemonHost(Action<string>? log) { this.log = log; }
 
     public int Count => engines.Count;
     public IReadOnlyList<SeedEngine> Engines => engines;
-    public string DashboardUrl => web?.Url;
+    public string? DashboardUrl => web?.Url;
 
-    public void Add(SeedEngine engine) { if (engine != null) engines.Add(engine); }
+    public void Add(SeedEngine? engine) { if (engine != null) engines.Add(engine); }
 
     public void Start(string bind, int port) {
       startedUtc = DateTime.UtcNow;

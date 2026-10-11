@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Seedforger {
@@ -10,9 +11,10 @@ namespace Seedforger {
   internal static class Encodings {
 
     private static readonly object gate = new object();
-    private static Encoding win1252;
+    private static Encoding? win1252;
 
     /// <summary>Makes the code-page encodings available. Safe to call repeatedly.</summary>
+    [MemberNotNull(nameof(win1252))]
     internal static void Register() {
       lock (gate) {
         if (win1252 != null) return;

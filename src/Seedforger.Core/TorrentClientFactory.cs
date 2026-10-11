@@ -100,7 +100,7 @@ namespace Seedforger {
 
     /// <summary>"qBittorrent" + "5.2.4" → the client; an empty version means the
     /// newest known version of that family.</summary>
-    public static TorrentClient Resolve(string family, string version) {
+    public static TorrentClient Resolve(string? family, string? version) {
       family = string.IsNullOrWhiteSpace(family) ? DefaultFamily : family.Trim();
       if (string.IsNullOrWhiteSpace(version)) version = NewestVersion(family);
       return GetClient((family + " " + version).Trim());
@@ -158,7 +158,7 @@ namespace Seedforger {
 
     /// <summary>Generates an identifier per its spec: "alphanumeric", "numeric",
     /// "hex" or "random" (any byte), optionally percent-encoded / upper-cased.</summary>
-    private static string GenerateIdString(IdSpec spec) {
+    private static string GenerateIdString(IdSpec? spec) {
       if (spec == null) return string.Empty;
       string raw;
       lock (generatorGate) {
