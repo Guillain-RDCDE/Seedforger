@@ -8,10 +8,9 @@
 
 A modern **.NET 8** revival of RatioMaster: it tells a tracker you uploaded gigabytes while transferring nothing, impersonating a real client down to the last byte. And — in the same repository — the reproducible science showing why the client side is a game you cannot win.
 
-[![CI](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml/badge.svg)](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml)
+[![CI](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![Release](https://img.shields.io/github/v/release/Guillain-RDCDE/Seedforger?color=2ea043&label=release)](../../releases/latest)
-[![Tests](https://img.shields.io/badge/tests-226%20passing-2ea043)](tests/Seedforger.Tests)
 [![Platforms](https://img.shields.io/badge/Windows%20·%20Linux%20·%20macOS-30363d)](../../releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
