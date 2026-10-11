@@ -122,7 +122,7 @@ namespace Seedforger.Tests {
   public class PeerTransferIntegrationTests {
 
     [Fact]
-    public void ClientDownloadsVerifiedPieceFromRealSeeder() {
+    public async Task ClientDownloadsVerifiedPieceFromRealSeeder() {
       var (path, hashes, content, pieceLen, total) = FilePieceSourceTests.MakeFile(40000, 16384);
       var infoHash = Fill(20, 0xAB);
       var governor = new Governor();
@@ -143,7 +143,8 @@ namespace Seedforger.Tests {
           0, 16384, hashes[0]);
         Assert.NotNull(got);
         Assert.Equal(content[..16384], got);
-        serverTask.Wait(5000);
+        // Give the server up to 5 s to finish; surface its exception if it failed.
+        if (await Task.WhenAny(serverTask, Task.Delay(5000)) == serverTask) await serverTask;
         Assert.True(governor.RealServed >= 16384, $"served {governor.RealServed}");
       }
       finally {
