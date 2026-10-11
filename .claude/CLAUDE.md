@@ -51,8 +51,11 @@ Nothing from the legacy RatioMaster form (`RM.cs`), the `BytesRoads` socket libr
 ## Conventions
 
 - Style is in `.editorconfig`: 2-space indent, brace on the same line, space after casts,
-  camelCase private fields, block-scoped namespaces. `Nullable`/`ImplicitUsings` are off
-  project-wide (`Directory.Build.props`); say `using System;` explicitly.
+  camelCase private fields, block-scoped namespaces. `ImplicitUsings` is off project-wide
+  (`Directory.Build.props`); say `using System;` explicitly. `Nullable` is off by default but
+  **on in Core** (annotated, 0 warnings): keep it warning-free, no `!` to silence it.
+- CI builds with warnings as errors (NuGet advisories excepted): a new warning breaks the build.
+- Package versions live in `Directory.Packages.props` (central package management) only.
 - One version number: `<Version>` in `Directory.Build.props`. Nowhere else.
 - Doc comments explain *why*; comments that narrate the code are deleted.
 - Swallowed exceptions must at least log through the engine's `Log` sink; UI-side
@@ -64,8 +67,8 @@ Nothing from the legacy RatioMaster form (`RM.cs`), the `BytesRoads` socket libr
   bump the profile count in `DefaultClientProfilesTests`, `docs/features.md` and
   `docs/REFERENCE.md`, and add current versions to `TorrentClientFactory.ModernClients`.
 - Tests are xUnit in `tests/Seedforger.Tests`, no outbound network: use the in-process
-  `FakeHttpServer` / `FakeProxy` from `TrackerTransportTests.cs`. The README badge carries the
-  passing count; update it when the count changes.
+  `FakeHttpServer` / `FakeProxy` from `TrackerTransportTests.cs`. The README shows the CI status
+  badge, never a hand-written test count.
 
 ## Build, test, validate
 
@@ -102,7 +105,7 @@ Windows capture.
 
 ## Identity and publication
 
-Every commit is authored by the single canonical identity in `.mailmap`
+Every commit is authored by the single canonical identity
 (`Guillain d'Erceville <167749917+Guillain-RDCDE@users.noreply.github.com>`); commits made
 by CI use `github-actions[bot]`. Before any push or publication, check `git log --format='%an <%ae>'`
 shows nothing else. Never write a model name into commits, code or docs.
