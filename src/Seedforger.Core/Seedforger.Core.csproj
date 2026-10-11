@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <!-- BEncode/tracker parsing relies on legacy code pages (Windows-1252), no longer built-in on .NET Core/8. -->
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
 
   <ItemGroup>
