@@ -54,3 +54,7 @@ publish/
 .claude/*
 !.claude/settings.json
 !.claude/CLAUDE.md
+
+# Python bytecode (tools/mock_tracker.py)
+__pycache__/
+*.py[cod]
