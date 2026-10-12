@@ -10,16 +10,18 @@ v2.19.0 use .NET 8).
 
 ## Release artifacts
 
+Sizes are those of v3.0.0.
+
 | File | Platform | What |
 |---|---|---|
 | `Seedforger-lite-win-x64.exe` | Windows | GUI, ~0.5 MB, needs the .NET 10 Desktop Runtime |
-| `Seedforger-win-x64.exe` | Windows | GUI, self-contained (~24 MB) |
-| `Seedforger-gui-win-x64.exe` | Windows | Cross-platform Avalonia GUI |
-| `Seedforger-cli-win-x64.exe` | Windows | Headless CLI / daemon |
-| `Seedforger-cli-linux-x64`, `-linux-arm64` | Linux | Headless CLI / daemon |
-| `Seedforger-gui-linux-x64` | Linux | Avalonia GUI |
-| `Seedforger-cli-osx-x64`, `-osx-arm64` | macOS | Headless CLI / daemon |
-| `Seedforger-gui-osx-x64`, `-osx-arm64` | macOS | Avalonia GUI |
+| `Seedforger-win-x64.exe` | Windows | GUI, self-contained (~17 MB) |
+| `Seedforger-gui-win-x64.exe` | Windows | Cross-platform Avalonia GUI (~24 MB) |
+| `Seedforger-cli-win-x64.exe` | Windows | Headless CLI / daemon (~13 MB) |
+| `Seedforger-cli-linux-x64`, `-linux-arm64` | Linux | Headless CLI / daemon (~14–15 MB) |
+| `Seedforger-gui-linux-x64`, `-linux-arm64` | Linux | Avalonia GUI (~23–24 MB) |
+| `Seedforger-cli-osx-x64`, `-osx-arm64` | macOS | Headless CLI / daemon (~13–14 MB) |
+| `Seedforger-gui-osx-x64`, `-osx-arm64` | macOS | Avalonia GUI (~25–26 MB) |
 
 Verify a download against the checksums:
 

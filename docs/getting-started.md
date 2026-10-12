@@ -12,12 +12,14 @@ Grab a build from the [latest release](../../../releases/latest) — pick the on
 
 | Download | Size | Starts up | Needs |
 |---|---|---|---|
-| ⭐ **`Seedforger-lite.exe`** *(recommended)* | ~0.5 MB | **fastest** | the free [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0/runtime) (one-time install; releases up to v2.19.0 use .NET 8) |
-| **`Seedforger.exe`** | ~24 MB | slower to launch | **nothing at all** — fully self-contained |
+| ⭐ **`Seedforger-lite-win-x64.exe`** *(recommended)* | ~0.5 MB | **fastest** | the free [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0/runtime) (one-time install) |
+| **`Seedforger-win-x64.exe`** | ~17 MB | slower to launch | **nothing at all** — fully self-contained |
+
+On **Linux or macOS**, take `Seedforger-gui-<platform>` (the same app, cross-platform) or `Seedforger-cli-<platform>` (no window, for servers and scripts); both are self-contained. On Linux, make the file executable first (`chmod +x`).
 
 Either way it's a **single file, no installer**, that you can drop anywhere (USB stick included). Double-click and go.
 
-> **Why two?** The self-contained build carries the whole .NET runtime inside it, so it's big and your antivirus rescans all of it on every launch — that's what makes it feel slow. (It is trimmed down from ~68 MB to ~24 MB, but that is still ~50× the lite build.) The lite build is a tiny 0.5 MB and starts roughly twice as fast; it just asks you to install the .NET runtime once. If you're not sure whether you have .NET, download lite first — Windows will tell you (and hand you the installer) if it's missing.
+> **Why two?** The self-contained build carries the whole .NET runtime inside it, so it's big and your antivirus rescans all of it on every launch — that's what makes it feel slow. (It is trimmed down from ~68 MB to ~17 MB, but that is still ~35× the lite build.) The lite build is a tiny 0.5 MB and starts roughly twice as fast; it just asks you to install the .NET runtime once. If you're not sure whether you have .NET, download lite first — Windows will tell you (and hand you the installer) if it's missing.
 
 <a id="guided-setup"></a>
 ## 2. Easiest start — guided setup 🧭
@@ -62,7 +64,7 @@ Trackers run anti-cheat. The fastest way to get banned is to be *implausible*. S
 - **Do I need a torrent client running?** No. Seedforger talks to the tracker by itself.
 - **Does it actually upload my files?** No — by default it transfers *nothing*; it only reports numbers. (There's an advanced [real peer-wire engine](features.md#-the-real-peer-wire-engine-advanced) that serves genuine data, but it's opt-in.)
 - **Will this make me undetectable?** **No.** It makes your story *consistent and human-shaped*. A determined tracker can still catch fakery. Treat it as a game / learning tool.
-- **Windows only?** Yes — it's a WinForms app for Windows.
+- **Windows only?** No. The two downloads above are the Windows app; Linux and macOS get the cross-platform app and the command line, which drive the same engine.
 
 ---
 

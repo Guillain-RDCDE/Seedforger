@@ -51,9 +51,11 @@ No installer — a single file. Grab the build for your platform from the [**lat
 
 | Platform | Download | Requires |
 |---|---|---|
-| **Windows** (recommended) | `Seedforger-lite-win-x64.exe` &nbsp;·&nbsp; ~0.5 MB | the free [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0/runtime) (releases up to v2.19.0: .NET 8) |
-| **Windows** (portable) | `Seedforger-win-x64.exe` &nbsp;·&nbsp; ~24 MB | nothing — fully self-contained |
-| **Linux / macOS** | `Seedforger-gui-*` (GUI) · `Seedforger-cli-*` (headless) | nothing — self-contained |
+| **Windows** (recommended) | `Seedforger-lite-win-x64.exe` &nbsp;·&nbsp; ~0.5 MB | the free [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0/runtime) |
+| **Windows** (portable) | `Seedforger-win-x64.exe` &nbsp;·&nbsp; ~17 MB | nothing — fully self-contained |
+| **Linux / macOS** | `Seedforger-gui-*` (GUI, ~23–26 MB) · `Seedforger-cli-*` (headless, ~13–15 MB) | nothing — self-contained |
+
+Every file is listed with its SHA-256 in the release's `SHA256SUMS.txt`. Package managers and the Linux Flatpak: [docs/packaging.md](docs/packaging.md).
 
 The **graphical app** and a **headless command line** drive the same engine:
 
