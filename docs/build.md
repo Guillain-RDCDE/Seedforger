@@ -20,9 +20,9 @@ dotnet publish src/Seedforger/Seedforger.csproj -c Release -r win-x64 --self-con
 ```
 
 > **Size:** any `--self-contained` publish is trimmed and compressed automatically
-> (see [`src/Publish.props`](../src/Publish.props)) — the Windows GUI comes out at
-> ~24 MB instead of ~68 MB, the CLI at ~12 MB instead of ~68 MB, the Avalonia GUI at
-> ~22 MB instead of ~93 MB. Most of what goes is **WPF**: the SDK ships the whole
+> (see [`src/Publish.props`](../src/Publish.props)) — on .NET 10 the Windows GUI comes out at
+> ~17 MB, the CLI at ~13–15 MB and the Avalonia GUI at ~23–26 MB depending on the platform,
+> where an untrimmed self-contained build ran to ~68–93 MB on .NET 8. Most of what goes is **WPF**: the SDK ships the whole
 > WindowsDesktop runtime pack with a WinForms app even though nothing loads it.
 >
 > Trimming needs three guardrails, all set in `Publish.props`: WinForms itself is
