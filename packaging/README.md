@@ -10,10 +10,10 @@ attached to each GitHub Release with a `SHA256SUMS.txt`. Bump `version` and the
 
 | Manager | File | Ships | Notes |
 |---|---|---|---|
-| **winget** (Windows) | [`winget/`](winget/) | Portable GUI exe | `InstallerType: portable` — no installer. Submit to `microsoft/winget-pkgs`. |
+| **winget** (Windows) | [`winget/`](winget/) | Portable GUI exe | `InstallerType: portable` — no installer; depends on `Microsoft.DotNet.DesktopRuntime.10`. Submit to `microsoft/winget-pkgs`. |
 | **Homebrew** (macOS) | [`homebrew/seedforger.rb`](homebrew/seedforger.rb) | CLI (x64 + arm64) | A formula for the headless CLI. Submit to a tap or `homebrew-core`. |
 | **AUR** (Arch Linux) | [`aur/PKGBUILD`](aur/PKGBUILD) | CLI | Self-contained single file; no .NET runtime dependency. |
-| **Flatpak** (Linux GUI) | [`flatpak/`](flatpak/) | Avalonia GUI | Manifest skeleton for the cross-platform GUI, with its AppStream metainfo (licence `GPL-3.0-only`). |
+| **Flatpak** (Linux GUI) | [`flatpak/`](flatpak/) | Avalonia GUI (x86_64 + aarch64) | freedesktop 26.08 runtime, desktop entry, icon and AppStream metainfo (licence `GPL-3.0-only`). CI builds it and opens the window. Submit to Flathub. |
 
 See [docs/packaging.md](../docs/packaging.md) for the full per-platform install story
 and how Windows code signing fits in.
