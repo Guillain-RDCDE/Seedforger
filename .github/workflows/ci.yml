@@ -146,8 +146,8 @@ jobs:
 
           kill $DAEMON $TRACKER 2>/dev/null || true
 
-  # Builds the Flatpak from packaging/flatpak, installs the bundle and opens the
-  # window under Xvfb. "manifest" builds the file exactly as committed (the released
+  # Builds the Flatpak from packaging/flatpak, installs the bundle, opens the
+  # window under Xvfb and checks a setting survives a restart. "manifest" builds the file exactly as committed (the released
   # binary, checksum-verified); "main" swaps in a GUI published from this checkout,
   # so a change that would break the Flatpak shows up before a tag, not after.
   flatpak:
@@ -221,6 +221,61 @@ jobs:
           flatpak kill "$APP_ID" 2>/dev/null || true
           tail -n 40 app.log || true
           [ -n "$WID" ] || { echo "::error::the Flatpak did not open a Seedforger window"; exit 1; }
+
+      # /app is read-only, so settings.json must land in the sandbox's config folder
+      # and come back on the next launch. Each run toggles Settings > Realistic speed
+      # from the keyboard (Alt opens the menu bar; Settings is the fourth menu and the
+      # toggle its first item): the second run turns it back on only if it read what
+      # the first run saved. The manifest variant is the released binary; it runs the
+      # same check for comparison but cannot fail the job while that release predates
+      # the per-user settings folder.
+      - name: A setting saved in one run is read back in the next
+        continue-on-error: ${{ matrix.variant == 'manifest' }}
+        run: |
+          set -euo pipefail
+          Xvfb :98 -screen 0 1280x900x24 > /dev/null 2>&1 &
+          export DISPLAY=:98
+          sleep 2
+          CFG="$HOME/.var/app/$APP_ID/config/seedforger/settings.json"
+          rm -f "$CFG"
+          toggle_realistic() {
+            flatpak run --user "$APP_ID" > "settings-run$1.log" 2>&1 &
+            local app=$! wid=
+            for i in $(seq 1 60); do
+              wid=$(xdotool search --onlyvisible --name 'Seedforger' 2>/dev/null | head -1 || true)
+              [ -n "$wid" ] && break
+              sleep 1
+            done
+            [ -n "$wid" ] || { echo "::error::run $1: no window"; tail -n 40 "settings-run$1.log"; return 1; }
+            sleep 3
+            xdotool mousemove --window "$wid" 400 300
+            xdotool windowfocus "$wid" 2>/dev/null || true
+            sleep 1
+            for k in alt Right Right Right Down Return; do
+              xdotool key --clearmodifiers "$k"
+              sleep 0.5
+            done
+            sleep 2
+            kill "$app" 2>/dev/null || true
+            flatpak kill "$APP_ID" 2>/dev/null || true
+            wait "$app" 2>/dev/null || true
+            tail -n 20 "settings-run$1.log" || true
+          }
+          realistic() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["RealisticSpeed"])' "$CFG"; }
+
+          toggle_realistic 1
+          if [ ! -s "$CFG" ]; then
+            echo "::error::run 1 left no settings.json in the sandbox config folder"
+            find "$HOME/.var/app/$APP_ID" -maxdepth 3 || true
+            exit 1
+          fi
+          cat "$CFG"
+          [ "$(realistic)" = "False" ] || { echo "::error::run 1 did not save Realistic speed = off"; exit 1; }
+
+          toggle_realistic 2
+          cat "$CFG"
+          [ "$(realistic)" = "True" ] || { echo "::error::run 2 did not start from the settings run 1 saved"; exit 1; }
+          echo "settings persisted across two sandboxed runs in $CFG"
 
       - uses: actions/upload-artifact@v7
         with:
