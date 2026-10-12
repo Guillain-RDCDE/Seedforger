@@ -71,7 +71,7 @@ Two short, **reproducible** papers, backed by a runnable deterministic model ([`
 
 ## Build
 
-Requires the **.NET 8 SDK**.
+Requires the **.NET 10 SDK**.
 
 ```bash
 dotnet build Seedforger.sln -c Release

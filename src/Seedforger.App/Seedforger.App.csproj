@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <!-- net8.0 (no -windows): the Avalonia GUI runs on Windows, Linux and macOS. -->
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- net10.0 (no -windows): the Avalonia GUI runs on Windows, Linux and macOS. -->
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Seedforger.App</RootNamespace>
     <AssemblyName>Seedforger.App</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>

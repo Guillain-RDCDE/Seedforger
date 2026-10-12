@@ -12,7 +12,7 @@ Grab a build from the [latest release](../../../releases/latest) — pick the on
 
 | Download | Size | Starts up | Needs |
 |---|---|---|---|
-| ⭐ **`Seedforger-lite.exe`** *(recommended)* | ~0.5 MB | **fastest** | the free [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0/runtime) (one-time install) |
+| ⭐ **`Seedforger-lite.exe`** *(recommended)* | ~0.5 MB | **fastest** | the free [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0/runtime) (one-time install; releases up to v2.19.0 use .NET 8) |
 | **`Seedforger.exe`** | ~24 MB | slower to launch | **nothing at all** — fully self-contained |
 
 Either way it's a **single file, no installer**, that you can drop anywhere (USB stick included). Double-click and go.

@@ -9,7 +9,7 @@ License: MIT
 LicenseUrl: https://github.com/Guillain-RDCDE/Seedforger/blob/main/LICENSE
 ShortDescription: Report any upload/download stats to a BitTorrent tracker without transferring bytes.
 Description: |-
-  A modern .NET 8 revival of RatioMaster built around believability: client
+  A modern .NET revival of RatioMaster built around believability: client
   impersonation, swarm-aware speeds, stealth timing, a real peer-wire engine,
   goal-seeking campaigns, a headless daemon with a web dashboard, and a
   cross-platform GUI/CLI. Educational / security-research tool.

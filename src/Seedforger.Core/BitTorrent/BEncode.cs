@@ -145,7 +145,9 @@ namespace Seedforger.BitTorrent {
 
       var length = Int32.Parse(q);
       Bytes = new Byte[length];
-      s.Read(Bytes, 0, length);
+      // A stream may hand back fewer bytes than asked; keep reading until the string is
+      // complete. A truncated file still leaves the tail zeroed, as it always did.
+      s.ReadAtLeast(Bytes, length, throwOnEndOfStream: false);
       v = Encoding.GetEncoding(1252).GetString(Bytes); // store string also
     }
   }

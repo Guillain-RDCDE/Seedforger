@@ -2,7 +2,7 @@
 
 [← back to the README](../README.md)
 
-Requires the **.NET 8 SDK** (`dotnet --version` ≥ 8).
+Requires the **.NET 10 SDK** (`dotnet --version` ≥ 10; `global.json` pins the 10.0 feature bands).
 
 ```bash
 # build everything
@@ -11,7 +11,7 @@ dotnet build Seedforger.sln -c Release
 # run the tests (xUnit)
 dotnet test tests/Seedforger.Tests/Seedforger.Tests.csproj
 
-# lite single-file exe — tiny & fast (needs the .NET 8 Desktop runtime installed)
+# lite single-file exe — tiny & fast (needs the .NET 10 Desktop runtime installed)
 dotnet publish src/Seedforger/Seedforger.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
 
 # self-contained single-file exe — bundles the runtime, needs nothing installed
@@ -42,7 +42,7 @@ A standard `src/` + `tests/` layout. One portable **Core** holds the engine, the
 
 ```
 src/
-  Seedforger.Core/              net8.0 — the engine, shared by every front-end (Windows/Linux/macOS)
+  Seedforger.Core/              net10.0 — the engine, shared by every front-end (Windows/Linux/macOS)
   │  ├─ SeedEngine.cs · SeedOptions.cs     one run of one torrent: announces, shaped counters, stop rules
   │  ├─ StealthOptions.cs · UpstreamBudget.cs   believability profile + shared uplink (instances, not globals)
   │  ├─ AnnounceProbe.cs              the dry-run announce (accepted / rejected / swarm)
@@ -57,14 +57,14 @@ src/
   │  ├─ Campaign/                     campaign model, planner and orchestrator
   │  ├─ BitTorrent/                   bencode + .torrent parsing, magnets
   │  └─ Web/                          the daemon's dashboard + JSON status
-  Seedforger.Cli/               net8.0 — the console executable (one line: it calls CliApp)
-  Seedforger.App/               net8.0 — the cross-platform Avalonia GUI (Views/, ViewModels/)
-  Seedforger/                   net8.0-windows — the Windows GUI (UI/MainForm, GuideForm, CampaignForm…);
+  Seedforger.Cli/               net10.0 — the console executable (one line: it calls CliApp)
+  Seedforger.App/               net10.0 — the cross-platform Avalonia GUI (Views/, ViewModels/)
+  Seedforger/                   net10.0-windows — the Windows GUI (UI/MainForm, GuideForm, CampaignForm…);
                                         started with CLI flags it runs CliApp too
-  Seedforger.Integrity/         net8.0 — the reproducible science model (the "No Free Ratio" annex)
-  Seedforger.Integrity.Figures/ net8.0 — regenerates the paper figures from the model
+  Seedforger.Integrity/         net10.0 — the reproducible science model (the "No Free Ratio" annex)
+  Seedforger.Integrity.Figures/ net10.0 — regenerates the paper figures from the model
 tests/
-  Seedforger.Tests/             net8.0 — the xUnit suite, run on Windows AND Linux in CI
+  Seedforger.Tests/             net10.0 — the xUnit suite, run on Windows AND Linux in CI
 scripts/                        build-release.cmd (Windows two-in-one publish)
 docs/  ·  packaging/  ·  tools/  (mock tracker for the E2E test)
 ```

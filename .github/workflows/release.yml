@@ -23,10 +23,10 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       # Trimming and single-file compression for the self-contained builds live in
       # src/Publish.props, so every publish path gets them.
@@ -68,7 +68,7 @@ jobs:
           cp out/cli/Seedforger.Cli.exe       dist/Seedforger-cli-win-x64.exe
           cp out/gui-avalonia/Seedforger.App.exe dist/Seedforger-gui-win-x64.exe
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: windows
           path: dist/*
@@ -80,10 +80,10 @@ jobs:
       matrix:
         rid: [linux-x64, linux-arm64, osx-x64, osx-arm64]
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Publish CLI + Avalonia GUI (${{ matrix.rid }})
         run: |
@@ -98,7 +98,7 @@ jobs:
           cp out/cli/Seedforger.Cli dist/Seedforger-cli-${{ matrix.rid }}
           cp out/gui/Seedforger.App dist/Seedforger-gui-${{ matrix.rid }}
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.rid }}
           path: dist/*
@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           path: staged
       - name: Collect + checksum

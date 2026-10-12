@@ -5,13 +5,14 @@
 Every release attaches self-contained binaries for Windows, Linux and macOS, plus a
 `SHA256SUMS.txt`, built by [`.github/workflows/release.yml`](../.github/workflows/release.yml).
 You can always just download and run — no installer, no runtime (except the tiny
-`lite` Windows GUI build, which uses the free .NET 8 Desktop Runtime).
+`lite` Windows GUI build, which uses the free .NET 10 Desktop Runtime; releases up to
+v2.19.0 use .NET 8).
 
 ## Release artifacts
 
 | File | Platform | What |
 |---|---|---|
-| `Seedforger-lite-win-x64.exe` | Windows | GUI, ~0.5 MB, needs the .NET 8 Desktop Runtime |
+| `Seedforger-lite-win-x64.exe` | Windows | GUI, ~0.5 MB, needs the .NET 10 Desktop Runtime |
 | `Seedforger-win-x64.exe` | Windows | GUI, self-contained (~24 MB) |
 | `Seedforger-gui-win-x64.exe` | Windows | Cross-platform Avalonia GUI |
 | `Seedforger-cli-win-x64.exe` | Windows | Headless CLI / daemon |

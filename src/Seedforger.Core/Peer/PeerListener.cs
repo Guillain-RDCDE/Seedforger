@@ -96,7 +96,9 @@ namespace Seedforger {
       using var stream = new NetworkStream(socket, true);
       stream.ReadTimeout = 1000;
       var buffer = new byte[68];
-      try { stream.Read(buffer, 0, buffer.Length); } catch { }
+      // The handshake can arrive split across TCP segments: read until all 68 bytes are in
+      // (or the peer closes / the timeout fires).
+      try { stream.ReadAtLeast(buffer, buffer.Length, throwOnEndOfStream: false); } catch { }
 
       var text = Latin1.GetString(buffer, 0, buffer.Length);
       if (text.IndexOf("BitTorrent protocol", StringComparison.Ordinal) >= 0 &&

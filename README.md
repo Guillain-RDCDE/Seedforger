@@ -6,10 +6,10 @@
 
 ### Fake your BitTorrent upload/download stats on any tracker — the most complete ratio spoofer we could build, shipped with the proof it can't actually win.
 
-A modern **.NET 8** revival of RatioMaster: it tells a tracker you uploaded gigabytes while transferring nothing, impersonating a real client down to the last byte. And — in the same repository — the reproducible science showing why the client side is a game you cannot win.
+A modern **.NET 10** revival of RatioMaster: it tells a tracker you uploaded gigabytes while transferring nothing, impersonating a real client down to the last byte. And — in the same repository — the reproducible science showing why the client side is a game you cannot win.
 
 [![CI](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Guillain-RDCDE/Seedforger/actions/workflows/ci.yml)
-[![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![Release](https://img.shields.io/github/v/release/Guillain-RDCDE/Seedforger?color=2ea043&label=release)](../../releases/latest)
 [![Platforms](https://img.shields.io/badge/Windows%20·%20Linux%20·%20macOS-30363d)](../../releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -27,7 +27,7 @@ A modern **.NET 8** revival of RatioMaster: it tells a tracker you uploaded giga
 <!-- opening -->
 > A tool that fakes file-sharing statistics, shipped together with the proof that it cannot win.
 >
-> A .NET 8 client that impersonates real peers byte for byte, plus two short papers and a runnable model showing the tracker-side reconciliation bound.
+> A .NET 10 client that impersonates real peers byte for byte, plus two short papers and a runnable model showing the tracker-side reconciliation bound.
 >
 > Build the thing properly, then publish its limits. Part of the work of [Guillain d’Erceville](https://github.com/Guillain-RDCDE), forward deployed engineer.
 <!-- opening -->
@@ -51,7 +51,7 @@ No installer — a single file. Grab the build for your platform from the [**lat
 
 | Platform | Download | Requires |
 |---|---|---|
-| **Windows** (recommended) | `Seedforger-lite-win-x64.exe` &nbsp;·&nbsp; ~0.5 MB | the free [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0/runtime) |
+| **Windows** (recommended) | `Seedforger-lite-win-x64.exe` &nbsp;·&nbsp; ~0.5 MB | the free [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0/runtime) (releases up to v2.19.0: .NET 8) |
 | **Windows** (portable) | `Seedforger-win-x64.exe` &nbsp;·&nbsp; ~24 MB | nothing — fully self-contained |
 | **Linux / macOS** | `Seedforger-gui-*` (GUI) · `Seedforger-cli-*` (headless) | nothing — self-contained |
 
@@ -70,7 +70,7 @@ New to this? The [**guided setup**](docs/getting-started.md) probes each torrent
 
 ## Lineage
 
-**RatioMaster** → [NikolayIT/RatioMaster.NET](https://github.com/NikolayIT/RatioMaster.NET) (MIT) → [sergiye/RatioMaster](https://github.com/sergiye/RatioMaster) → **Seedforger**: a .NET 8 rewrite that took the old idea as far as it could go — a modern client database, HTTPS, swarm-aware announces, a real peer-wire engine, campaigns, guided setup, i18n, portable settings — and then answered the question the old tools never asked, with a formal science annex.
+**RatioMaster** → [NikolayIT/RatioMaster.NET](https://github.com/NikolayIT/RatioMaster.NET) (MIT) → [sergiye/RatioMaster](https://github.com/sergiye/RatioMaster) → **Seedforger**: a modern .NET rewrite that took the old idea as far as it could go — a modern client database, HTTPS, swarm-aware announces, a real peer-wire engine, campaigns, guided setup, i18n, portable settings — and then answered the question the old tools never asked, with a formal science annex.
 
 ## License
 
