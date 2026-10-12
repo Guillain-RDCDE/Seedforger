@@ -67,7 +67,9 @@ namespace Seedforger.Tests {
       using var web = new WebDashboard("127.0.0.1", port, () => status, () => stopped = true, null);
       web.Start();
 
-      using var http = new HttpClient { Timeout = System.TimeSpan.FromSeconds(5) };
+      // Generous timeout: the rest of the suite runs in parallel and can keep the
+      // thread pool busy for several seconds on a loaded machine.
+      using var http = new HttpClient { Timeout = System.TimeSpan.FromSeconds(30) };
       var baseUrl = $"http://127.0.0.1:{port}";
 
       // The dashboard page.
