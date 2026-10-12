@@ -119,7 +119,8 @@ namespace Seedforger.UI {
 
     // ---- settings in and out ----
 
-    private static void LoadPersistedSettings() {
+    private void LoadPersistedSettings() {
+      Settings.Log = LogFromAnyThread;
       var s = Settings.Current;
       StealthOptions.Shared.LoadFrom(s);
       UpstreamBudget.Shared.TotalKBps = s.GlobalUpstreamKBps;

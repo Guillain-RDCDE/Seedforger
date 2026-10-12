@@ -1,16 +1,19 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Seedforger.UI;
 
 namespace Seedforger {
 
   /// <summary>
-  /// Portable, JSON-backed settings: a <c>settings.json</c> next to the executable,
-  /// no registry. Two groups: what the interface remembers about itself (window
-  /// behaviour, language, believability toggles) and the last-used run values
-  /// (client, speeds, proxy, stop rule) so the next launch starts where you left off.
+  /// JSON-backed settings, no registry: a <c>settings.json</c> next to the executable
+  /// for a portable copy, in the per-user config folder otherwise (see
+  /// <see cref="SettingsLocation"/>). Two groups: what the interface remembers about
+  /// itself (window behaviour, language, believability toggles) and the last-used run
+  /// values (client, speeds, proxy, stop rule) so the next launch starts where you left off.
   ///
   /// JSON property names are kept as they always were (misspellings included),
   /// so files written by earlier versions still load; numbers that used to be
@@ -24,15 +27,43 @@ namespace Seedforger {
       NumberHandling = JsonNumberHandling.AllowReadingFromString,
     };
 
-    internal static readonly string FilePath = Path.Combine(AppContext.BaseDirectory, "settings.json");
-
     private static readonly object gate = new object();
+    private static SettingsLocation? location;
     private static Settings? current;
+    private static Action<string>? log;
+    private static readonly List<string> pendingLog = new List<string>();
+    private static string? lastSaveError;
+
+    /// <summary>Where this process keeps its settings, resolved once.</summary>
+    internal static SettingsLocation Location {
+      get { lock (gate) return location ??= SettingsLocation.ForCurrentProcess(); }
+    }
+
+    internal static string FilePath => Location.FilePath;
 
     /// <summary>The one shared instance every window and command reads and writes.</summary>
     internal static Settings Current {
-      get { lock (gate) return current ??= Load(); }
+      get { lock (gate) return current ??= Load(Location); }
     }
+
+    /// <summary>Where settings problems are reported (a failed save, a corrupt file, a
+    /// carried-over file). The front-ends point it at their log; messages raised before
+    /// that are kept and delivered when it is set.</summary>
+    internal static Action<string>? Log {
+      get { lock (gate) return log; }
+      set {
+        string[] queued;
+        lock (gate) {
+          log = value;
+          queued = value == null ? Array.Empty<string>() : pendingLog.ToArray();
+          if (value != null) pendingLog.Clear();
+        }
+        foreach (var line in queued) value?.Invoke(line);
+      }
+    }
+
+    /// <summary>The file this instance saves to; null means the process-wide location.</summary>
+    private string? savePath;
 
     // ---- interface ----
 
@@ -89,29 +120,75 @@ namespace Seedforger {
 
     // ---- persistence ----
 
-    /// <summary>Loads the settings from disk; defaults when the file is missing. A
-    /// corrupt file is set aside as settings.json.bad instead of being overwritten.</summary>
-    internal static Settings Load() {
-      try {
-        if (!File.Exists(FilePath)) return new Settings();
-        var loaded = JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath), JsonOptions);
-        return loaded ?? new Settings();
+    /// <summary>Loads the settings of <paramref name="from"/>; defaults when there is no
+    /// file (an empty one counts as none, so creating an empty settings.json next to
+    /// the executable is how a copy is made portable). A corrupt file is set aside as
+    /// settings.json.bad instead of being overwritten. When only the older file of
+    /// <see cref="SettingsLocation.MigrateFrom"/> exists, it is read once and saved
+    /// to the new location.</summary>
+    internal static Settings Load(SettingsLocation from) {
+      var loaded = Read(from.FilePath);
+      if (loaded == null && from.MigrateFrom != null) {
+        loaded = Read(from.MigrateFrom);
+        if (loaded != null) {
+          loaded.savePath = from.FilePath;
+          if (loaded.Save())
+            Report(string.Format(UiStrings.Get("log.settings_moved"), from.MigrateFrom, from.FilePath));
+          return loaded;
+        }
       }
-      catch (Exception) {
-        try { File.Copy(FilePath, FilePath + ".bad", overwrite: true); } catch (Exception) { /* best effort */ }
-        return new Settings();
+      loaded ??= new Settings();
+      loaded.savePath = from.FilePath;
+      return loaded;
+    }
+
+    private static Settings? Read(string path) {
+      try {
+        if (!File.Exists(path)) return null;
+        var text = File.ReadAllText(path);
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        return JsonSerializer.Deserialize<Settings>(text, JsonOptions);
+      }
+      catch (Exception ex) {
+        var kept = path + ".bad";
+        try { File.Copy(path, kept, overwrite: true); } catch (Exception) { kept = path; }
+        Report(string.Format(UiStrings.Get("log.settings_bad"), path, ex.Message, kept));
+        return null;
       }
     }
 
-    /// <summary>Writes the current values (indented). Returns false if the write failed.</summary>
+    /// <summary>Writes the current values (indented), creating the folder if needed.
+    /// Returns false if the write failed; the failure is reported through
+    /// <see cref="Log"/> (once until a save succeeds again, not on every change).</summary>
     internal bool Save() {
+      var path = savePath ?? FilePath;
       try {
-        File.WriteAllText(FilePath, JsonSerializer.Serialize(this, JsonOptions));
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+        File.WriteAllText(path, JsonSerializer.Serialize(this, JsonOptions));
+        lock (gate) lastSaveError = null;
         return true;
       }
-      catch (Exception) {
-        return false; // a settings write must never take the app down
+      catch (Exception ex) {
+        // A settings write must never take the app down, but it must not vanish either.
+        var message = string.Format(UiStrings.Get("log.settings_save_failed"), path, ex.Message);
+        bool repeat;
+        lock (gate) { repeat = message == lastSaveError; lastSaveError = message; }
+        if (!repeat) Report(message);
+        return false;
       }
+    }
+
+    private static void Report(string message) {
+      Action<string>? sink;
+      lock (gate) {
+        sink = log;
+        if (sink == null) {
+          if (pendingLog.Count < 20) pendingLog.Add(message);
+          return;
+        }
+      }
+      sink(message);
     }
 
     /// <summary>Change-and-save in one call: <c>Settings.Current.Update(s => s.Language = "fr")</c>.</summary>

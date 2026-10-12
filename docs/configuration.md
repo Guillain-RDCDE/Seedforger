@@ -2,7 +2,7 @@
 
 [← back to the README](../README.md)
 
-Two optional JSON files, both dropped next to the exe on first launch and both editable without recompiling.
+Two optional JSON files, both dropped next to the exe on first launch and both editable without recompiling. Your own settings are a third file, kept in your user folder (see [Where settings live](#where-settings-live)).
 
 ---
 
@@ -61,4 +61,18 @@ The orchestrator staggers the starts, splits the connection's upstream toward th
 
 ---
 
-Settings themselves (theme, language, connection profile, active hours…) live in a portable **`settings.json`** next to the exe — no registry.
+## Where settings live
+
+Settings themselves (language, believability toggles, connection profile, active hours, the last client, speeds and proxy…) live in a **`settings.json`** — no registry. The GUIs read and write it; the CLI and the daemon take everything from their command line and do not use it.
+
+| Install | `settings.json` |
+|---|---|
+| **Portable** — a `settings.json` already sits next to the exe and that folder is writable | next to the exe, as before |
+| Windows (anything else: winget, Program Files…) | `%APPDATA%\Seedforger\settings.json` |
+| Linux (AUR, a copy under `/usr`…) | `$XDG_CONFIG_HOME/seedforger/settings.json`, by default `~/.config/seedforger/settings.json` |
+| Linux, Flatpak | `~/.var/app/io.github.guillain_rdcde.Seedforger/config/seedforger/settings.json` (the sandbox's own config folder) |
+| macOS (Homebrew, an app bundle…) | `~/Library/Application Support/Seedforger/settings.json` |
+
+- **To keep a copy portable** (a USB stick, a folder of tools), put a `settings.json` next to the exe — an empty file will do. Copies that already have one carry on unchanged.
+- **Read-only install folder:** a `settings.json` found next to the exe is read once as the starting point and saved to the per-user folder; the original is left untouched.
+- **A failed save is never silent:** the window's log says where the write failed and why. A file that cannot be parsed is set aside as `settings.json.bad`, and the log says so.

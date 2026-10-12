@@ -91,7 +91,7 @@ See [Configuration → Campaigns](configuration.md#campaigns-goal-seeking-orches
 | **English / French** | The whole interface follows the language toggle at runtime (*Settings → Language*). |
 | **Closing doesn't stop the run** | The close button minimises to the taskbar instead of quitting, so a run in progress survives a stray click — and the window stays where you can see it. The minimise button can tuck into the notification area instead (toggleable, with a first-time hint). Quit for real from *File → Exit* or the tray icon. |
 | **Live graph** | *Tools → Live graph* — a small window tracing cumulative upload + ratio for the running engine. |
-| **Portable settings** | Everything lives in `settings.json` next to the exe. **No registry**, fully portable (USB-friendly). |
+| **Settings that stick** | Everything lives in one `settings.json`, **no registry**: in your user config folder (`%APPDATA%`, `~/.config`, the Flatpak sandbox, `~/Library/Application Support`), or next to the exe for a portable copy (USB-friendly) — see [where settings live](configuration.md#where-settings-live). A save that fails is reported in the log. |
 | **Menu bar & shortcuts** | *File / Run / Tools / Settings / Help* reach every feature. Ctrl+O loads a torrent, F5 starts, F6 stops, F7 dry-runs an announce — and a `.torrent` dropped anywhere on the window loads it. |
 | **Command line** | A headless mode (`--cli` / `--test-announce`) that scripts cleanly for cron, CI or a server. See [Command line](cli.md). |
 

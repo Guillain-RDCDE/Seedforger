@@ -51,7 +51,8 @@ src/
   │  ├─ Net/                          ProxyConnector (direct, HTTP CONNECT, SOCKS4/4a/5) + ProxySettings
   │  ├─ TorrentClientFactory.cs · DefaultClientProfiles.cs   the client fingerprints
   │  ├─ SpeedShaper.cs · Stealth.cs · SwarmModel.cs          the shaping maths
-  │  ├─ Settings.cs · RunPreferences.cs · UI/UiStrings.cs    portable JSON settings, Advanced values, EN/FR
+  │  ├─ Settings.cs · SettingsLocation.cs   JSON settings; portable next to the exe or in the user's config folder
+  │  ├─ RunPreferences.cs · UI/UiStrings.cs  Advanced-dialog values, EN/FR
   │  ├─ Cli/                          CliApp (the command line), CommandLine, DaemonHost
   │  ├─ Peer/                         the real peer-wire engine (stages A–D + governor)
   │  ├─ Campaign/                     campaign model, planner and orchestrator

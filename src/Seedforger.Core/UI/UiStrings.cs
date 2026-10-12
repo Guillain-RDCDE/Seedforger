@@ -101,6 +101,12 @@ namespace Seedforger.UI {
       ["log.probing"]       = ("Dry run: announcing once as a complete seeder…", "Test à blanc : une annonce en seeder complet…"),
       ["log.real_file"]     = ("Real file armed for the next start: {0}", "Vrai fichier prêt pour le prochain démarrage : {0}"),
       ["log.campaign_done"] = ("goal reached — campaign complete.", "objectif atteint — campagne terminée."),
+      ["log.settings_save_failed"] = ("Settings could not be saved to {0}: {1} Changes will be lost when the app closes.",
+                                      "Impossible d'enregistrer les réglages dans {0} : {1} Les changements seront perdus à la fermeture."),
+      ["log.settings_bad"]  = ("Settings file {0} is unreadable ({1}); starting from the defaults, the file is kept as {2}.",
+                               "Le fichier de réglages {0} est illisible ({1}) ; réglages par défaut, le fichier est conservé sous {2}."),
+      ["log.settings_moved"] = ("Settings carried over from {0} (read-only folder) to {1}.",
+                                "Réglages repris de {0} (dossier en lecture seule) vers {1}."),
       // dry-run results
       ["probe.accepted"]    = ("Accepted by the tracker — there are people to upload to.", "Accepté par le tracker — il y a des gens à qui envoyer."),
       ["probe.accepted_empty"] = ("Accepted by the tracker, but nobody is downloading: you would gain nothing.", "Accepté par le tracker, mais personne ne télécharge : vous ne gagneriez rien."),

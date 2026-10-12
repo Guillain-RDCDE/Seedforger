@@ -47,6 +47,7 @@ namespace Seedforger.App.ViewModels {
 
     public MainViewModel() {
       Encodings.Register();
+      Settings.Log = AppendLog;
       var s = Settings.Current;
       StealthOptions.Shared.LoadFrom(s);
       UpstreamBudget.Shared.TotalKBps = s.GlobalUpstreamKBps;
