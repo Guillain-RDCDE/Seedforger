@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Seedforger
+Comment=Report upload/download stats to a BitTorrent tracker without transferring bytes
+Exec=seedforger-gui
+Icon=io.github.guillain_rdcde.Seedforger
+Terminal=false
+Categories=Network;FileTransfer;P2P;
+Keywords=bittorrent;torrent;tracker;ratio;

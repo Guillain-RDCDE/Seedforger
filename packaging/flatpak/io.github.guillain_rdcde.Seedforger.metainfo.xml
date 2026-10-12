@@ -16,6 +16,7 @@
       the client side cannot win. Educational / security-research tool.
     </p>
   </description>
+  <launchable type="desktop-id">io.github.guillain_rdcde.Seedforger.desktop</launchable>
   <url type="homepage">https://github.com/Guillain-RDCDE/Seedforger</url>
   <url type="bugtracker">https://github.com/Guillain-RDCDE/Seedforger/issues</url>
   <content_rating type="oars-1.1"/>

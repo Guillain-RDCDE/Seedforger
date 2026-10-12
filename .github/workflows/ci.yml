@@ -145,3 +145,84 @@ jobs:
           curl -sf http://127.0.0.1:8091/ | grep -q "Seedforger"
 
           kill $DAEMON $TRACKER 2>/dev/null || true
+
+  # Builds the Flatpak from packaging/flatpak, installs the bundle and opens the
+  # window under Xvfb. "manifest" builds the file exactly as committed (the released
+  # binary, checksum-verified); "main" swaps in a GUI published from this checkout,
+  # so a change that would break the Flatpak shows up before a tag, not after.
+  flatpak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [manifest, main]
+    env:
+      APP_ID: io.github.guillain_rdcde.Seedforger
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Flatpak tooling
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flatpak flatpak-builder xvfb xdotool > /dev/null
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - uses: actions/setup-dotnet@v6
+        if: matrix.variant == 'main'
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Point the manifest at a GUI built from this checkout
+        if: matrix.variant == 'main'
+        run: |
+          set -euo pipefail
+          dotnet publish src/Seedforger.App/Seedforger.App.csproj -c Release -r linux-x64 \
+            --self-contained true -p:PublishSingleFile=true -o out/gui
+          cp out/gui/Seedforger.App packaging/flatpak/Seedforger-gui-linux-x64
+          python3 - <<'PY'
+          import re
+          p = "packaging/flatpak/io.github.guillain_rdcde.Seedforger.yaml"
+          s = open(p, encoding="utf-8").read()
+          s, n = re.subn(r"url: \S+/Seedforger-gui-linux-x64\n(\s+)sha256: '[0-9a-f]{64}'",
+                         r"path: Seedforger-gui-linux-x64", s)
+          assert n == 1, "linux-x64 GUI source not found in the manifest"
+          open(p, "w", encoding="utf-8").write(s)
+          PY
+
+      - name: Build the Flatpak and its bundle
+        run: |
+          set -euo pipefail
+          cd packaging/flatpak
+          flatpak-builder --user --install-deps-from=flathub --disable-rofiles-fuse \
+            --repo="$RUNNER_TEMP/repo" --force-clean "$RUNNER_TEMP/build" "$APP_ID.yaml"
+          flatpak build-bundle "$RUNNER_TEMP/repo" "$GITHUB_WORKSPACE/seedforger.flatpak" "$APP_ID"
+          flatpak install --user -y --noninteractive "$GITHUB_WORKSPACE/seedforger.flatpak"
+          flatpak info --user "$APP_ID"
+          ls -la "$GITHUB_WORKSPACE/seedforger.flatpak"
+
+      - name: Open the window from the installed Flatpak
+        run: |
+          set -uo pipefail
+          Xvfb :99 -screen 0 1280x900x24 > /dev/null 2>&1 &
+          export DISPLAY=:99
+          sleep 2
+          flatpak run --user "$APP_ID" > app.log 2>&1 &
+          APP=$!
+          WID=
+          for i in $(seq 1 60); do
+            WID=$(xdotool search --onlyvisible --name 'Seedforger' 2>/dev/null | head -1 || true)
+            [ -n "$WID" ] && break
+            kill -0 $APP 2>/dev/null || break
+            sleep 1
+          done
+          echo "window: ${WID:-none} ($(xdotool getwindowname "$WID" 2>/dev/null || true))"
+          kill $APP 2>/dev/null || true
+          flatpak kill "$APP_ID" 2>/dev/null || true
+          tail -n 40 app.log || true
+          [ -n "$WID" ] || { echo "::error::the Flatpak did not open a Seedforger window"; exit 1; }
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: flatpak-${{ matrix.variant }}
+          path: seedforger.flatpak

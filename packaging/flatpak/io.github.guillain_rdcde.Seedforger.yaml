@@ -1,26 +1,50 @@
-# Flatpak manifest skeleton for the cross-platform Avalonia GUI.
+# Flatpak manifest for the cross-platform Avalonia GUI.
 # Ships the self-contained single-file GUI binary from the release. Update the
-# `url`/`sha256` for the linux-x64 GUI artifact when cutting a release, then build:
-#   flatpak-builder build-dir io.github.guillain_rdcde.Seedforger.yaml --install --user
+# `url`/`sha256` of both linux GUI artifacts when cutting a release, then build:
+#   flatpak-builder --user --install-deps-from=flathub --install build-dir io.github.guillain_rdcde.Seedforger.yaml
+# CI builds this manifest as committed, and once more with a GUI built from the
+# checkout, and opens the window from the installed bundle (.github/workflows/ci.yml).
 app-id: io.github.guillain_rdcde.Seedforger
 runtime: org.freedesktop.Platform
-runtime-version: '23.08'
+runtime-version: '26.08'
 sdk: org.freedesktop.Sdk
 command: seedforger-gui
 finish-args:
   - --share=network
+  - --share=ipc
   - --socket=x11
-  - --socket=wayland
   - --device=dri
+  # .torrent files usually sit in Downloads; the file picker goes through the portal anyway.
+  - --filesystem=xdg-download:ro
 modules:
   - name: seedforger
     buildsystem: simple
     build-commands:
-      - install -Dm755 Seedforger-gui-linux-x64 /app/bin/seedforger-gui
+      - install -Dm755 Seedforger-gui-linux-* /app/lib/seedforger/Seedforger.App
+      # The single-file binary unpacks its native libraries (SkiaSharp, HarfBuzz) on
+      # first start; inside the sandbox the default ~/.net is not writable.
+      - |
+        cat > seedforger-gui <<'EOF'
+        #!/bin/sh
+        export DOTNET_BUNDLE_EXTRACT_BASE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotnet-bundle"
+        exec /app/lib/seedforger/Seedforger.App "$@"
+        EOF
+      - install -Dm755 seedforger-gui /app/bin/seedforger-gui
+      - install -Dm644 io.github.guillain_rdcde.Seedforger.desktop /app/share/applications/io.github.guillain_rdcde.Seedforger.desktop
+      - install -Dm644 io.github.guillain_rdcde.Seedforger.png /app/share/icons/hicolor/256x256/apps/io.github.guillain_rdcde.Seedforger.png
       - install -Dm644 io.github.guillain_rdcde.Seedforger.metainfo.xml /app/share/metainfo/io.github.guillain_rdcde.Seedforger.metainfo.xml
     sources:
       - type: file
+        path: io.github.guillain_rdcde.Seedforger.desktop
+      - type: file
+        path: io.github.guillain_rdcde.Seedforger.png
+      - type: file
         path: io.github.guillain_rdcde.Seedforger.metainfo.xml
       - type: file
+        only-arches: [x86_64]
         url: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v2.19.0/Seedforger-gui-linux-x64
         sha256: 'aad8dfe2a49471246a3b9475eb6f2ca114c4ed164ac47f6a8f4213c01b040b11'
+      - type: file
+        only-arches: [aarch64]
+        url: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v2.19.0/Seedforger-gui-linux-arm64
+        sha256: 'ca06faa7883729f3776de2ad83fe0bc115c59aed6b70f502ce037fb0a35f1331'
