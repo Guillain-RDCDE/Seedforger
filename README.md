@@ -12,7 +12,7 @@ A modern **.NET 10** revival of RatioMaster: it tells a tracker you uploaded gig
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![Release](https://img.shields.io/github/v/release/Guillain-RDCDE/Seedforger?color=2ea043&label=release)](../../releases/latest)
 [![Platforms](https://img.shields.io/badge/Windows%20·%20Linux%20·%20macOS-30363d)](../../releases/latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 
 <br>
 
@@ -74,4 +74,4 @@ New to this? The [**guided setup**](docs/getting-started.md) probes each torrent
 
 ## License
 
-[MIT](LICENSE). Provided as-is, without warranty. Lineage and upstream copyrights: [NOTICE](NOTICE).
+[GNU GPL v3.0](LICENSE) (GPL-3.0-only). Provided as-is, without warranty. Seedforger derives from [sergiye/RatioMaster](https://github.com/sergiye/RatioMaster), whose code was published under GPL-3.0, and from [RatioMaster.NET](https://github.com/NikolayIT/RatioMaster.NET) (MIT, GPL-compatible). Lineage, dates and upstream copyrights: [NOTICE](NOTICE).

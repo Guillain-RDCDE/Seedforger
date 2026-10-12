@@ -5,7 +5,7 @@ Publisher: Guillain-RDCDE
 PublisherUrl: https://github.com/Guillain-RDCDE
 PackageName: Seedforger
 PackageUrl: https://github.com/Guillain-RDCDE/Seedforger
-License: MIT
+License: GPL-3.0-only
 LicenseUrl: https://github.com/Guillain-RDCDE/Seedforger/blob/main/LICENSE
 ShortDescription: Report any upload/download stats to a BitTorrent tracker without transferring bytes.
 Description: |-

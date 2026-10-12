@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.guillain_rdcde.Seedforger</id>
+  <name>Seedforger</name>
+  <summary>Report upload/download stats to a BitTorrent tracker without transferring bytes</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <developer id="io.github.guillain_rdcde">
+    <name>Guillain d'Erceville</name>
+  </developer>
+  <description>
+    <p>
+      A modern .NET revival of RatioMaster built around believability: client
+      impersonation, swarm-aware speeds, stealth timing, a real peer-wire engine and
+      goal-seeking campaigns. Shipped with a reproducible research annex showing why
+      the client side cannot win. Educational / security-research tool.
+    </p>
+  </description>
+  <url type="homepage">https://github.com/Guillain-RDCDE/Seedforger</url>
+  <url type="bugtracker">https://github.com/Guillain-RDCDE/Seedforger/issues</url>
+  <content_rating type="oars-1.1"/>
+</component>

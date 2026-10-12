@@ -12,7 +12,7 @@
     <Authors>Seedforger contributors</Authors>
     <Copyright>Copyright © 2026</Copyright>
     <RepositoryUrl>https://github.com/Guillain-RDCDE/Seedforger</RepositoryUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>

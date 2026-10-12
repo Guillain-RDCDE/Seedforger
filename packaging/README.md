@@ -13,7 +13,7 @@ attached to each GitHub Release with a `SHA256SUMS.txt`. Bump `version` and the
 | **winget** (Windows) | [`winget/`](winget/) | Portable GUI exe | `InstallerType: portable` — no installer. Submit to `microsoft/winget-pkgs`. |
 | **Homebrew** (macOS) | [`homebrew/seedforger.rb`](homebrew/seedforger.rb) | CLI (x64 + arm64) | A formula for the headless CLI. Submit to a tap or `homebrew-core`. |
 | **AUR** (Arch Linux) | [`aur/PKGBUILD`](aur/PKGBUILD) | CLI | Self-contained single file; no .NET runtime dependency. |
-| **Flatpak** (Linux GUI) | [`flatpak/`](flatpak/) | Avalonia GUI | Manifest skeleton for the cross-platform GUI. |
+| **Flatpak** (Linux GUI) | [`flatpak/`](flatpak/) | Avalonia GUI | Manifest skeleton for the cross-platform GUI, with its AppStream metainfo (licence `GPL-3.0-only`). |
 
 See [docs/packaging.md](../docs/packaging.md) for the full per-platform install story
 and how Windows code signing fits in.

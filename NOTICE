@@ -1,6 +1,13 @@
 Seedforger
-Copyright (c) 2026 Guillain d'Erceville
-Licensed under the MIT License (see LICENSE).
+Copyright (C) 2026 Guillain d'Erceville
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation, version 3 (GPL-3.0-only). The full text is in LICENSE.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 Lineage
 -------
@@ -9,16 +16,47 @@ Seedforger builds on the RatioMaster lineage:
 
   RatioMaster -> NikolayIT/RatioMaster.NET -> sergiye/RatioMaster -> Seedforger
 
-- RatioMaster.NET
-  https://github.com/NikolayIT/RatioMaster.NET
-  Copyright (c) 2006-2016 Nikolay Kostov
-  Licensed under the MIT License; its copyright line is reproduced in LICENSE.
+Copyrights in the prior works remain with their respective authors.
 
-- sergiye/RatioMaster
+
+sergiye/RatioMaster
   https://github.com/sergiye/RatioMaster
   "Copyright © 2023 Sergiy Egoshyn" (from its Properties/AssemblyInfo.cs).
-  Its first commit carried the RatioMaster.NET MIT licence file. The
-  repository does not carry a licence file today; see it for its current
-  terms.
 
-Copyrights in the prior works remain with their respective authors.
+  From 2025-05-07 (commit 32b68c1, "add LICENSE") to 2026-02-22 10:59 +0200
+  (commit 1359c87, which removed the file) the repository was published under
+  the GNU General Public License, version 3: its LICENSE.txt was the unmodified
+  GPL-3.0 text and its README read "GPL-3.0 License". Seedforger was imported
+  from it on 2026-02-22 at 11:05 +0200; the code taken is the code that was
+  published under GPL-3.0 (its last code change, commit 79b3470, dates from
+  2025-08-25). Seedforger uses that code under those GPL-3.0 terms, which is
+  why Seedforger as a whole is distributed under GPL-3.0. The LICENSE file
+  here is byte-for-byte the licence text sergiye/RatioMaster carried.
+
+
+RatioMaster.NET
+  https://github.com/NikolayIT/RatioMaster.NET
+  Licensed under the MIT License, which is compatible with the GPL. Its
+  licence notice, reproduced verbatim:
+
+The MIT License (MIT)
+
+Copyright (c) 2006-2016 Nikolay Kostov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

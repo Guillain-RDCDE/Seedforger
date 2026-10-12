@@ -6,7 +6,7 @@ class Seedforger < Formula
   desc "Report torrent stats to a tracker without transferring bytes (headless)"
   homepage "https://github.com/Guillain-RDCDE/Seedforger"
   version "2.19.0"
-  license "MIT"
+  license "GPL-3.0-only"
 
   on_arm do
     url "https://github.com/Guillain-RDCDE/Seedforger/releases/download/v2.19.0/Seedforger-cli-osx-arm64"
