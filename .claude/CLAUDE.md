@@ -5,9 +5,19 @@ current: when something here stops being true, change it in the same commit.
 
 ## What this is
 
-A .NET 8 BitTorrent ratio spoofer (a modern RatioMaster) shipped together with a
+A .NET 10 (LTS) BitTorrent ratio spoofer (a modern RatioMaster) shipped together with a
 research annex proving the client side cannot win. Educational / security-research
 tool; the README carries the warning, keep it there.
+
+## Licence
+
+**GPL-3.0-only.** `LICENSE` is the unmodified GPL-3.0 text, byte for byte the file
+sergiye/RatioMaster carried from 2025-05-07 to 2026-02-22; Seedforger was imported from
+that GPL-published code, so GPL-3.0 is the only licence it can be distributed under (no
+"or later": upstream never granted it). `NOTICE` holds the lineage, those dates, the
+upstream copyrights and the RatioMaster.NET MIT notice verbatim (MIT is GPL-compatible);
+keep it. Every licence field says `GPL-3.0-only`: `Directory.Build.props`, the winget,
+Homebrew, AUR and Flatpak (metainfo) manifests under `packaging/`, the README badge.
 
 ## Architecture (since v3.0.0)
 
@@ -56,6 +66,11 @@ Nothing from the legacy RatioMaster form (`RM.cs`), the `BytesRoads` socket libr
   **on in Core** (annotated, 0 warnings): keep it warning-free, no `!` to silence it.
 - CI builds with warnings as errors (NuGet advisories excepted): a new warning breaks the build.
 - Package versions live in `Directory.Packages.props` (central package management) only.
+  Dependabot pull requests are never merged: apply their diff on `main` as a normal commit
+  (plus whatever the new versions need) and Dependabot closes the PR by itself.
+- SDK: .NET 10, pinned by `global.json` (`10.0.100`, `latestFeature`); every project targets
+  `net10.0` (`net10.0-windows` for WinForms). The Avalonia GUI is on Avalonia 12 (drag and
+  drop goes through `DragEventArgs.DataTransfer`).
 - One version number: `<Version>` in `Directory.Build.props`. Nowhere else.
 - Doc comments explain *why*; comments that narrate the code are deleted.
 - Swallowed exceptions must at least log through the engine's `Log` sink; UI-side
