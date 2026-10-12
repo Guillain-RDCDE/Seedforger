@@ -25,7 +25,7 @@ namespace Seedforger.App.Views {
       // Drop a .torrent anywhere on the window to load it.
       AddHandler(DragDrop.DropEvent, OnDrop);
       AddHandler(DragDrop.DragOverEvent, (s, e) => {
-        e.DragEffects = e.Data.Contains(DataFormats.Files) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.DragEffects = e.DataTransfer.Contains(DataFormat.File) ? DragDropEffects.Copy : DragDropEffects.None;
       });
       DragDrop.SetAllowDrop(this, true);
       FillConnectionProfiles();
@@ -37,7 +37,7 @@ namespace Seedforger.App.Views {
 
     private void OnDrop(object sender, DragEventArgs e) {
       try {
-        var files = e.Data.GetFiles();
+        var files = e.DataTransfer.TryGetFiles();
         if (files == null) return;
         foreach (var f in files) {
           var path = f.TryGetLocalPath();
