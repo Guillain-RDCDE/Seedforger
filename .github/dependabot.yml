@@ -1,9 +1,15 @@
+# Dependabot pull requests are not merged: their diff is applied on main as an
+# ordinary commit (with whatever code changes it needs to stay warning-free), and
+# Dependabot closes the pull request itself once main carries the new versions.
+# The prefixes match the history's commit style.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: ci
     groups:
       github-actions:
         patterns: ["*"]
@@ -13,6 +19,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: build
     groups:
       nuget:
         patterns: ["*"]
