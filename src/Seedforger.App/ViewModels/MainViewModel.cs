@@ -27,6 +27,7 @@ namespace Seedforger.App.ViewModels {
     private SeedEngine engine;
     private CampaignEngine campaignEngine;
     private bool busy;
+    private bool restoring;
 
     private static readonly IBrush IdleBrush = new SolidColorBrush(Color.Parse("#6B7280"));
     private static readonly IBrush RunningBrush = new SolidColorBrush(Color.Parse("#15803D"));
@@ -54,10 +55,15 @@ namespace Seedforger.App.ViewModels {
       UiStrings.Language = UiStrings.ParseLanguage(s.Language);
       Preferences = RunPreferences.FromSettings(s);
 
+      // Filling the pickers must not save: the first version of the list would
+      // overwrite the remembered one before it is read back.
+      var savedVersion = s.ClientVersion;
+      restoring = true;
       foreach (var f in TorrentClientFactory.GetFamilies()) Families.Add(f);
       selectedFamily = Families.Contains(s.Client) ? s.Client : Families.Count > 0 ? Families[0] : null;
       RefreshVersions();
-      if (Versions.Contains(s.ClientVersion)) selectedVersion = s.ClientVersion;
+      if (Versions.Contains(savedVersion)) selectedVersion = savedVersion;
+      restoring = false;
       uploadText = s.UploadRate.ToString();
       RebuildModes();
 
@@ -91,7 +97,7 @@ namespace Seedforger.App.ViewModels {
       get => selectedVersion;
       set {
         if (!Set(ref selectedVersion, value)) return;
-        if (value != null) Settings.Current.Update(s => s.ClientVersion = value);
+        if (value != null && !restoring) Settings.Current.Update(s => s.ClientVersion = value);
         Raise(nameof(ClientSummary));
       }
     }
