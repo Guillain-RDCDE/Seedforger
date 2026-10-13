@@ -5,16 +5,16 @@
 class Seedforger < Formula
   desc "Report torrent stats to a tracker without transferring bytes (headless)"
   homepage "https://github.com/Guillain-RDCDE/Seedforger"
-  version "3.0.1"
+  version "3.0.2"
   license "GPL-3.0-only"
 
   on_arm do
-    url "https://github.com/Guillain-RDCDE/Seedforger/releases/download/v3.0.1/Seedforger-cli-osx-arm64"
-    sha256 "d1af50efa82ab2d20ce671b17d8994e00012a080df6983954f8e93b3fa1d7910"
+    url "https://github.com/Guillain-RDCDE/Seedforger/releases/download/v3.0.2/Seedforger-cli-osx-arm64"
+    sha256 "2a2cd36d7f47cc2d9c960824d07e191b827aedeb0df67504907a0487900fa67d"
   end
   on_intel do
-    url "https://github.com/Guillain-RDCDE/Seedforger/releases/download/v3.0.1/Seedforger-cli-osx-x64"
-    sha256 "963eb0c54ed9a009ee23368385675754baaeabfe8aecfc5933cdaac75511a5e7"
+    url "https://github.com/Guillain-RDCDE/Seedforger/releases/download/v3.0.2/Seedforger-cli-osx-x64"
+    sha256 "af2faa2b2ddddc59b97ff1c48de4ae6b4af3327bb66680110095adbce6163e3a"
   end
 
   def install

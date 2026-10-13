@@ -10,7 +10,7 @@ v2.19.0 use .NET 8).
 
 ## Release artifacts
 
-Sizes are those of v3.0.0.
+Sizes are those of the v3.0.2 files as published (1 MB = 1,000,000 bytes).
 
 | File | Platform | What |
 |---|---|---|
