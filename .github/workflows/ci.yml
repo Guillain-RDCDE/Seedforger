@@ -226,11 +226,9 @@ jobs:
       # and come back on the next launch. Each run toggles Settings > Realistic speed
       # from the keyboard (Alt opens the menu bar; Settings is the fourth menu and the
       # toggle its first item): the second run turns it back on only if it read what
-      # the first run saved. The manifest variant is the released binary; it runs the
-      # same check for comparison but cannot fail the job while that release predates
-      # the per-user settings folder.
+      # the first run saved. Both variants must pass: the released binary as well as
+      # the one built from this checkout.
       - name: A setting saved in one run is read back in the next; the samples are created
-        continue-on-error: ${{ matrix.variant == 'manifest' }}
         run: |
           set -euo pipefail
           Xvfb :98 -screen 0 1280x900x24 > /dev/null 2>&1 &
