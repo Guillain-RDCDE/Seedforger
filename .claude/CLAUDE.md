@@ -40,9 +40,20 @@ executables are thin front-ends over it.
   exe (`Seedforger.exe --test-announce …`). `CommandLine` rejects unknown flags.
 - `RunPreferences`: the Advanced-dialog values (proxy, fingerprint overrides, interval, stop
   rule) with one mapping to/from `Settings` and one `ApplyTo(SeedOptions)`.
-- `Settings`: `settings.json` next to the exe. JSON names are frozen (misspellings included,
+- `Settings`: one `settings.json`. JSON names are frozen (misspellings included,
   via `[JsonPropertyName]`); numbers are read leniently from older files; a corrupt file is
-  set aside as `settings.json.bad`, never overwritten.
+  set aside as `settings.json.bad`, never overwritten. Failed saves, corrupt files and
+  carry-overs are reported through `Settings.Log` (each GUI points it at its log pane).
+- `SettingsLocation`: the only place that decides where user files live. **Portable rule:**
+  a `settings.json` next to the exe in a writable folder means portable (an empty file
+  works) and everything stays there; otherwise the per-user folder (`%APPDATA%\Seedforger`,
+  `$XDG_CONFIG_HOME/seedforger` or `~/.config/seedforger`, the Flatpak sandbox's config,
+  `~/Library/Application Support/Seedforger`). A settings.json next to a read-only exe is
+  read once and saved to the user folder. `clients.json` is read from the user folder
+  first, then next to the exe; `clients.sample.json` / `campaign.sample.json` go next to
+  the exe when it is writable, else to the user folder. Never use `AppContext.BaseDirectory`
+  for a user file elsewhere. The Flatpak CI job checks a setting survives a restart and the
+  samples are created inside the sandbox.
 - `UI/UiStrings`: the only EN/FR mechanism (`Get(key)`, `Pick(en, fr)`, `Language`).
 - `Format`: the only byte/ratio/duration formatter.
 - `TorrentClientFactory` + `DefaultClientProfiles`: the client database. `Resolve(family,
