@@ -10,6 +10,10 @@ namespace Seedforger.App {
     [STAThread]
     public static void Main(string[] args) {
       Encodings.Register();
+      // Same templates as the Windows window drops, so the override and campaign
+      // formats are discoverable on every platform.
+      TorrentClientFactory.ExportSampleIfMissing();
+      Campaign.ExportSampleIfMissing();
       BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

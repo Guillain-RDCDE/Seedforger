@@ -229,7 +229,7 @@ jobs:
       # the first run saved. The manifest variant is the released binary; it runs the
       # same check for comparison but cannot fail the job while that release predates
       # the per-user settings folder.
-      - name: A setting saved in one run is read back in the next
+      - name: A setting saved in one run is read back in the next; the samples are created
         continue-on-error: ${{ matrix.variant == 'manifest' }}
         run: |
           set -euo pipefail
@@ -276,6 +276,15 @@ jobs:
           cat "$CFG"
           [ "$(realistic)" = "True" ] || { echo "::error::run 2 did not start from the settings run 1 saved"; exit 1; }
           echo "settings persisted across two sandboxed runs in $CFG"
+
+          # The read-only /app cannot take the sample files either: they belong next
+          # to settings.json, and must be valid JSON.
+          for f in clients.sample.json campaign.sample.json; do
+            P="$(dirname "$CFG")/$f"
+            test -s "$P" || { echo "::error::$f was not created in the sandbox config folder"; exit 1; }
+            python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$P"
+            echo "$f created in the sandbox ($(stat -c %s "$P") bytes)"
+          done
 
       - uses: actions/upload-artifact@v7
         with:

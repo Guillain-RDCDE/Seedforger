@@ -11,7 +11,7 @@ namespace Seedforger {
   /// (random key and peer_id tail each time), and answers the questions the
   /// front-ends ask: which families and versions exist, what is current, what is
   /// the default. Profiles are the built-in list merged with an optional
-  /// <c>clients.json</c> next to the executable.
+  /// <c>clients.json</c> (the user folder's copy, else the one next to the executable).
   /// </summary>
   internal static class TorrentClientFactory {
 
@@ -45,13 +45,17 @@ namespace Seedforger {
 
     private static List<ClientProfile> Profiles => profiles.Value;
 
+    internal const string OverridesFileName = "clients.json";
+    internal const string SampleFileName = "clients.sample.json";
+
+    private static List<ClientProfile> LoadProfiles() => LoadProfiles(SettingsLocation.FindDataFile(OverridesFileName));
+
     /// <summary>Built-in defaults merged with an optional clients.json (entries
     /// override or add by FullName). Invalid JSON is ignored rather than crashing.</summary>
-    private static List<ClientProfile> LoadProfiles() {
+    internal static List<ClientProfile> LoadProfiles(string? path) {
       var list = new List<ClientProfile>(DefaultClientProfiles.All);
       try {
-        var path = Path.Combine(AppContext.BaseDirectory, "clients.json");
-        if (!File.Exists(path)) return list;
+        if (path == null || !File.Exists(path)) return list;
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var overrides = JsonSerializer.Deserialize<List<ClientProfile>>(File.ReadAllText(path), options);
         if (overrides == null) return list;
@@ -68,14 +72,18 @@ namespace Seedforger {
     }
 
     /// <summary>
-    /// Writes a <c>clients.sample.json</c> next to the executable (once) so users can
-    /// see the exact override format. It is NOT loaded automatically: copy it to
-    /// <c>clients.json</c> and edit to add or override fingerprints without recompiling.
+    /// Writes a <c>clients.sample.json</c> (once) so users can see the exact override
+    /// format: next to the executable, or in the user folder when that one is
+    /// read-only. It is NOT loaded automatically: copy it to <c>clients.json</c> and
+    /// edit to add or override fingerprints without recompiling.
     /// </summary>
-    public static void ExportSampleIfMissing() {
+    public static void ExportSampleIfMissing() => ExportSampleIfMissing(SettingsLocation.SampleDirectory());
+
+    internal static void ExportSampleIfMissing(string directory) {
       try {
-        var path = Path.Combine(AppContext.BaseDirectory, "clients.sample.json");
+        var path = Path.Combine(directory, SampleFileName);
         if (File.Exists(path)) return;
+        Directory.CreateDirectory(directory);
         var options = new JsonSerializerOptions {
           WriteIndented = true,
           DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,

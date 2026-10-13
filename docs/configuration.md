@@ -2,13 +2,13 @@
 
 [← back to the README](../README.md)
 
-Two optional JSON files, both dropped next to the exe on first launch and both editable without recompiling. Your own settings are a third file, kept in your user folder (see [Where settings live](#where-settings-live)).
+Two optional JSON files, both editable without recompiling, plus the `settings.json` the windows keep for you. Where each one lives is under [Where your files live](#where-your-files-live).
 
 ---
 
 ## Custom / updated fingerprints without rebuilding
 
-On first launch Seedforger drops a **`clients.sample.json`** next to the exe. Copy it to **`clients.json`**, edit, done — entries are merged by name (yours override the built-ins), so you can add tomorrow's qBittorrent the day it ships:
+On first launch the window drops a **`clients.sample.json`** (next to the exe, or in your user folder when the exe's folder is read-only). Copy it to **`clients.json`** in the same folder, edit, done — entries are merged by name (yours override the built-ins), so you can add tomorrow's qBittorrent the day it ships:
 
 ```json
 [
@@ -40,7 +40,7 @@ Keep fingerprints accurate: a wrong `peer_id` gets *users* banned.
 
 *Tools → Campaigns…* opens the [visual builder](screenshots/campaign-builder.png) — pick a goal (ratio / GB by a deadline), a connection profile, active hours, a torrent folder, and hit **Start** (or Save / Load). No JSON to hand-write.
 
-Under the hood it's a `campaign.json` (Save/Load in the dialog; a `campaign.sample.json` is dropped next to the exe):
+Under the hood it's a `campaign.json` (Save/Load in the dialog; a `campaign.sample.json` is dropped beside `clients.sample.json`):
 
 ```json
 {
@@ -61,7 +61,7 @@ The orchestrator staggers the starts, splits the connection's upstream toward th
 
 ---
 
-## Where settings live
+## Where your files live
 
 Settings themselves (language, believability toggles, connection profile, active hours, the last client, speeds and proxy…) live in a **`settings.json`** — no registry. The GUIs read and write it; the CLI and the daemon take everything from their command line and do not use it.
 
@@ -76,3 +76,5 @@ Settings themselves (language, believability toggles, connection profile, active
 - **To keep a copy portable** (a USB stick, a folder of tools), put a `settings.json` next to the exe — an empty file will do. Copies that already have one carry on unchanged.
 - **Read-only install folder:** a `settings.json` found next to the exe is read once as the starting point and saved to the per-user folder; the original is left untouched.
 - **A failed save is never silent:** the window's log says where the write failed and why. A file that cannot be parsed is set aside as `settings.json.bad`, and the log says so.
+
+**`clients.json`** is read from the same per-user folder first, then from next to the exe; the CLI and the daemon use it too. **`clients.sample.json`** and **`campaign.sample.json`** are written next to the exe when that folder is writable, in the per-user folder otherwise (inside the Flatpak: `~/.var/app/io.github.guillain_rdcde.Seedforger/config/seedforger/`).

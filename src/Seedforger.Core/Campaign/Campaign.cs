@@ -61,11 +61,17 @@ namespace Seedforger {
       catch { /* best effort */ }
     }
 
-    /// <summary>Writes a documented sample campaign next to the exe (once).</summary>
-    internal static void ExportSampleIfMissing() {
+    internal const string SampleFileName = "campaign.sample.json";
+
+    /// <summary>Writes a documented sample campaign (once): next to the exe, or in
+    /// the user folder when that one is read-only.</summary>
+    internal static void ExportSampleIfMissing() => ExportSampleIfMissing(SettingsLocation.SampleDirectory());
+
+    internal static void ExportSampleIfMissing(string directory) {
       try {
-        var path = Path.Combine(AppContext.BaseDirectory, "campaign.sample.json");
+        var path = Path.Combine(directory, SampleFileName);
         if (File.Exists(path)) return;
+        Directory.CreateDirectory(directory);
         new Campaign {
           Goal = "upload", UploadGoalGB = 200, DeadlineHours = 336,
           Connection = "Fibre  300 / 300 Mbps", UseActiveHours = true,

@@ -51,6 +51,31 @@ namespace Seedforger {
       return new SettingsLocation(userFile, File.Exists(userFile) ? null : portableFile, portable: false);
     }
 
+    // ---- the other user-editable files (clients.json, the samples) ----
+
+    /// <summary>The <paramref name="fileName"/> to read: the copy in the user folder
+    /// first, then the one next to the executable; null when neither exists.</summary>
+    internal static string? FindDataFile(string fileName, string exeDirectory, string userConfigDirectory) {
+      foreach (var dir in new[] { userConfigDirectory, exeDirectory }) {
+        var path = Path.Combine(dir, fileName);
+        if (File.Exists(path)) return path;
+      }
+      return null;
+    }
+
+    /// <summary>Same lookup for this process.</summary>
+    internal static string? FindDataFile(string fileName) =>
+      FindDataFile(fileName, AppContext.BaseDirectory, UserConfigDirectory());
+
+    /// <summary>Where a new sample file goes: next to the executable when that folder
+    /// accepts files (as before), the user folder otherwise.</summary>
+    internal static string SampleDirectory(string exeDirectory, string userConfigDirectory, Func<string, bool> canWrite) =>
+      canWrite(exeDirectory) ? exeDirectory : userConfigDirectory;
+
+    /// <summary>Same choice for this process.</summary>
+    internal static string SampleDirectory() =>
+      SampleDirectory(AppContext.BaseDirectory, UserConfigDirectory(), CanWriteTo);
+
     /// <summary>The per-user config folder of this process's platform.</summary>
     internal static string UserConfigDirectory() {
       var platform = OperatingSystem.IsWindows() ? ConfigPlatform.Windows

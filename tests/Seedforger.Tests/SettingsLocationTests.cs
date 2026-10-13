@@ -191,6 +191,63 @@ namespace Seedforger.Tests {
       Assert.Equal(Path.Combine(expected, SettingsLocation.FileName), loc.FilePath);
     }
 
+    // ---- clients.json and the sample files ----
+
+    private const string OverrideJson =
+      "[ { \"Family\": \"TestClient\", \"Version\": \"{0}\", \"PeerIdPrefix\": \"-TC0000-\" } ]";
+
+    private static string Override(string version) => OverrideJson.Replace("{0}", version);
+
+    [Fact]
+    public void ClientsJson_UserFolderCopyWins_ThenTheExeFolder() {
+      var exeCopy = Path.Combine(exeDir, TorrentClientFactory.OverridesFileName);
+      var userCopy = Path.Combine(userDir, TorrentClientFactory.OverridesFileName);
+      Assert.Null(SettingsLocation.FindDataFile(TorrentClientFactory.OverridesFileName, exeDir, userDir));
+
+      File.WriteAllText(exeCopy, Override("1.0"));
+      Assert.Equal(exeCopy, SettingsLocation.FindDataFile(TorrentClientFactory.OverridesFileName, exeDir, userDir));
+
+      Directory.CreateDirectory(userDir);
+      File.WriteAllText(userCopy, Override("2.0"));
+      var found = SettingsLocation.FindDataFile(TorrentClientFactory.OverridesFileName, exeDir, userDir);
+      Assert.Equal(userCopy, found);
+
+      var profiles = TorrentClientFactory.LoadProfiles(found);
+      Assert.Contains(profiles, p => p.FullName == "TestClient 2.0");
+      Assert.DoesNotContain(profiles, p => p.FullName == "TestClient 1.0");
+      Assert.Equal(DefaultClientProfiles.All.Count + 1, profiles.Count);
+      Assert.Equal(DefaultClientProfiles.All.Count, TorrentClientFactory.LoadProfiles(null).Count);
+    }
+
+    [Fact]
+    public void Samples_GoNextToTheExe_WhenItIsWritable() {
+      var dir = SettingsLocation.SampleDirectory(exeDir, userDir, SettingsLocation.CanWriteTo);
+      Assert.Equal(exeDir, dir);
+      TorrentClientFactory.ExportSampleIfMissing(dir);
+      Campaign.ExportSampleIfMissing(dir);
+      Assert.True(File.Exists(Path.Combine(exeDir, TorrentClientFactory.SampleFileName)));
+      Assert.True(File.Exists(Path.Combine(exeDir, Campaign.SampleFileName)));
+      Assert.False(Directory.Exists(userDir));
+    }
+
+    [Fact]
+    public void Samples_GoToTheUserFolder_WhenTheExeFolderIsReadOnly() {
+      using (MakeReadOnly(exeDir)) {
+        if (SettingsLocation.CanWriteTo(exeDir)) return; // root ignores permission bits: nothing to observe
+        var dir = SettingsLocation.SampleDirectory(exeDir, userDir, SettingsLocation.CanWriteTo);
+        Assert.Equal(userDir, dir);
+        TorrentClientFactory.ExportSampleIfMissing(dir);   // creates the missing folder
+        Campaign.ExportSampleIfMissing(dir);
+      }
+      var sample = Path.Combine(userDir, TorrentClientFactory.SampleFileName);
+      Assert.True(File.Exists(sample));
+      Assert.True(File.Exists(Path.Combine(userDir, Campaign.SampleFileName)));
+      Assert.False(File.Exists(Path.Combine(exeDir, TorrentClientFactory.SampleFileName)));
+      // The sample is the override format: copied to clients.json it loads every built-in profile.
+      Assert.Equal(DefaultClientProfiles.All.Count, TorrentClientFactory.LoadProfiles(sample).Count);
+      Assert.NotNull(Campaign.Load(Path.Combine(userDir, Campaign.SampleFileName)));
+    }
+
     // ---- helpers ----
 
     private static List<string> CaptureLog(Action body) {
