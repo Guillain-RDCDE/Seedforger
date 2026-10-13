@@ -2,7 +2,7 @@
 # AUR package for the Seedforger headless CLI (self-contained, no .NET runtime dep).
 # Update pkgver and the sha256sums from the release's SHA256SUMS.txt.
 pkgname=seedforger-cli
-pkgver=3.0.0
+pkgver=3.0.1
 pkgrel=1
 pkgdesc="Report torrent stats to a tracker without transferring bytes (headless CLI)"
 arch=('x86_64' 'aarch64')
@@ -11,8 +11,8 @@ license=('GPL-3.0-only')
 provides=('seedforger')
 source_x86_64=("seedforger-$pkgver-x86_64::https://github.com/Guillain-RDCDE/Seedforger/releases/download/v$pkgver/Seedforger-cli-linux-x64")
 source_aarch64=("seedforger-$pkgver-aarch64::https://github.com/Guillain-RDCDE/Seedforger/releases/download/v$pkgver/Seedforger-cli-linux-arm64")
-sha256sums_x86_64=('319ce951e0aca2f3be044bda0497dbc7d64372c87690ca148f8c69f08f693732')
-sha256sums_aarch64=('e59e872d3b7ce6a312f031c02549e4b0b5e795057d049fcfc4fcfbf10636bc45')
+sha256sums_x86_64=('296840f6ce5f2c416535620e432da206877a287905e8929cab5b17f07c8af691')
+sha256sums_aarch64=('d55898471cba0e613e0cc51b4cda8b3d9edf368f45df6ce00bbaeee58124c51f')
 
 package() {
   install -Dm755 "seedforger-$pkgver-$CARCH" "$pkgdir/usr/bin/seedforger"

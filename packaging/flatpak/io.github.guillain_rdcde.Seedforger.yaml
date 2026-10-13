@@ -42,9 +42,9 @@ modules:
         path: io.github.guillain_rdcde.Seedforger.metainfo.xml
       - type: file
         only-arches: [x86_64]
-        url: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v3.0.0/Seedforger-gui-linux-x64
-        sha256: '1bfa4348792eb53286f5a2dbb7b5995bdd1f3b7c909a49d410abf35edae0a9d2'
+        url: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v3.0.1/Seedforger-gui-linux-x64
+        sha256: 'af8e593bafecacede24fec3cd8f92cfc986b5b8b289fbbc8a5508efc4561457f'
       - type: file
         only-arches: [aarch64]
-        url: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v3.0.0/Seedforger-gui-linux-arm64
-        sha256: 'cfe115afc763c0cf57f660bb2079f173e84d29c2d48ebd7ba301b528ebb28d89'
+        url: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v3.0.1/Seedforger-gui-linux-arm64
+        sha256: 'df7476bd8dd49eb3739cc05da420c5db495a449871fcccb1e5a61ac7b8f65a82'

@@ -2,7 +2,7 @@
 # Update PackageVersion, InstallerUrl and InstallerSha256 from the GitHub Release's
 # SHA256SUMS.txt, then submit the three manifests to microsoft/winget-pkgs.
 PackageIdentifier: Guillain-RDCDE.Seedforger
-PackageVersion: 3.0.0
+PackageVersion: 3.0.1
 InstallerType: portable
 Commands:
   - Seedforger
@@ -10,10 +10,10 @@ Commands:
 Dependencies:
   PackageDependencies:
     - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.10
-ReleaseDate: 2026-10-12
+ReleaseDate: 2026-10-13
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v3.0.0/Seedforger-lite-win-x64.exe
-    InstallerSha256: 2E5F88983B0B69326FA4FC0BE57D06D4BD5AA98ABF191E8BEE05FBC8D7B6FCBE
+    InstallerUrl: https://github.com/Guillain-RDCDE/Seedforger/releases/download/v3.0.1/Seedforger-lite-win-x64.exe
+    InstallerSha256: BA0A40128E8D16302A40A075ABA7AE08474B111430535DE9B2B86FE04ECCCF2D
 ManifestType: installer
 ManifestVersion: 1.6.0
