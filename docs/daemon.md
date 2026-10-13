@@ -46,7 +46,7 @@ curl -s http://127.0.0.1:8080/api/status | jq
 
 ```json
 {
-  "app": "Seedforger", "version": "3.0.0", "uptimeSeconds": 3600,
+  "app": "Seedforger", "version": "3.0.1", "uptimeSeconds": 3600,
   "totals": { "uploaded": 5368709120, "downloaded": 0, "ratio": 0, "running": 3, "count": 3 },
   "torrents": [
     { "name": "…", "client": "qBittorrent 5.2.4", "uploaded": 1789569706,
