@@ -8,7 +8,7 @@ Two optional JSON files, both editable without recompiling, plus the `settings.j
 
 ## Custom / updated fingerprints without rebuilding
 
-On first launch the window drops a **`clients.sample.json`** (next to the exe, or in your user folder when the exe's folder is read-only). Copy it to **`clients.json`** in the same folder, edit, done — entries are merged by name (yours override the built-ins), so you can add tomorrow's qBittorrent the day it ships:
+On first launch the window drops a **`clients.sample.json`** (next to the exe for a portable copy or a writable folder, in your user folder otherwise). Copy it to **`clients.json`** in the same folder, edit, done — entries are merged by name (yours override the built-ins), so you can add tomorrow's qBittorrent the day it ships:
 
 ```json
 [
@@ -77,4 +77,7 @@ Settings themselves (language, believability toggles, connection profile, active
 - **Read-only install folder:** a `settings.json` found next to the exe is read once as the starting point and saved to the per-user folder; the original is left untouched.
 - **A failed save is never silent:** the window's log says where the write failed and why. A file that cannot be parsed is set aside as `settings.json.bad`, and the log says so.
 
-**`clients.json`** is read from the same per-user folder first, then from next to the exe; the CLI and the daemon use it too. **`clients.sample.json`** and **`campaign.sample.json`** are written next to the exe when that folder is writable, in the per-user folder otherwise (inside the Flatpak: `~/.var/app/io.github.guillain_rdcde.Seedforger/config/seedforger/`).
+**`clients.json`** and the two samples (`clients.sample.json`, `campaign.sample.json`) follow the same portable rule; the CLI and the daemon read `clients.json` too.
+
+- **Portable copy:** the copy is self-contained. `clients.json` is read only from next to the exe and the samples are written there; the per-user folder is never looked at.
+- **Installed copy:** `clients.json` is read from the per-user folder first, then from next to the exe. The samples are written next to the exe when that folder is writable, in the per-user folder otherwise (inside the Flatpak: `~/.var/app/io.github.guillain_rdcde.Seedforger/config/seedforger/`).

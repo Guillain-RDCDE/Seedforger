@@ -53,28 +53,30 @@ namespace Seedforger {
 
     // ---- the other user-editable files (clients.json, the samples) ----
 
-    /// <summary>The <paramref name="fileName"/> to read: the copy in the user folder
-    /// first, then the one next to the executable; null when neither exists.</summary>
-    internal static string? FindDataFile(string fileName, string exeDirectory, string userConfigDirectory) {
-      foreach (var dir in new[] { userConfigDirectory, exeDirectory }) {
+    /// <summary>The <paramref name="fileName"/> to read; null when there is none. A
+    /// portable copy is self-contained: only the file next to the executable counts.
+    /// Otherwise the user folder's copy first, then the one next to the executable.</summary>
+    internal static string? FindDataFile(string fileName, string exeDirectory, string userConfigDirectory, bool portable) {
+      var dirs = portable ? new[] { exeDirectory } : new[] { userConfigDirectory, exeDirectory };
+      foreach (var dir in dirs) {
         var path = Path.Combine(dir, fileName);
         if (File.Exists(path)) return path;
       }
       return null;
     }
 
-    /// <summary>Same lookup for this process.</summary>
+    /// <summary>Same lookup for this process (portable as decided for settings.json).</summary>
     internal static string? FindDataFile(string fileName) =>
-      FindDataFile(fileName, AppContext.BaseDirectory, UserConfigDirectory());
+      FindDataFile(fileName, AppContext.BaseDirectory, UserConfigDirectory(), Settings.Location.Portable);
 
-    /// <summary>Where a new sample file goes: next to the executable when that folder
-    /// accepts files (as before), the user folder otherwise.</summary>
-    internal static string SampleDirectory(string exeDirectory, string userConfigDirectory, Func<string, bool> canWrite) =>
-      canWrite(exeDirectory) ? exeDirectory : userConfigDirectory;
+    /// <summary>Where a new sample file goes: next to the executable for a portable
+    /// copy or when that folder accepts files, the user folder otherwise.</summary>
+    internal static string SampleDirectory(string exeDirectory, string userConfigDirectory, bool portable, Func<string, bool> canWrite) =>
+      portable || canWrite(exeDirectory) ? exeDirectory : userConfigDirectory;
 
     /// <summary>Same choice for this process.</summary>
     internal static string SampleDirectory() =>
-      SampleDirectory(AppContext.BaseDirectory, UserConfigDirectory(), CanWriteTo);
+      SampleDirectory(AppContext.BaseDirectory, UserConfigDirectory(), Settings.Location.Portable, CanWriteTo);
 
     /// <summary>The per-user config folder of this process's platform.</summary>
     internal static string UserConfigDirectory() {

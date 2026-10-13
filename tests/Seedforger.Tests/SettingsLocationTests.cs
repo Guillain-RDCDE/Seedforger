@@ -198,19 +198,27 @@ namespace Seedforger.Tests {
 
     private static string Override(string version) => OverrideJson.Replace("{0}", version);
 
-    [Fact]
-    public void ClientsJson_UserFolderCopyWins_ThenTheExeFolder() {
-      var exeCopy = Path.Combine(exeDir, TorrentClientFactory.OverridesFileName);
-      var userCopy = Path.Combine(userDir, TorrentClientFactory.OverridesFileName);
-      Assert.Null(SettingsLocation.FindDataFile(TorrentClientFactory.OverridesFileName, exeDir, userDir));
+    private string ExeClients => Path.Combine(exeDir, TorrentClientFactory.OverridesFileName);
+    private string UserClients => Path.Combine(userDir, TorrentClientFactory.OverridesFileName);
 
-      File.WriteAllText(exeCopy, Override("1.0"));
-      Assert.Equal(exeCopy, SettingsLocation.FindDataFile(TorrentClientFactory.OverridesFileName, exeDir, userDir));
+    private SettingsLocation Resolve() => SettingsLocation.Resolve(exeDir, userDir, SettingsLocation.CanWriteTo);
+
+    private string FindClients(SettingsLocation loc) =>
+      SettingsLocation.FindDataFile(TorrentClientFactory.OverridesFileName, exeDir, userDir, loc.Portable);
+
+    [Fact]
+    public void ClientsJson_Installed_UserFolderCopyWins_ThenTheExeFolder() {
+      var loc = Resolve();                       // no settings.json next to the exe: not portable
+      Assert.False(loc.Portable);
+      Assert.Null(FindClients(loc));
+
+      File.WriteAllText(ExeClients, Override("1.0"));
+      Assert.Equal(ExeClients, FindClients(loc));
 
       Directory.CreateDirectory(userDir);
-      File.WriteAllText(userCopy, Override("2.0"));
-      var found = SettingsLocation.FindDataFile(TorrentClientFactory.OverridesFileName, exeDir, userDir);
-      Assert.Equal(userCopy, found);
+      File.WriteAllText(UserClients, Override("2.0"));
+      var found = FindClients(loc);
+      Assert.Equal(UserClients, found);
 
       var profiles = TorrentClientFactory.LoadProfiles(found);
       Assert.Contains(profiles, p => p.FullName == "TestClient 2.0");
@@ -220,8 +228,41 @@ namespace Seedforger.Tests {
     }
 
     [Fact]
-    public void Samples_GoNextToTheExe_WhenItIsWritable() {
-      var dir = SettingsLocation.SampleDirectory(exeDir, userDir, SettingsLocation.CanWriteTo);
+    public void ClientsJson_Portable_OnlyTheExeFolderCounts() {
+      File.WriteAllText(PortableFile, "");
+      var loc = Resolve();
+      Assert.True(loc.Portable);
+
+      Directory.CreateDirectory(userDir);
+      File.WriteAllText(UserClients, Override("2.0"));
+      Assert.Null(FindClients(loc));            // the user folder is never consulted
+
+      File.WriteAllText(ExeClients, Override("1.0"));
+      var found = FindClients(loc);
+      Assert.Equal(ExeClients, found);
+      Assert.Contains(TorrentClientFactory.LoadProfiles(found), p => p.FullName == "TestClient 1.0");
+    }
+
+    [Fact]
+    public void Samples_Portable_GoNextToTheExe_AndNeverToTheUserFolder() {
+      File.WriteAllText(PortableFile, "");
+      var loc = Resolve();
+      Assert.True(loc.Portable);
+      // Even if the probe said otherwise, a portable copy keeps its files with it.
+      Assert.Equal(exeDir, SettingsLocation.SampleDirectory(exeDir, userDir, loc.Portable, _ => false));
+      var dir = SettingsLocation.SampleDirectory(exeDir, userDir, loc.Portable, SettingsLocation.CanWriteTo);
+      TorrentClientFactory.ExportSampleIfMissing(dir);
+      Campaign.ExportSampleIfMissing(dir);
+      Assert.True(File.Exists(Path.Combine(exeDir, TorrentClientFactory.SampleFileName)));
+      Assert.True(File.Exists(Path.Combine(exeDir, Campaign.SampleFileName)));
+      Assert.False(Directory.Exists(userDir));
+    }
+
+    [Fact]
+    public void Samples_Installed_GoNextToTheExe_WhenItIsWritable() {
+      var loc = Resolve();
+      Assert.False(loc.Portable);
+      var dir = SettingsLocation.SampleDirectory(exeDir, userDir, loc.Portable, SettingsLocation.CanWriteTo);
       Assert.Equal(exeDir, dir);
       TorrentClientFactory.ExportSampleIfMissing(dir);
       Campaign.ExportSampleIfMissing(dir);
@@ -231,10 +272,12 @@ namespace Seedforger.Tests {
     }
 
     [Fact]
-    public void Samples_GoToTheUserFolder_WhenTheExeFolderIsReadOnly() {
+    public void Samples_Installed_GoToTheUserFolder_WhenTheExeFolderIsReadOnly() {
       using (MakeReadOnly(exeDir)) {
         if (SettingsLocation.CanWriteTo(exeDir)) return; // root ignores permission bits: nothing to observe
-        var dir = SettingsLocation.SampleDirectory(exeDir, userDir, SettingsLocation.CanWriteTo);
+        var loc = Resolve();
+        Assert.False(loc.Portable);
+        var dir = SettingsLocation.SampleDirectory(exeDir, userDir, loc.Portable, SettingsLocation.CanWriteTo);
         Assert.Equal(userDir, dir);
         TorrentClientFactory.ExportSampleIfMissing(dir);   // creates the missing folder
         Campaign.ExportSampleIfMissing(dir);

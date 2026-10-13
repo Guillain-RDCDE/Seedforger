@@ -49,9 +49,11 @@ executables are thin front-ends over it.
   works) and everything stays there; otherwise the per-user folder (`%APPDATA%\Seedforger`,
   `$XDG_CONFIG_HOME/seedforger` or `~/.config/seedforger`, the Flatpak sandbox's config,
   `~/Library/Application Support/Seedforger`). A settings.json next to a read-only exe is
-  read once and saved to the user folder. `clients.json` is read from the user folder
-  first, then next to the exe; `clients.sample.json` / `campaign.sample.json` go next to
-  the exe when it is writable, else to the user folder. Never use `AppContext.BaseDirectory`
+  read once and saved to the user folder. A portable copy is self-contained: `clients.json`
+  is read only next to the exe and `clients.sample.json` / `campaign.sample.json` are
+  written there, the user folder is never consulted. Otherwise `clients.json` is read
+  from the user folder first, then next to the exe, and the samples go next to the exe
+  when it is writable, else to the user folder. Never use `AppContext.BaseDirectory`
   for a user file elsewhere. The Flatpak CI job checks a setting survives a restart and the
   samples are created inside the sandbox.
 - `UI/UiStrings`: the only EN/FR mechanism (`Get(key)`, `Pick(en, fr)`, `Language`).
